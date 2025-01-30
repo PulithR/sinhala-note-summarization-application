@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 const GetStarted = () => {
   return (
     <View style={styles.container}>
+      {/*to do*/}
       <Text style={styles.text}>Get Started screen-to be implemented...</Text>
     </View>
   );

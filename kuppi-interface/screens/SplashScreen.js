@@ -5,6 +5,7 @@ SplashScreen = () => {
   return (
     <View style={styles.container}>
       <View>
+        {/*sample logo*/}
         <Image source={require("../assets/kuppi-icon.png")} style={styles.image} />
       </View>
     </View>

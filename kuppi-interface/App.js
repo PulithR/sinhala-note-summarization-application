@@ -3,7 +3,6 @@ import SplashScreen from "./screens/SplashScreen";
 import GetStarted from "./screens/GetStarted";
 
 const App = () => {
-  // Added 'const' to define the component properly
 
   const [showSplashScreen, setShowSplashScreen] = useState(true);
 
