@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, Image } from "react-native";
+import AppButton from "../components/AppButton";
 
 const GetStarted = () => {
   return (
@@ -24,7 +25,16 @@ const GetStarted = () => {
         </Text>
         <Text style={styles.helper}>grow with them</Text>
 
-        <Text>Button to be added...</Text>
+        <View style={styles.buttonContainer}>
+          <AppButton
+            text="Get Started"
+            onPress={() => alert("Button Pressed!")}
+            color="#2940c0"
+            textColor="#fff"
+            fontSize={18}
+            style={styles.buttonContainer}
+          />
+        </View>
       </View>
     </View>
   );
@@ -50,10 +60,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#f5f0f0",
-    marginTop: 80,
+    marginTop: 100,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     paddingTop: 40,
+    paddingHorizontal: 20,
   },
   lineBox: {
     flexDirection: "row",
@@ -81,15 +92,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   header: {
-    fontSize: 20,
+    fontSize: 22,
     textAlign: "center",
     fontWeight: "900",
-    marginBottom: 10,
+    marginBottom: 12,
+    color: "#333",
   },
   helper: {
-    fontSize: 15,
-    color: "#b9b3b3",
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#a4a0a0",
     textAlign: "center",
+  },
+  buttonContainer: {
+    marginTop: 10,
   },
 });
 
