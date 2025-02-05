@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SplashScreen from "./screens/SplashScreen";
-import LoginScreen from "./screens/LoginPage";
 import GetStarted from "./screens/GetStarted";
+import LoginScreen from "./screens/LoginScreen";
 
 
 const App = () => {
