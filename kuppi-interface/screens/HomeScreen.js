@@ -1,17 +1,28 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Animated,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
 const HomeScreen = ({ navigation }) => {
+  // Animation values for fade-in and slide-up effects
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
+  // Button scale animations
+  const buttonScales = {
+    summarizer: useRef(new Animated.Value(1)).current,
+    generateAnswer: useRef(new Animated.Value(1)).current,
+    addNotes: useRef(new Animated.Value(1)).current,
+    scanDocument: useRef(new Animated.Value(1)).current,
+    logIn: useRef(new Animated.Value(1)).current,
+  };
 
   useEffect(() => {
     Animated.parallel([
@@ -28,55 +39,177 @@ const HomeScreen = ({ navigation }) => {
     ]).start();
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.background}>
-        <Animated.View
-          style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
+  const handlePressIn = (scale) => {
+    Animated.spring(scale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      speed: 5,
+    }).start();
+  };
+
+  const handlePressOut = (scale, screen) => {
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start(() => navigation.navigate(screen));
+  };
+
+  const renderButton = (icon, title, description, scale, screenName) => (
+    <Animated.View style={[styles.buttonContainer, { transform: [{ scale }] }]}>
+      <TouchableOpacity
+        style={styles.button}
+        onPressIn={() => handlePressIn(scale)}
+        onPressOut={() => handlePressOut(scale, screenName)}
+        activeOpacity={0.9}
+      >
+        <LinearGradient
+          colors={["#4a90e2", "#357abd"]}
+          style={styles.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.title}>What would you like to do?</Text>
+          <Text style={styles.buttonIcon}>{icon}</Text>
+          <View style={styles.buttonTextContainer}>
+            <Text style={styles.buttonTitle}>{title}</Text>
+            <Text style={styles.buttonDescription}>{description}</Text>
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+    </Animated.View>
+  );
 
-          <TouchableOpacity style={styles.settingsButton}>
-            <Ionicons name="person-circle" size={45} color="#2c3e50" />
-          </TouchableOpacity>
+  return (
+    <>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={["#f0f8ff", "#e6f3ff"]}
+          style={styles.background}
+        >
+          <Animated.View
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.welcomeText}>Welcome back!</Text>
+            <Text style={styles.title}>What would you like to do?</Text>
 
-          {/* Buttons will be implemented in the next commit */}
-        </Animated.View>
-      </LinearGradient>
-    </View>
+            {/* Gear Icon Button */}
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={() => navigation.navigate("Profile")}
+            >
+              <Ionicons name="person-circle" size={45} color="#2c3e50" />
+            </TouchableOpacity>
+
+            {renderButton(
+              "📝",
+              "Summarizer",
+              "Get quick summaries of your documents",
+              buttonScales.summarizer,
+              "Summarizer"
+            )}
+
+            {renderButton(
+              "💡",
+              "Generate Answer",
+              "Get instant answers to your questions",
+              buttonScales.generateAnswer,
+              "GenerateAnswer"
+            )}
+
+            {renderButton(
+              "📖",
+              "Add Notes",
+              "Create and organize your notes",
+              buttonScales.addNotes,
+              "AddNotesScreen"
+            )}
+
+            {renderButton(
+              "📄",
+              "Scan Document",
+              "Scan and digitize your documents",
+              buttonScales.scanDocument,
+              "ScanDocument"
+            )}
+          </Animated.View>
+        </LinearGradient>
+      </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
-},
+  container: {
+    flex: 1,
+  },
   background: {
-     flex: 1 
-},
+    flex: 1,
+  },
   content: {
-     flex: 1, 
-     paddingHorizontal: 20, 
-     paddingTop: 60 
-},
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+  },
   welcomeText: {
-     fontSize: 32, 
-     fontWeight: "bold", 
-     color: "#2c3e50", 
-     marginBottom: 8,
-},
-  title: { 
-    fontSize: 24, 
-    color: "#7f8c8d", 
-    marginBottom: 40 
-},
-  settingsButton: { 
-    position: "absolute", 
-    top: 20, 
-    right: 20, 
-    zIndex: 1 
-  }
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#2c3e50",
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 24,
+    color: "#7f8c8d",
+    marginBottom: 40,
+  },
+  settingsButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    zIndex: 1,
+  },
+  buttonContainer: {
+    marginBottom: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  gradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+  },
+  buttonIcon: {
+    fontSize: 32,
+    marginRight: 15,
+  },
+  buttonTextContainer: {
+    flex: 1,
+  },
+  buttonTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  buttonDescription: {
+    fontSize: 14,
+    color: "#e8f4ff",
+    opacity: 0.9,
+  },
 });
 
 export default HomeScreen;
