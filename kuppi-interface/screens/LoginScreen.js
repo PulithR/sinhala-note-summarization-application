@@ -79,7 +79,7 @@ const LoginScreen = ({ setShowSignUp }) => {
         >
           <View style={styles.topHalf}>
             <Image
-              source={require("../assets/Login_Page.png")}
+              source={require("../assets/login.png")}
               style={styles.image}
             />
           </View>
