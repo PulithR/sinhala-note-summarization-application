@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { AuthContext } from "../authentication/AuthContext";
 
 const SignUpScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
@@ -22,23 +23,17 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
-  // const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { signUp } = useContext(AuthContext);
+
   const slideAnim = useRef(new Animated.Value(700)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      // Animated.timing(fadeAnim, {
-      //   toValue: 1,
-      //   duration: 600,
-      //   useNativeDriver: true,
-      // }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   const handlePressIn = () => {
@@ -49,13 +44,15 @@ const SignUpScreen = ({ setShowSignUp }) => {
     }).start();
   };
 
-  const handlePressOut = () => {
+  const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
       friction: 3,
       tension: 40,
       useNativeDriver: true,
-    }).start(() => alert("Sign Up Pressed!"));
+    }).start();
+
+    await signUp({ email, name, password });
   };
 
   const validateEmail = (text) => {
@@ -86,6 +83,23 @@ const SignUpScreen = ({ setShowSignUp }) => {
     }
   };
 
+  // const validateForm = () => {
+  //   let isValid = true;
+  //   if (!email) {
+  //     setEmailError("Email is required");
+  //     isValid = false;
+  //   }
+  //   if (!password) {
+  //     setPasswordError("Password is required");
+  //     isValid = false;
+  //   }
+  //   if (password !== confirmPassword) {
+  //     setConfirmPasswordError("Passwords do not match");
+  //     isValid = false;
+  //   }
+  //   return isValid;
+  // };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -111,7 +125,6 @@ const SignUpScreen = ({ setShowSignUp }) => {
             style={[
               styles.bottomHalf,
               {
-                // opacity: fadeAnim,
                 transform: [{ translateX: slideAnim }],
               },
             ]}
@@ -186,10 +199,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
 
               <Text style={styles.signupText}>
                 Already have an account?{" "}
-                <TouchableOpacity
-                  // onPress={() => navigation.navigate("LoginPage")}
-                  onPress={() => setShowSignUp(false)}
-                >
+                <TouchableOpacity onPress={() => setShowSignUp(false)}>
                   <Text style={styles.loginLink}>Log In</Text>
                 </TouchableOpacity>
               </Text>
@@ -227,32 +237,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 40,
     overflow: "hidden",
   },
-  // container: {
-  //   flex: 1,
-  // },
-  // background: {
-  //   flex: 1,
-  // },
-  // topHalf: {
-  //   flex: 1,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  // },
-  // image: {
-  //   width: "80%",
-  //   height: "80%",
-  //   resizeMode: "contain",
-  //   marginTop: 30,
-  // },
-  // bottomHalf: {
-  //   flex: 1.4,
-  //   justifyContent: "flex-start",
-  //   alignItems: "center",
-  //   marginTop: 20,
-  //   borderTopLeftRadius: 40,
-  //   borderTopRightRadius: 40,
-  //   overflow: "hidden",
-  // },
   formContainer: {
     width: "100%",
     height: "100%",
