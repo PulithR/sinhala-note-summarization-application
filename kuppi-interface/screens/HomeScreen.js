@@ -1,16 +1,18 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useContext } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Animated,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../authentication/AuthContext";
 
 const HomeScreen = ({ navigation }) => {
+  const { user } = useContext(AuthContext);
+
   // Animation values for fade-in and slide-up effects
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -97,6 +99,18 @@ const HomeScreen = ({ navigation }) => {
             ]}
           >
             <Text style={styles.welcomeText}>Welcome back!</Text>
+            <Text
+              style={[styles.title, { color: "red" }, { fontWeight: "bold" }]}
+            >
+              {`${user.name}`
+                .substring(0, 1)
+                .toLocaleUpperCase()
+                .concat(
+                  `${user.name}`
+                    .substring(1, `${user.name}`.length)
+                    .toLocaleLowerCase()
+                )}
+            </Text>
             <Text style={styles.title}>What would you like to do?</Text>
 
             {/* Gear Icon Button */}

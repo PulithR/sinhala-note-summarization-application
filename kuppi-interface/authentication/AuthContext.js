@@ -62,13 +62,14 @@ export const AuthProvider = ({ children }) => {
   const API_URL = "http://192.168.43.131:5000";
 
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null);
 
   // Sign-up function
   const signUp = async (credentials) => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const response = await fetch(`${API_URL}/signup`, {
         method: "POST",
         headers: {
