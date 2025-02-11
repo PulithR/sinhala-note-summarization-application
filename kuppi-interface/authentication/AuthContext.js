@@ -52,19 +52,58 @@
 
 
 // sign-up API implementation
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Auth Context for sharing user state across the app
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const API_URL = ""; // replace with you URL
+  const API_URL = "http://10.31.27.208:5000"; // replace with you URL
 
   const [user, setUser] = useState(null);
-  // const [loading, setLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+
+  // Check authentication status on app load
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  // Check if user has a valid token in AsyncStorage
+  const checkAuthStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      if (token) {
+        setToken(token);
+        const response = await fetch(
+          `${API_URL}/validate-token`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser( {name: data.user.name} );
+        } else {
+          const errorData = await response.json();
+          // alert(errorData.error || "User not found or token invalid.");
+        }
+      } else {
+        // alert("No token found.");
+      }
+    } catch (error) {
+      alert("Auth check failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Sign-up function
   const signUp = async (credentials) => {

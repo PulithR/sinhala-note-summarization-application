@@ -1,7 +1,8 @@
 import datetime
 from flask import Flask, request, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -59,6 +60,18 @@ def login():
 
     return jsonify({"error": "Invalid credentials"}), 401
 
+
+# Validate Token route (to fetch user info based on the token)
+@app.route("/validate-token", methods=["POST"])
+@jwt_required()
+def validate_token():
+    current_user_email = get_jwt_identity()
+    user = users_db.get(current_user_email)
+
+    if user:
+        return jsonify({"user": {"email": user["email"], "name": user["name"]}}), 200
+
+    return jsonify({"error": "Invalid token or user not found"}), 404
 
 # Run the Flask app
 if __name__ == '__main__':
