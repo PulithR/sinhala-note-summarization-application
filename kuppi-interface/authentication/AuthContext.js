@@ -6,7 +6,7 @@ import BASE_API_URL from "../API/BaseApiUrl";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const API_URL = BASE_API_URL; // replace with you URL
+  const API_URL = BASE_API_URL;
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         // alert("No token found.");
+        // return;
       }
     } catch (error) {
       alert("Auth check failed:", error);
