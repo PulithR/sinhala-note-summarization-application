@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   Animated,
+  ScrollView,
   StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -72,7 +73,8 @@ const HomeScreen = ({ navigation }) => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.buttonIcon}>{icon}</Text>
+          <Text style={styles.buttonIcon}>{`${icon}`}</Text>
+          {/* Ensure this is wrapped in Text */}
           <View style={styles.buttonTextContainer}>
             <Text style={styles.buttonTitle}>{title}</Text>
             <Text style={styles.buttonDescription}>{description}</Text>
@@ -83,85 +85,83 @@ const HomeScreen = ({ navigation }) => {
   );
 
   return (
-    <>
-      <View style={styles.container}>
-        <LinearGradient
-          colors={["#f0f8ff", "#e6f3ff"]}
-          style={styles.background}
+    <ScrollView contentContainerStyle={styles.container}>
+      {" "}
+      {/* Wrap with ScrollView */}
+      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.background}>
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
-          <Animated.View
-            style={[
-              styles.content,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
+          <Text style={styles.welcomeText}>Welcome back!</Text>
+          <Text
+            style={[styles.title, { color: "red" }, { fontWeight: "bold" }]}
           >
-            <Text style={styles.welcomeText}>Welcome back!</Text>
-            <Text
-              style={[styles.title, { color: "red" }, { fontWeight: "bold" }]}
-            >
-              {`${user.name}`
-                .substring(0, 1)
-                .toLocaleUpperCase()
-                .concat(
-                  `${user.name}`
-                    .substring(1, `${user.name}`.length)
-                    .toLocaleLowerCase()
-                )}
-            </Text>
-            <Text style={styles.title}>What would you like to do?</Text>
+            {`${user.name}`
+              .substring(0, 1)
+              .toLocaleUpperCase()
+              .concat(
+                `${user.name}`
+                  .substring(1, `${user.name}`.length)
+                  .toLocaleLowerCase()
+              )}
+          </Text>
+          <Text style={styles.title}>What would you like to do?</Text>
 
-            {/* Gear Icon Button */}
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={() => navigation.navigate("Profile")}
-            >
-              <Ionicons name="person-circle" size={45} color="#2c3e50" />
-            </TouchableOpacity>
+          {/* Gear Icon Button */}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => navigation.navigate("Profile")}
+          >
+            <Ionicons name="person-circle" size={45} color="#2c3e50" />
+          </TouchableOpacity>
 
-            {renderButton(
-              "📝",
-              "Summarizer",
-              "Get quick summaries of your documents",
-              buttonScales.summarizer,
-              "Summarizer"
-            )}
+          {renderButton(
+            "📝",
+            "Summarizer",
+            "Get quick summaries of your documents",
+            buttonScales.summarizer,
+            "Summarizer"
+          )}
 
-            {renderButton(
-              "💡",
-              "Generate Answer",
-              "Get instant answers to your questions",
-              buttonScales.generateAnswer,
-              "GenerateAnswer"
-            )}
+          {renderButton(
+            "💡",
+            "Generate Answer",
+            "Get instant answers to your questions",
+            buttonScales.generateAnswer,
+            "GenerateAnswer"
+          )}
 
-            {renderButton(
-              "📖",
-              "Add Notes",
-              "Create and organize your notes",
-              buttonScales.addNotes,
-              "AddNotesScreen"
-            )}
+          {renderButton(
+            "📖",
+            "Add Notes",
+            "Create and organize your notes",
+            buttonScales.addNotes,
+            "AddNotesScreen"
+          )}
 
-            {renderButton(
-              "📄",
-              "Scan Document",
-              "Scan and digitize your documents",
-              buttonScales.scanDocument,
-              "ScanDocument"
-            )}
-          </Animated.View>
-        </LinearGradient>
-      </View>
-    </>
+          {renderButton(
+            "📄",
+            "Scan Document",
+            "Scan and digitize your documents",
+            buttonScales.scanDocument,
+            "ScanDocument"
+          )}
+        </Animated.View>
+      </LinearGradient>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   background: {
     flex: 1,
