@@ -40,6 +40,27 @@ def signup():
 
     return jsonify({"success": True, "token": token, "user": {"email": email, "name": name}}), 201
 
+
+# Login route (authenticate existing user)
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required!"}), 400
+
+    user = users_db.get(email)
+
+    if user and check_password_hash(user["password"], password):
+        token = create_access_token(identity=email, expires_delta=datetime.timedelta(hours=24))
+        return jsonify({"success": True, "token": token, "user": {"email": user["email"], "name": user["name"]}}), 200
+
+    return jsonify({"error": "Invalid credentials"}), 401
+
+
 # Run the Flask app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
