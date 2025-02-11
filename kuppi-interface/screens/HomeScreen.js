@@ -73,8 +73,7 @@ const HomeScreen = ({ navigation }) => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.buttonIcon}>{`${icon}`}</Text>
-          {/* Ensure this is wrapped in Text */}
+          <Text style={styles.buttonIcon}>{icon}</Text>
           <View style={styles.buttonTextContainer}>
             <Text style={styles.buttonTitle}>{title}</Text>
             <Text style={styles.buttonDescription}>{description}</Text>
@@ -86,8 +85,6 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {" "}
-      {/* Wrap with ScrollView */}
       <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.background}>
         <Animated.View
           style={[
@@ -99,17 +96,9 @@ const HomeScreen = ({ navigation }) => {
           ]}
         >
           <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text
-            style={[styles.title, { color: "red" }, { fontWeight: "bold" }]}
-          >
-            {`${user.name}`
-              .substring(0, 1)
-              .toLocaleUpperCase()
-              .concat(
-                `${user.name}`
-                  .substring(1, `${user.name}`.length)
-                  .toLocaleLowerCase()
-              )}
+          <Text style={[styles.title, { color: "red", fontWeight: "bold" }]}>
+            {user.name.charAt(0).toUpperCase() +
+              user.name.slice(1).toLowerCase()}
           </Text>
           <Text style={styles.title}>What would you like to do?</Text>
 
