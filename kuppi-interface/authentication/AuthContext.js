@@ -59,7 +59,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const API_URL = "http://192.168.43.131:5000";
+  const API_URL = ""; // replace with you URL
 
   const [user, setUser] = useState(null);
   // const [loading, setLoading] = useState(true);
@@ -95,8 +95,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login function
+  const login = async (credentials) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+      // alert("Login response:", data);
+
+      if (data && data.token) {
+        await AsyncStorage.setItem("userToken", data.token);
+        setToken(data.token);
+        // alert("Token stored in AsyncStorage:", data.token); 
+        setUser({ name: data.user.name });
+      } else {
+        alert("Login failed: " + (data.error || "Unknown error"));
+      }
+    } catch (error) {
+      alert("Login error: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, signUp, loading, token }}>
+    <AuthContext.Provider value={{ user, login, signUp, loading, token }}>
       {children}
     </AuthContext.Provider>
   );

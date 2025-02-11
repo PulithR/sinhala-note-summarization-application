@@ -1,6 +1,6 @@
 import datetime
 from flask import Flask, request, jsonify
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import JWTManager, create_access_token
 
 app = Flask(__name__)
