@@ -59,7 +59,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const API_URL = "http://10.31.27.208:5000"; // replace with you URL
+  const API_URL = ""; // replace with you URL
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
