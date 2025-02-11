@@ -164,8 +164,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout function
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await AsyncStorage.removeItem("userToken");
+      // alert("Token removed from AsyncStorage");
+      setUser(null);
+    } catch (error) {
+      alert("Logout failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signUp, loading, token }}>
+    <AuthContext.Provider value={{ user, login, signUp, logout, loading, token }}>
       {children}
     </AuthContext.Provider>
   );
