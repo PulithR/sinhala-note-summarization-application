@@ -7,8 +7,6 @@ import {
   Image,
   StyleSheet,
   Animated,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,7 +16,9 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
@@ -83,29 +83,8 @@ const SignUpScreen = ({ setShowSignUp }) => {
     }
   };
 
-  // const validateForm = () => {
-  //   let isValid = true;
-  //   if (!email) {
-  //     setEmailError("Email is required");
-  //     isValid = false;
-  //   }
-  //   if (!password) {
-  //     setPasswordError("Password is required");
-  //     isValid = false;
-  //   }
-  //   if (password !== confirmPassword) {
-  //     setConfirmPasswordError("Passwords do not match");
-  //     isValid = false;
-  //   }
-  //   return isValid;
-  // };
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-    >
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -156,26 +135,46 @@ const SignUpScreen = ({ setShowSignUp }) => {
                 onChangeText={setName}
               />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                placeholderTextColor="#7f8c8d"
-                value={password}
-                onChangeText={validatePassword}
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputWithButton}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor="#7f8c8d"
+                  value={password}
+                  onChangeText={validatePassword}
+                />
+                <TouchableOpacity
+                  style={styles.visibilityButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Text style={styles.visibilityButtonText}>
+                    {showPassword ? "HIDE" : "SHOW"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               {passwordError ? (
                 <Text style={styles.errorText}>{passwordError}</Text>
               ) : null}
 
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                secureTextEntry
-                placeholderTextColor="#7f8c8d"
-                value={confirmPassword}
-                onChangeText={validateConfirmPassword}
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputWithButton}
+                  placeholder="Confirm Password"
+                  secureTextEntry={!showConfirmPassword}
+                  placeholderTextColor="#7f8c8d"
+                  value={confirmPassword}
+                  onChangeText={validateConfirmPassword}
+                />
+                <TouchableOpacity
+                  style={styles.visibilityButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  <Text style={styles.visibilityButtonText}>
+                    {showConfirmPassword ? "HIDE" : "SHOW"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               {confirmPasswordError ? (
                 <Text style={styles.errorText}>{confirmPasswordError}</Text>
               ) : null}
@@ -207,7 +206,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -275,8 +274,40 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#e74c3c",
     alignSelf: "flex-start",
-    marginLeft: "5%",
+    marginLeft: "8%",
     fontSize: 14,
+  },
+  inputContainer: {
+    width: "90%",
+    position: "relative",
+    marginVertical: 10,
+  },
+  inputWithButton: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    padding: 15,
+    paddingRight: 70,
+    fontSize: 16,
+    color: "#2c3e50",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  visibilityButton: {
+    position: "absolute",
+    right: 15,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+  },
+  visibilityButtonText: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "blue",
   },
   loginButton: {
     width: 300,
@@ -302,8 +333,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginLink: {
+    fontSize: 14,
     color: "#4a90e2",
     fontWeight: "bold",
+    top: 3,
+    left: 4,
   },
 });
 

@@ -7,8 +7,6 @@ import {
   Image,
   StyleSheet,
   Animated,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +15,7 @@ import { AuthContext } from "../authentication/AuthContext";
 const LoginScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
 
   const { login } = useContext(AuthContext);
@@ -62,11 +61,7 @@ const LoginScreen = ({ setShowSignUp }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-    >
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -85,9 +80,7 @@ const LoginScreen = ({ setShowSignUp }) => {
           <Animated.View
             style={[
               styles.bottomHalf,
-              {
-                transform: [{ translateX: slideAnim }],
-              },
+              { transform: [{ translateX: slideAnim }] },
             ]}
           >
             <LinearGradient
@@ -109,14 +102,24 @@ const LoginScreen = ({ setShowSignUp }) => {
                 <Text style={styles.errorText}>{emailError}</Text>
               ) : null}
 
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                placeholderTextColor="#7f8c8d"
-                value={password}
-                onChangeText={setPassword}
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputWithButton}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor="#7f8c8d"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  style={styles.visibilityButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Text style={styles.visibilityButtonText}>
+                    {showPassword ? "HIDE" : "SHOW"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
@@ -131,8 +134,6 @@ const LoginScreen = ({ setShowSignUp }) => {
                   <LinearGradient
                     colors={["#4a90e2", "#357abd"]}
                     style={styles.loginButton}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
                   >
                     <Text style={styles.loginButtonText}>Login</Text>
                   </LinearGradient>
@@ -149,7 +150,7 @@ const LoginScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -220,11 +221,43 @@ const styles = StyleSheet.create({
     marginLeft: "5%",
     fontSize: 14,
   },
+  inputContainer: {
+    width: "90%",
+    position: "relative",
+    marginVertical: 10,
+  },
+  inputWithButton: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    padding: 15,
+    paddingRight: 70,
+    fontSize: 16,
+    color: "#2c3e50",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  visibilityButton: {
+    position: "absolute",
+    right: 15,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+  },
+  visibilityButtonText: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "blue",
+  },
   forgotPassword: {
     alignSelf: "flex-end",
     color: "#4a90e2",
     marginTop: 10,
-    marginRight: "5%",
+    marginRight: "1%",
     fontSize: 14,
   },
   loginButton: {
@@ -251,8 +284,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   signupLink: {
+    fontSize: 14,
     color: "#4a90e2",
     fontWeight: "bold",
+    top: 3,
+    left: 4,
   },
 });
 
