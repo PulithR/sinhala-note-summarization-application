@@ -7,8 +7,6 @@ import {
   Image,
   StyleSheet,
   Animated,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
