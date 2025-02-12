@@ -113,6 +113,7 @@ const LoginScreen = ({ setShowSignUp }) => {
                 />
                 <TouchableOpacity
                   style={styles.visibilityButton}
+                  activeOpacity={1}
                   onPress={() => setShowPassword(!showPassword)}
                 >
                   <Text style={styles.visibilityButtonText}>
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   input: {
-    width: "90%",
+    width: "100%",
     height: 50,
     borderRadius: 12,
     backgroundColor: "#ffffff",
@@ -222,14 +223,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   inputContainer: {
-    width: "90%",
-    position: "relative",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginVertical: 10,
   },
   inputWithButton: {
-    width: "100%",
-    height: 50,
-    borderRadius: 12,
+    width: "70%",
+    height: 49,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
     backgroundColor: "#ffffff",
     padding: 15,
     paddingRight: 70,
@@ -239,14 +242,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
   },
   visibilityButton: {
-    position: "absolute",
-    right: 15,
-    top: 0,
-    bottom: 0,
+    width: "30%",
+    height: 50,
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 5,
+    marginRight: 10,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
   },
   visibilityButtonText: {
     fontSize: 14,

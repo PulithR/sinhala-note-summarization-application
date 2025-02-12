@@ -146,6 +146,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
                 />
                 <TouchableOpacity
                   style={styles.visibilityButton}
+                  activeOpacity={1}
                   onPress={() => setShowPassword(!showPassword)}
                 >
                   <Text style={styles.visibilityButtonText}>
@@ -168,6 +169,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
                 />
                 <TouchableOpacity
                   style={styles.visibilityButton}
+                  activeOpacity={1}
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   <Text style={styles.visibilityButtonText}>
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   input: {
-    width: "90%",
+    width: "100%",
     height: 50,
     borderRadius: 12,
     backgroundColor: "#ffffff",
@@ -278,14 +280,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   inputContainer: {
-    width: "90%",
-    position: "relative",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginVertical: 10,
   },
   inputWithButton: {
-    width: "100%",
-    height: 50,
-    borderRadius: 12,
+    width: "70%",
+    height: 49,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
     backgroundColor: "#ffffff",
     padding: 15,
     paddingRight: 70,
@@ -298,11 +302,15 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   visibilityButton: {
-    position: "absolute",
-    right: 15,
-    top: 0,
-    bottom: 0,
+    width: "30%",
+    height: 50,
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 5,
+    marginRight: 10,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
   },
   visibilityButtonText: {
     fontSize: 14,
@@ -316,6 +324,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 30,
+    backgroundColor: "#3498db",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -340,5 +349,6 @@ const styles = StyleSheet.create({
     left: 4,
   },
 });
+
 
 export default SignUpScreen;
