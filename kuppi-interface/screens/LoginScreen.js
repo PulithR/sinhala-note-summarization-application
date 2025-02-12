@@ -233,8 +233,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   showPassword: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "900",
     color: "blue",
     position: "absolute",
     right: 10,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     color: "#4a90e2",
     marginTop: 10,
-    marginRight: "5%",
+    marginRight: "1%",
     fontSize: 14,
   },
   loginButton: {
@@ -271,8 +271,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   signupLink: {
+    fontSize: 14,
     color: "#4a90e2",
     fontWeight: "bold",
+    top: 3,
+    left: 4
   },
 });
 

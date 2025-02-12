@@ -303,8 +303,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   showPassword: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "900",
     color: "blue",
     position: "absolute",
     right: 10,
@@ -334,8 +334,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginLink: {
+    fontSize: 14,
     color: "#4a90e2",
     fontWeight: "bold",
+    top: 3,
+    left: 4,
   },
 });
 
