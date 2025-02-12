@@ -63,10 +63,8 @@ const LoginScreen = ({ setShowSignUp }) => {
   };
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -161,7 +159,7 @@ const LoginScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

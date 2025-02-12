@@ -18,7 +18,9 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
@@ -101,10 +103,8 @@ const SignUpScreen = ({ setShowSignUp }) => {
   // };
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -156,26 +156,48 @@ const SignUpScreen = ({ setShowSignUp }) => {
                 onChangeText={setName}
               />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                placeholderTextColor="#7f8c8d"
-                value={password}
-                onChangeText={validatePassword}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor="#7f8c8d"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowPassword(!showPassword);
+                  }}
+                >
+                  <Text style={styles.showPassword}>
+                    {showPassword ? "HIDE " : "SHOW"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               {passwordError ? (
                 <Text style={styles.errorText}>{passwordError}</Text>
               ) : null}
 
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                secureTextEntry
-                placeholderTextColor="#7f8c8d"
-                value={confirmPassword}
-                onChangeText={validateConfirmPassword}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm Password"
+                  secureTextEntry={!showConfirmPassword}
+                  placeholderTextColor="#7f8c8d"
+                  value={confirmPassword}
+                  onChangeText={validateConfirmPassword}
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowConfirmPassword(!showConfirmPassword);
+                  }}
+                >
+                  <Text style={styles.showPassword}>
+                    {showConfirmPassword ? "HIDE " : "SHOW"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               {confirmPasswordError ? (
                 <Text style={styles.errorText}>{confirmPasswordError}</Text>
               ) : null}
@@ -207,7 +229,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -277,6 +299,18 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginLeft: "5%",
     fontSize: 14,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  showPassword: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "blue",
+    position: "absolute",
+    right: 10,
+    top: 24,
   },
   loginButton: {
     width: 300,
