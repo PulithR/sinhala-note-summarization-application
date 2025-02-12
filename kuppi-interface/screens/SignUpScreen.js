@@ -83,27 +83,8 @@ const SignUpScreen = ({ setShowSignUp }) => {
     }
   };
 
-  // const validateForm = () => {
-  //   let isValid = true;
-  //   if (!email) {
-  //     setEmailError("Email is required");
-  //     isValid = false;
-  //   }
-  //   if (!password) {
-  //     setPasswordError("Password is required");
-  //     isValid = false;
-  //   }
-  //   if (password !== confirmPassword) {
-  //     setConfirmPasswordError("Passwords do not match");
-  //     isValid = false;
-  //   }
-  //   return isValid;
-  // };
-
   return (
-    <View
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -154,22 +135,21 @@ const SignUpScreen = ({ setShowSignUp }) => {
                 onChangeText={setName}
               />
 
-              <View style={styles.passwordContainer}>
+              <View style={styles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputWithButton}
                   placeholder="Password"
                   secureTextEntry={!showPassword}
                   placeholderTextColor="#7f8c8d"
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={validatePassword}
                 />
                 <TouchableOpacity
-                  onPress={() => {
-                    setShowPassword(!showPassword);
-                  }}
+                  style={styles.visibilityButton}
+                  onPress={() => setShowPassword(!showPassword)}
                 >
-                  <Text style={styles.showPassword}>
-                    {showPassword ? "HIDE " : "SHOW"}
+                  <Text style={styles.visibilityButtonText}>
+                    {showPassword ? "HIDE" : "SHOW"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -177,9 +157,9 @@ const SignUpScreen = ({ setShowSignUp }) => {
                 <Text style={styles.errorText}>{passwordError}</Text>
               ) : null}
 
-              <View style={styles.passwordContainer}>
+              <View style={styles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputWithButton}
                   placeholder="Confirm Password"
                   secureTextEntry={!showConfirmPassword}
                   placeholderTextColor="#7f8c8d"
@@ -187,12 +167,11 @@ const SignUpScreen = ({ setShowSignUp }) => {
                   onChangeText={validateConfirmPassword}
                 />
                 <TouchableOpacity
-                  onPress={() => {
-                    setShowConfirmPassword(!showConfirmPassword);
-                  }}
+                  style={styles.visibilityButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  <Text style={styles.showPassword}>
-                    {showConfirmPassword ? "HIDE " : "SHOW"}
+                  <Text style={styles.visibilityButtonText}>
+                    {showConfirmPassword ? "HIDE" : "SHOW"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -295,20 +274,40 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#e74c3c",
     alignSelf: "flex-start",
-    marginLeft: "5%",
+    marginLeft: "8%",
     fontSize: 14,
   },
-  passwordContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  inputContainer: {
+    width: "90%",
+    position: "relative",
+    marginVertical: 10,
   },
-  showPassword: {
+  inputWithButton: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    padding: 15,
+    paddingRight: 70,
+    fontSize: 16,
+    color: "#2c3e50",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  visibilityButton: {
+    position: "absolute",
+    right: 15,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+  },
+  visibilityButtonText: {
     fontSize: 14,
     fontWeight: "900",
     color: "blue",
-    position: "absolute",
-    right: 10,
-    top: 24,
   },
   loginButton: {
     width: 300,

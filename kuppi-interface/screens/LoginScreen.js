@@ -61,9 +61,7 @@ const LoginScreen = ({ setShowSignUp }) => {
   };
 
   return (
-    <View
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -82,9 +80,7 @@ const LoginScreen = ({ setShowSignUp }) => {
           <Animated.View
             style={[
               styles.bottomHalf,
-              {
-                transform: [{ translateX: slideAnim }],
-              },
+              { transform: [{ translateX: slideAnim }] },
             ]}
           >
             <LinearGradient
@@ -106,9 +102,9 @@ const LoginScreen = ({ setShowSignUp }) => {
                 <Text style={styles.errorText}>{emailError}</Text>
               ) : null}
 
-              <View style={styles.passwordContainer}>
+              <View style={styles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputWithButton}
                   placeholder="Password"
                   secureTextEntry={!showPassword}
                   placeholderTextColor="#7f8c8d"
@@ -116,12 +112,11 @@ const LoginScreen = ({ setShowSignUp }) => {
                   onChangeText={setPassword}
                 />
                 <TouchableOpacity
-                  onPress={() => {
-                    setShowPassword(!showPassword);
-                  }}
+                  style={styles.visibilityButton}
+                  onPress={() => setShowPassword(!showPassword)}
                 >
-                  <Text style={styles.showPassword}>
-                    {showPassword ? "HIDE " : "SHOW"}
+                  <Text style={styles.visibilityButtonText}>
+                    {showPassword ? "HIDE" : "SHOW"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -139,8 +134,6 @@ const LoginScreen = ({ setShowSignUp }) => {
                   <LinearGradient
                     colors={["#4a90e2", "#357abd"]}
                     style={styles.loginButton}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
                   >
                     <Text style={styles.loginButtonText}>Login</Text>
                   </LinearGradient>
@@ -228,17 +221,37 @@ const styles = StyleSheet.create({
     marginLeft: "5%",
     fontSize: 14,
   },
-  passwordContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  inputContainer: {
+    width: "90%",
+    position: "relative",
+    marginVertical: 10,
   },
-  showPassword: {
+  inputWithButton: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    padding: 15,
+    paddingRight: 70,
+    fontSize: 16,
+    color: "#2c3e50",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  visibilityButton: {
+    position: "absolute",
+    right: 15,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+  },
+  visibilityButtonText: {
     fontSize: 14,
     fontWeight: "900",
     color: "blue",
-    position: "absolute",
-    right: 10,
-    top: 24,
   },
   forgotPassword: {
     alignSelf: "flex-end",
@@ -275,7 +288,7 @@ const styles = StyleSheet.create({
     color: "#4a90e2",
     fontWeight: "bold",
     top: 3,
-    left: 4
+    left: 4,
   },
 });
 
