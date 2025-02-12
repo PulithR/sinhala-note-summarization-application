@@ -17,6 +17,7 @@ import { AuthContext } from "../authentication/AuthContext";
 const LoginScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
 
   const { login } = useContext(AuthContext);
@@ -109,14 +110,25 @@ const LoginScreen = ({ setShowSignUp }) => {
                 <Text style={styles.errorText}>{emailError}</Text>
               ) : null}
 
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                placeholderTextColor="#7f8c8d"
-                value={password}
-                onChangeText={setPassword}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor="#7f8c8d"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowPassword(!showPassword);
+                  }}
+                >
+                  <Text style={styles.showPassword}>
+                    {showPassword ? "HIDE " : "SHOW"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
@@ -219,6 +231,18 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginLeft: "5%",
     fontSize: 14,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  showPassword: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "blue",
+    position: "absolute",
+    right: 10,
+    top: 24,
   },
   forgotPassword: {
     alignSelf: "flex-end",
