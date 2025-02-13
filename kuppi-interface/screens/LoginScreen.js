@@ -8,6 +8,10 @@ import {
   StyleSheet,
   Animated,
   ScrollView,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
@@ -62,95 +66,104 @@ const LoginScreen = ({ setShowSignUp }) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <LinearGradient
-          colors={["#f0f8ff", "#e6f3ff"]}
-          style={styles.background}
-        >
-          <View style={styles.topHalf}>
-            <Image
-              source={require("../assets/login.png")}
-              style={styles.image}
-            />
-          </View>
-
-          <Animated.View
-            style={[
-              styles.bottomHalf,
-              { transform: [{ translateX: slideAnim }] },
-            ]}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
           >
             <LinearGradient
-              colors={["#ffffff", "#f8f9ff"]}
-              style={styles.formContainer}
+              colors={["#f0f8ff", "#e6f3ff"]}
+              style={styles.background}
             >
-              <Text style={styles.header}>Welcome Back!</Text>
-              <Text style={styles.helper}>Sign in to continue</Text>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#7f8c8d"
-                value={email}
-                onChangeText={validateEmail}
-                keyboardType="email-address"
-              />
-              {emailError ? (
-                <Text style={styles.errorText}>{emailError}</Text>
-              ) : null}
-
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.inputWithButton}
-                  placeholder="Password"
-                  secureTextEntry={!showPassword}
-                  placeholderTextColor="#7f8c8d"
-                  value={password}
-                  onChangeText={setPassword}
+              <View style={styles.topHalf}>
+                <Image
+                  source={require("../assets/login.png")}
+                  style={styles.image}
                 />
-                <TouchableOpacity
-                  style={styles.visibilityButton}
-                  activeOpacity={1}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Text style={styles.visibilityButtonText}>
-                    {showPassword ? "HIDE" : "SHOW"}
-                  </Text>
-                </TouchableOpacity>
               </View>
 
-              <TouchableOpacity>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
-              </TouchableOpacity>
-
-              <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-                <TouchableOpacity
-                  onPressIn={handlePressIn}
-                  onPressOut={handlePressOut}
-                  activeOpacity={0.9}
+              <Animated.View
+                style={[
+                  styles.bottomHalf,
+                  { transform: [{ translateX: slideAnim }] },
+                ]}
+              >
+                <LinearGradient
+                  colors={["#ffffff", "#f8f9ff"]}
+                  style={styles.formContainer}
                 >
-                  <LinearGradient
-                    colors={["#4a90e2", "#357abd"]}
-                    style={styles.loginButton}
-                  >
-                    <Text style={styles.loginButtonText}>Login</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animated.View>
+                  <Text style={styles.header}>Welcome Back!</Text>
+                  <Text style={styles.helper}>Sign in to continue</Text>
 
-              <Text style={styles.signupText}>
-                Don't have an account?{" "}
-                <TouchableOpacity onPress={() => setShowSignUp(true)}>
-                  <Text style={styles.signupLink}>Sign Up</Text>
-                </TouchableOpacity>
-              </Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    placeholderTextColor="#7f8c8d"
+                    value={email}
+                    onChangeText={validateEmail}
+                    keyboardType="email-address"
+                  />
+                  {emailError ? (
+                    <Text style={styles.errorText}>{emailError}</Text>
+                  ) : null}
+
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.inputWithButton}
+                      placeholder="Password"
+                      secureTextEntry={!showPassword}
+                      placeholderTextColor="#7f8c8d"
+                      value={password}
+                      onChangeText={setPassword}
+                    />
+                    <TouchableOpacity
+                      style={styles.visibilityButton}
+                      activeOpacity={1}
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
+                      <Text style={styles.visibilityButtonText}>
+                        {showPassword ? "HIDE" : "SHOW"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <TouchableOpacity>
+                    <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                  </TouchableOpacity>
+
+                  <Animated.View
+                    style={{ transform: [{ scale: buttonScale }] }}
+                  >
+                    <TouchableOpacity
+                      onPressIn={handlePressIn}
+                      onPressOut={handlePressOut}
+                      activeOpacity={0.9}
+                    >
+                      <LinearGradient
+                        colors={["#4a90e2", "#357abd"]}
+                        style={styles.loginButton}
+                      >
+                        <Text style={styles.loginButtonText}>Login</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </Animated.View>
+
+                  <Text style={styles.signupText}>
+                    Don't have an account?{" "}
+                    <TouchableOpacity onPress={() => setShowSignUp(true)}>
+                      <Text style={styles.signupLink}>Sign Up</Text>
+                    </TouchableOpacity>
+                  </Text>
+                </LinearGradient>
+              </Animated.View>
             </LinearGradient>
-          </Animated.View>
-        </LinearGradient>
-      </ScrollView>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -172,6 +185,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     resizeMode: "contain",
+    paddingTop: 40,
   },
   bottomHalf: {
     flex: 1,
@@ -253,6 +267,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   visibilityButtonText: {
     fontSize: 14,

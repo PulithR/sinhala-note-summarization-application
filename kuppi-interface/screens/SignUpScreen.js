@@ -8,6 +8,8 @@ import {
   StyleSheet,
   Animated,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
@@ -84,7 +86,10 @@ const SignUpScreen = ({ setShowSignUp }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -208,7 +213,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -229,6 +234,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     resizeMode: "contain",
+    paddingTop: 40,
   },
   bottomHalf: {
     flex: 1,
@@ -311,6 +317,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   visibilityButtonText: {
     fontSize: 14,
