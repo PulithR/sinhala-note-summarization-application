@@ -11,11 +11,18 @@ import {
   Keyboard,
 } from "react-native";
 
-const OTPModal = ({ visible }) => {
+const OTPModal = ({ visible, onClose, email }) => {
   const [otp, setOtp] = useState("");
-
-  const handleVerifyOtp = () => {};
   const [otpError, setOtpError] = useState("");
+
+  const handleVerifyOtp = () => {
+    try {
+      // await API
+      onclose();
+    } catch (error) {
+      setOtpError("Error verifying OTP: " + error.message);
+    }
+  };
 
 
   return (
@@ -50,7 +57,7 @@ const OTPModal = ({ visible }) => {
               </LinearGradient>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.closeButton}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeText}>Close</Text>
             </TouchableOpacity>
           </View>

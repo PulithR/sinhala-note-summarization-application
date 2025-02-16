@@ -55,8 +55,17 @@ const SignUpScreen = ({ setShowSignUp }) => {
       tension: 40,
       useNativeDriver: true,
     }).start();
-    setModalVisible(true);
-    // await signUp({ email, name, password });
+    
+    try {
+      if (email && password && confirmPassword) {
+        setModalVisible(true);
+        await signUp({ email, name, password });
+      } else {
+        alert("Please enter credentials!");
+      }
+    } catch (error) {
+      alert("Error initiating sign-up: " + error.message);
+    }
   };
 
   const validateEmail = (text) => {
@@ -218,6 +227,8 @@ const SignUpScreen = ({ setShowSignUp }) => {
 
       <OTPModal 
         visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        email={email}
       />
     </KeyboardAvoidingView>
   );
