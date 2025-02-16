@@ -20,9 +20,19 @@ const OTPModal = ({ visible, onClose, email }) => {
   const [otpError, setOtpError] = useState("");
 
   const handleVerifyOtp = async () => {
+    if (!email) {
+      setOtpError("Something went wrong. Please sign up again.");
+      return;
+    }
+
+    if (!otp.trim()) {
+      setOtpError("OTP is required.");
+      return;
+    }
+
     try {
       await verifyOTP({ email, otp });
-      onclose();
+      onClose();
     } catch (error) {
       setOtpError("Error verifying OTP: " + error.message);
     }

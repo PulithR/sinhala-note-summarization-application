@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
@@ -25,6 +26,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false); 
   const [modalVisible, setModalVisible] = useState(false);
 
   const { signUp } = useContext(AuthContext);
@@ -58,7 +60,9 @@ const SignUpScreen = ({ setShowSignUp }) => {
     
     try {
       if (email && password && confirmPassword) {
+        setOtpLoading(true);
         const response = await signUp({ email, name, password });
+        setOtpLoading(false);
         if (response.success) {
           setModalVisible(true);
         } else {
@@ -206,14 +210,19 @@ const SignUpScreen = ({ setShowSignUp }) => {
                   onPressIn={handlePressIn}
                   onPressOut={handlePressOut}
                   activeOpacity={0.9}
+                  disabled={otpLoading}
                 >
                   <LinearGradient
                     colors={["#4a90e2", "#357abd"]}
-                    style={styles.loginButton}
+                    style={[styles.loginButton, otpLoading && { opacity: 0.7 }]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <Text style={styles.loginButtonText}>Sign Up</Text>
+                    {otpLoading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.loginButtonText}>Sign Up</Text>
+                    )}
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
@@ -229,7 +238,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
         </LinearGradient>
       </ScrollView>
 
-      <OTPModal 
+      <OTPModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         email={email}
