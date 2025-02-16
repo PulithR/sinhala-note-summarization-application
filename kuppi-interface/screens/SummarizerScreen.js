@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
       marginBottom: 20,
     },
     label: {
-      fontSize: 90,
+      fontSize: 24,
       fontWeight: "bold",
       color: "#2c3e50",
       marginBottom: 8,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     sublabel: {
       fontSize: 16,
       color: "#7f8c8d",
-      lineHeight: 85,
+      lineHeight: 22,
     },
     textAreaContainer: {
       flex: 1,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     },
     customTextArea: {
       backgroundColor: "#fff",
-      borderRadius: 50,
+      borderRadius: 16,
       padding: 15,
       minHeight: 200,
       shadowColor: "#000",
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     submitButton: {
       borderRadius: 16,
-      overflow: "hide",
+      overflow: "hidden",
       marginBottom: 20,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     },
     submitButtonText: {
       color: "#fff",
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: "bold",
     },
   });
