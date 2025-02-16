@@ -44,6 +44,42 @@ def signup_user(email, name, password):
         "message": "OTP sent to your email. Please verify to complete registration."
     }), 200
 
+def verify_otp(email, otp):
+    otp_data = otp_storage.get(email)
+    if not otp_data:
+        return jsonify({"error": "No OTP found for this email"}), 400
+
+    time_diff = datetime.datetime.now() - otp_data["timestamp"]
+    if time_diff.total_seconds() > 600:
+        del otp_storage[email]
+        return jsonify({"error": "OTP has expired"}), 400
+
+    if otp != otp_data["otp"]:
+        otp_data["attempts"] += 1
+        return jsonify({"error": "Invalid OTP"}), 400
+
+    user_data = pending_users.get(email)
+    if not user_data:
+        return jsonify({"error": "User data not found"}), 400
+    
+    users_db[email] = {
+        "email": user_data["email"],
+        "password": user_data["password"],
+        "name": user_data["name"],
+        "notes": []
+    }
+
+    del otp_storage[email]
+    del pending_users[email]
+
+    token = create_access_token(identity=email, expires_delta=datetime.timedelta(days=10))
+
+    return jsonify({
+        "success": True,
+        "token": token,
+        "user": {"email": email, "name": user_data["name"]}
+    }), 201
+
 def login_user(email, password):
     if not email or not password:
         return {"success": False, "error": "Email and password are required!"}, 400
