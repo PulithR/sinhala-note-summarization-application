@@ -56,8 +56,7 @@ export const AuthProvider = ({ children }) => {
   // Sign-up function
   const signUp = async (credentials) => {
     try {
-      // setLoading(true);
-      const response = await fetch(`${API_URL}/signup`, {
+      const response = await fetch(`${API_URL}/initiate-signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,17 +65,17 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      // alert("Sign-up response:", data);
 
-      if (data && data.token) {
-        await AsyncStorage.setItem("userToken", data.token);
-        setToken(data.token);
-        setUser({ name: data.user.name });
+      if (response.ok) {
+        return { success: true, message: "OTP sent to email" };
       } else {
-        alert("Sign-up failed: " + (data.error || "Unknown error"));
+        return {
+          success: false,
+          error: data.error || "Signup initiation failed",
+        };
       }
     } catch (error) {
-      // alert("Sign-up error: " + error.message);
+      return { success: false, error: "Network error. Please try again." };
     } finally {
       setLoading(false);
     }

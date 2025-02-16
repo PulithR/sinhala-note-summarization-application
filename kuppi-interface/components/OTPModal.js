@@ -18,7 +18,7 @@ const OTPModal = ({ visible, onClose, email }) => {
   const handleVerifyOtp = () => {
     try {
       // await API
-      onclose();
+      onClose();
     } catch (error) {
       setOtpError("Error verifying OTP: " + error.message);
     }

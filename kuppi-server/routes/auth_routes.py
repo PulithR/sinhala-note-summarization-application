@@ -9,7 +9,7 @@ auth_bp = Blueprint("auth", __name__)
 def signup():
     data = request.json
     response, status = signup_user(data.get("email"), data.get("name"), data.get("password"))
-    return jsonify(response), status
+    return response, status
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
