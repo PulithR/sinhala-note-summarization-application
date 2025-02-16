@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
+import OTPModal from "../components/OTPModal";
 
 const SignUpScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
@@ -24,6 +25,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { signUp } = useContext(AuthContext);
 
@@ -53,8 +55,8 @@ const SignUpScreen = ({ setShowSignUp }) => {
       tension: 40,
       useNativeDriver: true,
     }).start();
-
-    await signUp({ email, name, password });
+    setModalVisible(true);
+    // await signUp({ email, name, password });
   };
 
   const validateEmail = (text) => {
@@ -213,6 +215,10 @@ const SignUpScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
+
+      <OTPModal 
+        visible={modalVisible}
+      />
     </KeyboardAvoidingView>
   );
 };

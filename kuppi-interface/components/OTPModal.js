@@ -10,13 +10,13 @@ import {
   Keyboard,
 } from "react-native";
 
-const OTPModal = () => {
+const OTPModal = ({ visible }) => {
   const [otp, setOtp] = useState("");
 
   const handleVerifyOtp = () => {};
 
   return (
-    <Modal animationType="slide">
+    <Modal animationType="slide" transparent visible={visible}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
