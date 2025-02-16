@@ -6,6 +6,11 @@ const SummarizerScreen = () => {
     <SafeAreaView>
       <View>
         <Text>Summarizer</Text>
+        <TextInput
+          value={text}
+          onChangeText={setText}
+          placeholder="Enter or paste your text here..."
+        />
       </View>
     </SafeAreaView>
   );
