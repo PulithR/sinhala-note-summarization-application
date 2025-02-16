@@ -58,8 +58,12 @@ const SignUpScreen = ({ setShowSignUp }) => {
     
     try {
       if (email && password && confirmPassword) {
-        setModalVisible(true);
-        await signUp({ email, name, password });
+        const response = await signUp({ email, name, password });
+        if (response.success) {
+          setModalVisible(true);
+        } else {
+          alert(response.error);
+        }
       } else {
         alert("Please enter credentials!");
       }

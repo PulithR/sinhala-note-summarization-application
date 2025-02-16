@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -10,15 +10,19 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { AuthContext } from "../authentication/AuthContext";
 
 const OTPModal = ({ visible, onClose, email }) => {
+
+  const { verifyOTP } = useContext(AuthContext);
+
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     try {
-      // await API
-      onClose();
+      await verifyOTP({ email, otp });
+      onclose();
     } catch (error) {
       setOtpError("Error verifying OTP: " + error.message);
     }
