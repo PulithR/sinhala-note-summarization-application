@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from services.auth_service import signup_user, login_user
+from services.auth_service import signup_user, login_user, verify_otp
 from models.user_model import users_db
 
 auth_bp = Blueprint("auth", __name__)
@@ -9,8 +9,20 @@ auth_bp = Blueprint("auth", __name__)
 def signup():
     data = request.json
     response, status = signup_user(data.get("email"), data.get("name"), data.get("password"))
-    return jsonify(response), status
+    return response, status
 
+@auth_bp.route("/verify-otp", methods=["POST"])
+def verifyotp():
+    data = request.json
+    email = data.get("email")
+    submitted_otp = data.get("otp")
+
+    if not email or not submitted_otp:
+        return jsonify({"error": "Email and OTP are required!"}), 400
+
+    response, status = verify_otp(email, submitted_otp)
+    return response, status
+    
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json

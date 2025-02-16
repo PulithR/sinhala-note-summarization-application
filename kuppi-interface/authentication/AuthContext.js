@@ -24,20 +24,17 @@ export const AuthProvider = ({ children }) => {
 
       if (token) {
         setToken(token);
-        const response = await fetch(
-          `${API_URL}/validate-token`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/validate-token`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
-          setUser( {name: data.user.name} );
+          setUser({ name: data.user.name });
         } else {
           const errorData = await response.json();
           // alert(errorData.error || "User not found or token invalid.");
@@ -66,17 +63,44 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      // alert("Sign-up response:", data);
 
-      if (data && data.token) {
+      if (response.ok) {
+        return { success: true, message: "OTP sent to email" };
+      } else {
+        return {
+          success: false,
+          error: data.error || "Signup initiation failed",
+        };
+      }
+    } catch (error) {
+      return { success: false, error: "Network error. Please try again." };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify OTP and complete signup 
+  const verifyOTP = async (otpData) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(otpData),
+      });
+
+      const data = await response.json();
+      if (data.token) {
         await AsyncStorage.setItem("userToken", data.token);
         setToken(data.token);
         setUser({ name: data.user.name });
       } else {
-        alert("Sign-up failed: " + (data.error || "Unknown error"));
+        alert(data.error || "OTP verification failed.");
       }
     } catch (error) {
-      // alert("Sign-up error: " + error.message);
+      alert("OTP verification failed:", error);
     } finally {
       setLoading(false);
     }
@@ -100,7 +124,7 @@ export const AuthProvider = ({ children }) => {
       if (data && data.token) {
         await AsyncStorage.setItem("userToken", data.token);
         setToken(data.token);
-        // alert("Token stored in AsyncStorage:", data.token); 
+        // alert("Token stored in AsyncStorage:", data.token);
         setUser({ name: data.user.name });
       } else {
         alert("Login failed: " + (data.error || "Unknown error"));
@@ -127,7 +151,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signUp, logout, loading, token }}>
+    <AuthContext.Provider
+      value={{ user, login, signUp, verifyOTP, logout, loading, token }}
+    >
       {children}
     </AuthContext.Provider>
   );

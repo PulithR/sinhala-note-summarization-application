@@ -10,9 +10,11 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
+import OTPModal from "../components/OTPModal";
 
 const SignUpScreen = ({ setShowSignUp }) => {
   const [email, setEmail] = useState("");
@@ -24,6 +26,8 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false); 
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { signUp } = useContext(AuthContext);
 
@@ -53,8 +57,23 @@ const SignUpScreen = ({ setShowSignUp }) => {
       tension: 40,
       useNativeDriver: true,
     }).start();
-
-    await signUp({ email, name, password });
+    
+    try {
+      if (email && password && confirmPassword) {
+        setOtpLoading(true);
+        const response = await signUp({ email, name, password });
+        setOtpLoading(false);
+        if (response.success) {
+          setModalVisible(true);
+        } else {
+          alert(response.error);
+        }
+      } else {
+        alert("Please enter credentials!");
+      }
+    } catch (error) {
+      alert("Error initiating sign-up: " + error.message);
+    }
   };
 
   const validateEmail = (text) => {
@@ -191,14 +210,19 @@ const SignUpScreen = ({ setShowSignUp }) => {
                   onPressIn={handlePressIn}
                   onPressOut={handlePressOut}
                   activeOpacity={0.9}
+                  disabled={otpLoading}
                 >
                   <LinearGradient
                     colors={["#4a90e2", "#357abd"]}
-                    style={styles.loginButton}
+                    style={[styles.loginButton, otpLoading && { opacity: 0.7 }]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <Text style={styles.loginButtonText}>Sign Up</Text>
+                    {otpLoading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.loginButtonText}>Sign Up</Text>
+                    )}
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
@@ -213,6 +237,12 @@ const SignUpScreen = ({ setShowSignUp }) => {
           </Animated.View>
         </LinearGradient>
       </ScrollView>
+
+      <OTPModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        email={email}
+      />
     </KeyboardAvoidingView>
   );
 };
