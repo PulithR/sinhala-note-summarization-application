@@ -54,3 +54,25 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
       setShowPasswordReset(false);
     }
   };
+
+  return (
+    <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <LinearGradient
+              colors={["#f0f8ff", "#e6f3ff"]}
+              style={styles.background}
+            >
+              <View style={styles.topHalf}>
+                <Image
+                  source={require("../assets/login.png")}
+                  style={styles.image}
+                />
+              </View>
