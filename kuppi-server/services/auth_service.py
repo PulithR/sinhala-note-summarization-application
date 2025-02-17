@@ -1,24 +1,23 @@
-from flask import request, jsonify
+from flask import jsonify
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
-from models.user_model import users_db
-from models.user_model import pending_users
-from models.user_model import otp_storage
+from models.user_model import users_db, pending_users, otp_storage
 from services.otp_service import generate_otp
 from services.email_service import send_email
 
-def signup_user(email, name, password):
-    data = request.json
-    email = data.get("email")
-    name = data.get("name")
-    password = data.get("password")
+# Max OTP verification attempts
+MAX_OTP_ATTEMPTS = 3
+OTP_EXPIRY_SECONDS = 600  # 10 minutes
 
-    if not email or not password:
-        return jsonify({"error": "Email and password are required!"}), 400
+def signup_user(email, name, password):
+    """Handles user signup, generates OTP, and sends it via email."""
+
+    if not email or not password or not name:
+        return {"error": "Email, name, and password are required!"}, 400
 
     if email in users_db:
-        return jsonify({"error": "User already exists!"}), 400
+        return {"error": "User already exists!"}, 400
 
     # Generate and store OTP
     otp = generate_otp()
@@ -28,7 +27,7 @@ def signup_user(email, name, password):
         "attempts": 0
     }
 
-    # Store pending user data
+    # Store pending user data securely
     pending_users[email] = {
         "email": email,
         "name": name,
@@ -37,31 +36,42 @@ def signup_user(email, name, password):
 
     # Send OTP via email
     if not send_email(email, otp):
-        return jsonify({"error": "Failed to send OTP"}), 500
+        del pending_users[email]  # Cleanup if email sending fails
+        return {"error": "Failed to send OTP. Please try again."}, 500
 
-    return jsonify({
+    return {
         "success": True,
         "message": "OTP sent to your email. Please verify to complete registration."
-    }), 200
+    }, 200
 
 def verify_otp(email, otp):
+    """Verifies OTP, completes registration, and returns JWT token if successful."""
+
     otp_data = otp_storage.get(email)
     if not otp_data:
-        return jsonify({"error": "No OTP found for this email"}), 400
+        return {"error": "No OTP found for this email"}, 400
 
+    # Check OTP expiry
     time_diff = datetime.datetime.now() - otp_data["timestamp"]
-    if time_diff.total_seconds() > 600:
+    if time_diff.total_seconds() > OTP_EXPIRY_SECONDS:
         del otp_storage[email]
-        return jsonify({"error": "OTP has expired"}), 400
+        return {"error": "OTP has expired. Please request a new one."}, 400
+
+    # Check OTP attempts
+    if otp_data["attempts"] >= MAX_OTP_ATTEMPTS:
+        del otp_storage[email]
+        return {"error": "Too many incorrect attempts. Request a new OTP."}, 403
 
     if otp != otp_data["otp"]:
         otp_data["attempts"] += 1
-        return jsonify({"error": "Invalid OTP"}), 400
+        return {"error": "Invalid OTP. Please try again."}, 400
 
-    user_data = pending_users.get(email)
+    # Retrieve user data from pending users
+    user_data = pending_users.pop(email, None)
     if not user_data:
-        return jsonify({"error": "User data not found"}), 400
-    
+        return {"error": "User data not found"}, 400
+
+    # Move user from pending to active users
     users_db[email] = {
         "email": user_data["email"],
         "password": user_data["password"],
@@ -69,24 +79,32 @@ def verify_otp(email, otp):
         "notes": []
     }
 
-    del otp_storage[email]
-    del pending_users[email]
+    del otp_storage[email]  # OTP verified, remove from storage
 
+    # Generate JWT token
     token = create_access_token(identity=email, expires_delta=datetime.timedelta(days=10))
 
-    return jsonify({
+    return {
         "success": True,
         "token": token,
         "user": {"email": email, "name": user_data["name"]}
-    }), 201
+    }, 201
 
 def login_user(email, password):
+    """Handles user login and returns a JWT token if credentials are valid."""
+
     if not email or not password:
-        return {"success": False, "error": "Email and password are required!"}, 400
+        return {"error": "Email and password are required!"}, 400
 
     user = users_db.get(email)
-    if user and check_password_hash(user["password"], password):
-        token = create_access_token(identity=email, expires_delta=datetime.timedelta(hours=24))
-        return {"success": True, "token": token, "user": {"email": user["email"], "name": user["name"]}}, 200
+    if not user or not check_password_hash(user["password"], password):
+        return {"error": "Invalid email or password"}, 401
 
-    return {"success": False, "error": "Invalid credentials"}, 401
+    # Generate JWT token
+    token = create_access_token(identity=email, expires_delta=datetime.timedelta(hours=24))
+
+    return {
+        "success": True,
+        "token": token,
+        "user": {"email": user["email"], "name": user["name"]}
+    }, 200

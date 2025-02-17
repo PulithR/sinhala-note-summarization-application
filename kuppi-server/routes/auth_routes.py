@@ -8,25 +8,28 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.json
-    response, status = signup_user(data.get("email"), data.get("name"), data.get("password"))
-    return response, status
+    if not data or not all(k in data for k in ["email", "name", "password"]):
+        return jsonify({"error": "Email, name, and password are required!"}), 400
+    
+    response, status = signup_user(data["email"], data["name"], data["password"])
+    return jsonify(response), status
 
 @auth_bp.route("/verify-otp", methods=["POST"])
 def verifyotp():
     data = request.json
-    email = data.get("email")
-    submitted_otp = data.get("otp")
-
-    if not email or not submitted_otp:
+    if not data or not all(k in data for k in ["email", "otp"]):
         return jsonify({"error": "Email and OTP are required!"}), 400
 
-    response, status = verify_otp(email, submitted_otp)
-    return response, status
-    
+    response, status = verify_otp(data["email"], data["otp"])
+    return jsonify(response), status
+
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
-    response, status = login_user(data.get("email"), data.get("password"))
+    if not data or not all(k in data for k in ["email", "password"]):
+        return jsonify({"error": "Email and password are required!"}), 400
+
+    response, status = login_user(data["email"], data["password"])
     return jsonify(response), status
 
 @auth_bp.route("/validate-token", methods=["POST"])
@@ -35,7 +38,7 @@ def validate_token():
     current_user_email = get_jwt_identity()
     user = users_db.get(current_user_email)
 
-    if user:
-        return jsonify({"user": {"email": user["email"], "name": user["name"]}}), 200
+    if not user:
+        return jsonify({"success": False, "error": "Invalid token or user not found"}), 404
 
-    return jsonify({"success": False, "error": "Invalid token or user not found"}), 404
+    return jsonify({"user": {"email": user["email"], "name": user["name"]}}), 200
