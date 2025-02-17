@@ -2,23 +2,27 @@ import React, { useContext, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AuthProvider, AuthContext } from "./authentication/AuthContext";
+
 import HomeScreen from "./screens/HomeScreen";
 import SummarizerScreen from "./screens/SummarizerScreen";
 import AnswerGeneratorScreen from "./screens/AnswerGeneratorScreen";
 import NoteBookScreen from "./screens/NoteBookScreen";
 import ScanDocumentScreen from "./screens/ScanDocumentScreen";
 import AddNotesScreen from "./screens/AddNotesScreen";
+import NoteBook from "./components/NoteBook";
 
 import LoginScreen from "./screens/LoginScreen";
 import SignUpScreen from "./screens/SignUpScreen";
 import SplashScreen from "./screens/SplashScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import PasswordResetScreen from "./screens/PasswordResetScreen";
 
 const Stack = createStackNavigator();
 
 function AppNavigator() {
   const { user, loading } = useContext(AuthContext);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   if (loading) {
     return <SplashScreen />;
@@ -38,19 +42,24 @@ function AppNavigator() {
           <Stack.Screen name="ScanDocument" component={ScanDocumentScreen} />
           <Stack.Screen name="AddNotesScreen" component={AddNotesScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="NoteBook" component={NoteBook} />
         </Stack.Navigator>
-
-        ) : (
-      <>
-        {showSignUp ? (
-          <SignUpScreen setShowSignUp={setShowSignUp} />
-        ) : (
-          <LoginScreen setShowSignUp={setShowSignUp} />
-        )}
-      </>
-    )}
-  </NavigationContainer>
-);
+      ) : (
+        <>
+          {showSignUp ? (
+            <SignUpScreen setShowSignUp={setShowSignUp} />
+          ) : showPasswordReset ? (
+            <PasswordResetScreen setShowPasswordReset={setShowPasswordReset} />
+          ) : (
+            <LoginScreen
+              setShowSignUp={setShowSignUp}
+              setShowPasswordReset={setShowPasswordReset}
+            />
+          )}
+        </>
+      )}
+    </NavigationContainer>
+  );
 }
 
 export default function App() {
