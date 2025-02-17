@@ -24,4 +24,20 @@ function AppNavigator() {
     return <SplashScreen />;
   }
 
-  
+  return (
+    <NavigationContainer>
+      {user ? (
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Summarizer" component={SummarizerScreen} />
+          <Stack.Screen
+            name="GenerateAnswer"
+            component={AnswerGeneratorScreen}
+          />
+          <Stack.Screen name="AddNotes" component={NoteBookScreen} />
+          <Stack.Screen name="ScanDocument" component={ScanDocumentScreen} />
+          <Stack.Screen name="AddNotesScreen" component={AddNotesScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+        </Stack.Navigator>
+
+        
