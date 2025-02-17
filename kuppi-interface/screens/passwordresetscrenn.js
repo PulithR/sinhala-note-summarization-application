@@ -76,3 +76,115 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                   style={styles.image}
                 />
               </View>
+
+              <Animated.View
+                style={[
+                  styles.bottomHalf,
+                  { transform: [{ translateY: slideAnim }] },
+                ]}
+              >
+                <LinearGradient
+                  colors={["#ffffff", "#f8f9ff"]}
+                  style={styles.formContainer}
+                >
+                  <Text style={styles.header}>Reset Password</Text>
+                  <Text style={styles.helper}>Enter your new password</Text>
+
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.inputWithButton}
+                      placeholder="New Password"
+                      secureTextEntry={!showPassword}
+                      placeholderTextColor="#7f8c8d"
+                      value={newPassword}
+                      onChangeText={(text) => {
+                        setNewPassword(text);
+                        if (text.length < 6) {
+                          setPasswordError(
+                            "Password must be at least 6 characters long"
+                          );
+                        } else {
+                          setPasswordError("");
+                        }
+                      }}
+                    />
+                    <TouchableOpacity
+                      style={styles.visibilityButton}
+                      activeOpacity={1}
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
+                      <Text style={styles.visibilityButtonText}>
+                        {showPassword ? "HIDE" : "SHOW"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {passwordError ? (
+                    <Text style={styles.errorText}>{passwordError}</Text>
+                  ) : null}
+
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.inputWithButton}
+                      placeholder="Confirm New Password"
+                      secureTextEntry={!showConfirmPassword}
+                      placeholderTextColor="#7f8c8d"
+                      value={confirmNewPassword}
+                      onChangeText={(text) => {
+                        setConfirmNewPassword(text);
+                        if (text !== newPassword) {
+                          setConfirmPasswordError("Passwords do not match");
+                        } else {
+                          setConfirmPasswordError("");
+                        }
+                      }}
+                    />
+                    <TouchableOpacity
+                      style={styles.visibilityButton}
+                      activeOpacity={1}
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      <Text style={styles.visibilityButtonText}>
+                        {showConfirmPassword ? "HIDE" : "SHOW"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {confirmPasswordError ? (
+                    <Text style={styles.errorText}>{confirmPasswordError}</Text>
+                  ) : null}
+
+                  <Animated.View
+                    style={{ transform: [{ scale: buttonScale }] }}
+                  >
+                    <TouchableOpacity
+                      onPressIn={handlePressIn}
+                      onPressOut={handlePressOut}
+                      activeOpacity={0.9}
+                    >
+                      <LinearGradient
+                        colors={["#4a90e2", "#357abd"]}
+                        style={styles.resetButton}
+                      >
+                        <Text style={styles.resetButtonText}>
+                          Reset Password
+                        </Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </Animated.View>
+
+                  <TouchableOpacity
+                    onPress={() => setShowPasswordReset(false)}
+                    style={styles.backButton}
+                  >
+                    <Text style={styles.backButtonText}>Back to Login</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              </Animated.View>
+            </LinearGradient>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </View>
+  );
+};
