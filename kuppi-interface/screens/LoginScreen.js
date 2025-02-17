@@ -64,7 +64,6 @@ const LoginScreen = ({ setShowSignUp, setShowPasswordReset }) => {
     }
   };
 
-
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
