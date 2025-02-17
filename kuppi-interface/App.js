@@ -52,3 +52,11 @@ function AppNavigator() {
   </NavigationContainer>
 );
 }
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
+  );
+}
