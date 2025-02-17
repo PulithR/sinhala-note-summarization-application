@@ -40,4 +40,15 @@ function AppNavigator() {
           <Stack.Screen name="Profile" component={ProfileScreen} />
         </Stack.Navigator>
 
-        
+        ) : (
+      <>
+        {showSignUp ? (
+          <SignUpScreen setShowSignUp={setShowSignUp} />
+        ) : (
+          <LoginScreen setShowSignUp={setShowSignUp} />
+        )}
+      </>
+    )}
+  </NavigationContainer>
+);
+}
