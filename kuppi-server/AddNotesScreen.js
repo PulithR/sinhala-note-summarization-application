@@ -47,3 +47,17 @@ const AddNotesScreen = ({ navigation }) => {
             />
           </View>
 
+          {/* Create new note button */}
+          <TouchableOpacity onPress={() => navigation.navigate("AddNotes")}>
+            <LinearGradient
+              colors={["#4a90e2", "#357abd"]}
+              style={styles.addGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={[styles.addButtonText]}>+</Text>
+              <Text style={[styles.addButtonDescription]}>Create New Note</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+
