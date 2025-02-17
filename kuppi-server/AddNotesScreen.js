@@ -70,5 +70,20 @@ const AddNotesScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
+                    {/* Topics Grid */}
+                    <FlatList
+            data={notes}
+            numColumns={1}
+            keyExtractor={(item) => item.id}
+            renderItem={RenderTopicItem}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      </LinearGradient>
+    </View>
+  );
+};
+
 
 
