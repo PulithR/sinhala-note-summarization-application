@@ -29,3 +29,21 @@ const AddNotesScreen = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+
+  return (
+    <View style={styles.safeContainer}>
+      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
+        <View style={styles.content}>
+          <Text style={styles.mainTopic}>Your Notes</Text>
+
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.search}
+              placeholder="Search topics..."
+              value={searchText}
+              onChangeText={setSearchText}
+              placeholderTextColor="#7f8c8d"
+            />
+          </View>
+
