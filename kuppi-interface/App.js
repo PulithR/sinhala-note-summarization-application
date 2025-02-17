@@ -13,3 +13,15 @@ import LoginScreen from "./screens/LoginScreen";
 import SignUpScreen from "./screens/SignUpScreen";
 import SplashScreen from "./screens/SplashScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+
+const Stack = createStackNavigator();
+
+function AppNavigator() {
+  const { user, loading } = useContext(AuthContext);
+  const [showSignUp, setShowSignUp] = useState(false);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
+
+  
