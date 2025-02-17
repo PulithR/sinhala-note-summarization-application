@@ -60,4 +60,15 @@ const AddNotesScreen = ({ navigation }) => {
             </LinearGradient>
           </TouchableOpacity>
 
+          {/* Recently Viewed */}
+          <View style={styles.row}>
+            <Text style={styles.subtitle}>Recent Notes</Text>
+            <TouchableOpacity
+              onPress={() => Alert.alert("Delete All", "Functionality removed")}
+            >
+              <Text style={styles.deleteAll}>Delete All</Text>
+            </TouchableOpacity>
+          </View>
+
+
 
