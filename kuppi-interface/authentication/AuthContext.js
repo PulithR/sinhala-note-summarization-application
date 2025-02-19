@@ -1,12 +1,13 @@
 import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_API_URL from "../API/BaseApiUrl";
+import { BASE_API_URL } from '@env';
 
 // Auth Context for sharing user state across the app
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const API_URL = BASE_API_URL;
+  console.log(API_URL);
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
