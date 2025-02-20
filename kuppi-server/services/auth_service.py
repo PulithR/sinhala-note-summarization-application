@@ -1,4 +1,3 @@
-from flask import jsonify
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
@@ -10,7 +9,7 @@ from services.email_service import send_email
 MAX_OTP_ATTEMPTS = 3
 OTP_EXPIRY_SECONDS = 600  # 10 minutes
 
-def signup_user(email, name, password):
+def signup_user_service(email, name, password):
     """Handles user signup, generates OTP, and sends it via email."""
 
     if not email or not password or not name:
@@ -44,7 +43,7 @@ def signup_user(email, name, password):
         "message": "OTP sent to your email. Please verify to complete registration."
     }, 200
 
-def verify_otp(email, otp):
+def verify_otp_service(email, otp):
     """Verifies OTP, completes registration, and returns JWT token if successful."""
 
     otp_data = otp_storage.get(email)
@@ -90,7 +89,7 @@ def verify_otp(email, otp):
         "user": {"email": email, "name": user_data["name"]}
     }, 201
 
-def login_user(email, password):
+def login_user_service(email, password):
     """Handles user login and returns a JWT token if credentials are valid."""
 
     if not email or not password:

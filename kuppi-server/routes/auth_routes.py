@@ -1,35 +1,35 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from services.auth_service import signup_user, login_user, verify_otp
+from services.auth_service import signup_user_service, login_user_service, verify_otp_service
 from models.user_model import users_db
 
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/signup", methods=["POST"])
-def signup():
+def signup_user():
     data = request.json
     if not data or not all(k in data for k in ["email", "name", "password"]):
         return jsonify({"error": "Email, name, and password are required!"}), 400
     
-    response, status = signup_user(data["email"], data["name"], data["password"])
+    response, status = signup_user_service(data["email"], data["name"], data["password"])
     return jsonify(response), status
 
 @auth_bp.route("/verify-otp", methods=["POST"])
-def verifyotp():
+def verify_otp():
     data = request.json
     if not data or not all(k in data for k in ["email", "otp"]):
         return jsonify({"error": "Email and OTP are required!"}), 400
 
-    response, status = verify_otp(data["email"], data["otp"])
+    response, status = verify_otp_service(data["email"], data["otp"])
     return jsonify(response), status
 
 @auth_bp.route("/login", methods=["POST"])
-def login():
+def login_user():
     data = request.json
     if not data or not all(k in data for k in ["email", "password"]):
         return jsonify({"error": "Email and password are required!"}), 400
 
-    response, status = login_user(data["email"], data["password"])
+    response, status = login_user_service(data["email"], data["password"])
     return jsonify(response), status
 
 @auth_bp.route("/validate-token", methods=["POST"])
