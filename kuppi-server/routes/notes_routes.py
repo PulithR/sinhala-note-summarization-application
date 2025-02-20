@@ -10,3 +10,9 @@ def add_note():
     data = request.json
     response, status = add_note_service(data)
     return jsonify(response), status
+
+@notes_bp.route("/notes", methods=["GET"])
+@jwt_required()
+def get_notes():
+    response, status = get_notes_service()
+    return jsonify(response), status
