@@ -19,3 +19,12 @@ def add_note_service(data):
     user["notes"].append(note)
 
     return {"success": True, "note": note}, 201
+    def get_notes_service():
+    current_user_email = get_jwt_identity()
+    user = users_db.get(current_user_email)
+
+    if not user:
+        return {"error": "User not found"}, 404
+
+    notes_preview = [{"id": note["id"], "title": note["title"]} for note in user["notes"]]
+    return {"notes": notes_preview}, 200
