@@ -1,12 +1,12 @@
 import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_API_URL from "../API/BaseApiUrl";
+import { BASE_API_URL } from '@env';
 
 // Auth Context for sharing user state across the app
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const API_URL = BASE_API_URL;
+  // console.log(BASE_API_URL);
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
       if (token) {
         setToken(token);
-        const response = await fetch(`${API_URL}/validate-token`, {
+        const response = await fetch(`${BASE_API_URL}/validate-token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (credentials) => {
     try {
       // setLoading(true);
-      const response = await fetch(`${API_URL}/signup`, {
+      const response = await fetch(`${BASE_API_URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
   const verifyOTP = async (otpData) => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/verify-otp`, {
+      const response = await fetch(`${BASE_API_URL}/verify-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${BASE_API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
