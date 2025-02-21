@@ -16,3 +16,15 @@ def add_note():
 def get_notes():
     response, status = get_notes_service()
     return jsonify(response), status
+
+@notes_bp.route("/notes/<int:note_id>", methods=["DELETE"])
+@jwt_required()
+def delete_note(note_id):
+    response, status = delete_note_service(note_id)
+    return jsonify(response), status
+
+@notes_bp.route("/notes", methods=["DELETE"])
+@jwt_required()
+def delete_all_notes():
+    response, status = delete_all_notes_service()
+    return jsonify(response), status
