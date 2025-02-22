@@ -109,7 +109,13 @@ const AddNotesScreen = ({ navigation }) => {
 
           {/* Topics Grid */}
           <FlatList
-            data={notes}
+            data={
+              !searchText
+                ? notes
+                : notes.filter((note) =>
+                    note.title.toLowerCase().includes(searchText.toLowerCase())
+                  )
+            }
             numColumns={1}
             keyExtractor={(item) => item.id}
             renderItem={RenderTopicItem}
