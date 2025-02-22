@@ -2,13 +2,12 @@ from flask_mail import Message
 from flask import current_app
 
 def send_email(email, otp):
-    print(otp)
     msg = Message('Your OTP for Registration',
                       recipients=[email])
     msg.html = f"""
     <div style="max-width: 600px; margin: 40px auto; padding: 25px 20px; 
         border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-        background-color: #000000; text-align: center; font-family: Arial, sans-serif; border: 2px solid #000000;" >
+        background-color: #000000; text-align: center; font-family: Arial, sans-serif; border: 2px solid #ffffff;" >
 
         <h1 style="background-color: #2581eb; color: #ffffff; 
                 padding: 20px; border-radius: 12px; 
