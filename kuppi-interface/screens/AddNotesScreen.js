@@ -10,8 +10,13 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
+import { BASE_API_URL } from '@env';
+import { AuthContext } from "../authentication/AuthContext";
 
 const AddNotesScreen = ({ navigation }) => {
+
+  const { token } = useContext(AuthContext);
+
   const [searchText, setSearchText] = useState("");
   const [notes, setNotes] = useState([]);
 
@@ -23,7 +28,25 @@ const AddNotesScreen = ({ navigation }) => {
   );
 
   const fetchNotes = async () => {
-    // implement fetch notes here
+    try {
+      const response = await fetch(`${BASE_API_URL}/notes`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data.notes);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.error || "Failed to fetch notes");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const handleNotePress = async (noteId) => {
@@ -67,6 +90,7 @@ const AddNotesScreen = ({ navigation }) => {
       <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
         <View style={styles.content}>
           {!searchText && <Text style={styles.mainTopic}>Your Notes</Text>}
+
           {/* Search Bar */}
           <View style={styles.searchContainer}>
             <TextInput
@@ -90,14 +114,14 @@ const AddNotesScreen = ({ navigation }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={[styles.addButtonText]}>{"+"}</Text>
+                <Text style={[styles.addButtonText]}>+</Text>
                 <Text style={[styles.addButtonDescription]}>
-                  {"Create New Note"}
+                  Create New Note
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
           )}
-          ;{/* Recent Notes */}
+          {/* Recent Notes */}
           <View style={styles.row}>
             {searchText ? (
               <Text style={styles.subtitle}>Filtered Notes</Text>
