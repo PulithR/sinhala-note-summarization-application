@@ -28,6 +28,9 @@ const AddNotesScreen = ({ navigation }) => {
 
   const handleNotePress = async (noteId) => {
     // implement user actions when a note is clicked here
+    // use handleDeleteNote() method here
+    // when user click note ask for two options (using Alert.alert or something)
+    // open or delete
   };
 
   const handleDeleteNote = async (noteId) => {
@@ -63,8 +66,7 @@ const AddNotesScreen = ({ navigation }) => {
     <View style={styles.safeContainer}>
       <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
         <View style={styles.content}>
-          <Text style={styles.mainTopic}>Your Notes</Text>
-
+          {!searchText && <Text style={styles.mainTopic}>Your Notes</Text>}
           {/* Search Bar */}
           <View style={styles.searchContainer}>
             <TextInput
@@ -75,38 +77,39 @@ const AddNotesScreen = ({ navigation }) => {
               placeholderTextColor="#7f8c8d"
             />
           </View>
-
           {/*create new note button */}
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("AddNotes");
-            }}
-          >
-            <LinearGradient
-              colors={["#4a90e2", "#357abd"]}
-              style={styles.addGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+          {!searchText && (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("NoteBook");
+              }}
             >
-              <Text style={[styles.addButtonText]}>{"+"}</Text>
-              <Text style={[styles.addButtonDescription]}>
-                {"Create New Note"}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Recent Notes */}
+              <LinearGradient
+                colors={["#4a90e2", "#357abd"]}
+                style={styles.addGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={[styles.addButtonText]}>{"+"}</Text>
+                <Text style={[styles.addButtonDescription]}>
+                  {"Create New Note"}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+          ;{/* Recent Notes */}
           <View style={styles.row}>
             {searchText ? (
               <Text style={styles.subtitle}>Filtered Notes</Text>
             ) : (
               <Text style={styles.subtitle}>Recent Notes</Text>
             )}
-            <TouchableOpacity onPress={handleDeleteAll}>
-              <Text style={styles.deleteAll}>Delete All</Text>
-            </TouchableOpacity>
+            {notes.length > 0 && (
+              <TouchableOpacity onPress={handleDeleteAll}>
+                <Text style={styles.deleteAll}>Delete All</Text>
+              </TouchableOpacity>
+            )}
           </View>
-
           {/* Topics Grid */}
           <FlatList
             data={

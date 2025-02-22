@@ -38,7 +38,7 @@ function AppNavigator() {
             name="GenerateAnswer"
             component={AnswerGeneratorScreen}
           />
-          <Stack.Screen name="AddNotes" component={NoteBookScreen} />
+          <Stack.Screen name="NoteBook" component={NoteBookScreen} />
           <Stack.Screen name="ScanDocument" component={ScanDocumentScreen} />
           <Stack.Screen name="AddNotesScreen" component={AddNotesScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />

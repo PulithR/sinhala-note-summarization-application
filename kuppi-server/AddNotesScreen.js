@@ -48,7 +48,7 @@ const AddNotesScreen = ({ navigation }) => {
           </View>
 
           {/* Create new note button */}
-          <TouchableOpacity onPress={() => navigation.navigate("AddNotes")}>
+          <TouchableOpacity onPress={() => navigation.navigate("NoteBook")}>
             <LinearGradient
               colors={["#4a90e2", "#357abd"]}
               style={styles.addGradient}
