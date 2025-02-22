@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,15 @@ import {
   Alert,
   StyleSheet,
 } from "react-native";
+import { AuthContext } from "../authentication/AuthContext";
+import { BASE_API_URL } from "@env";
+import { useNavigation } from "@react-navigation/native";
 
 const NotebookScreen = () => {
+  const { token } = useContext(AuthContext);
+
+  const navigation = useNavigation();
+
   const [noteText, setNoteText] = useState("");
   const [noteTopic, setNoteTopic] = useState("");
   const [isSaved, setIsSaved] = useState(false);
@@ -31,6 +38,40 @@ const NotebookScreen = () => {
         style: "destructive",
       },
     ]);
+  };
+
+  // Add a new note
+  const handleAddNote = async () => {
+    const title = noteTopic;
+    const content = noteText;
+    try {
+      const response = await fetch(`${BASE_API_URL}/notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title, content }),
+      });
+
+      if (response.ok) {
+        Alert.alert("Success", "Note added successfully!", [
+          {
+            text: "OK",
+            onPress: () =>
+              navigation.reset({
+                index: 1,
+                routes: [{ name: "Home" }, { name: "AddNotesScreen" }],
+              }),
+          },
+        ]);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.error || "Failed to add note");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   return (
@@ -59,7 +100,10 @@ const NotebookScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, styles.saveButton]}
-          onPress={() => setIsSaved(true)}
+          onPress={() => {
+            handleAddNote();
+            setIsSaved(true);
+          }}
         >
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>

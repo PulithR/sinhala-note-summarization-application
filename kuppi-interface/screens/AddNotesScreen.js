@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,69 @@ import {
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect } from "@react-navigation/native";
+import { BASE_API_URL } from '@env';
+import { AuthContext } from "../authentication/AuthContext";
 
 const AddNotesScreen = ({ navigation }) => {
+
+  const { token } = useContext(AuthContext);
+
   const [searchText, setSearchText] = useState("");
   const [notes, setNotes] = useState([]);
 
+  // Fetch notes every time the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNotes();
+    }, [])
+  );
+
+  const fetchNotes = async () => {
+    try {
+      const response = await fetch(`${BASE_API_URL}/notes`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data.notes);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.error || "Failed to fetch notes");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const handleNotePress = async (noteId) => {
+    // implement user actions when a note is clicked here
+    // use handleDeleteNote() method here
+    // when user click note ask for two options (using Alert.alert or something)
+    // open or delete
+  };
+
+  const handleDeleteNote = async (noteId) => {
+    // implement delete a single note here
+  };
+
+  const handleDeleteAll = async () => {
+    // implement delete all notes here
+  };
+
   const RenderTopicItem = ({ item }) => {
     return (
-      <TouchableOpacity style={styles.topicButton}>
+      <TouchableOpacity
+        style={styles.topicButton}
+        onPress={() => {
+          handleNotePress(item.id);
+        }}
+      >
         <LinearGradient
           colors={["#ffffff", "#f8f9fa"]}
           style={styles.topicGradient}
@@ -34,7 +89,7 @@ const AddNotesScreen = ({ navigation }) => {
     <View style={styles.safeContainer}>
       <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
         <View style={styles.content}>
-          <Text style={styles.mainTopic}>Your Notes</Text>
+          {!searchText && <Text style={styles.mainTopic}>Your Notes</Text>}
 
           {/* Search Bar */}
           <View style={styles.searchContainer}>
@@ -46,33 +101,48 @@ const AddNotesScreen = ({ navigation }) => {
               placeholderTextColor="#7f8c8d"
             />
           </View>
-
-          {/* Create new note button */}
-          <TouchableOpacity onPress={() => navigation.navigate("AddNotes")}>
-            <LinearGradient
-              colors={["#4a90e2", "#357abd"]}
-              style={styles.addGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={[styles.addButtonText]}>+</Text>
-              <Text style={[styles.addButtonDescription]}>Create New Note</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Recently Viewed */}
-          <View style={styles.row}>
-            <Text style={styles.subtitle}>Recent Notes</Text>
+          {/*create new note button */}
+          {!searchText && (
             <TouchableOpacity
-              onPress={() => Alert.alert("Delete All", "Functionality removed")}
+              onPress={() => {
+                navigation.navigate("NoteBook");
+              }}
             >
-              <Text style={styles.deleteAll}>Delete All</Text>
+              <LinearGradient
+                colors={["#4a90e2", "#357abd"]}
+                style={styles.addGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={[styles.addButtonText]}>+</Text>
+                <Text style={[styles.addButtonDescription]}>
+                  Create New Note
+                </Text>
+              </LinearGradient>
             </TouchableOpacity>
+          )}
+          {/* Recent Notes */}
+          <View style={styles.row}>
+            {searchText ? (
+              <Text style={styles.subtitle}>Filtered Notes</Text>
+            ) : (
+              <Text style={styles.subtitle}>Recent Notes</Text>
+            )}
+            {notes.length > 0 && (
+              <TouchableOpacity onPress={handleDeleteAll}>
+                <Text style={styles.deleteAll}>Delete All</Text>
+              </TouchableOpacity>
+            )}
           </View>
-
           {/* Topics Grid */}
           <FlatList
-            data={notes}
+            data={
+              !searchText
+                ? notes
+                : notes.filter((note) =>
+                    note.title.toLowerCase().includes(searchText.toLowerCase())
+                  )
+            }
             numColumns={1}
             keyExtractor={(item) => item.id}
             renderItem={RenderTopicItem}
