@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,43 @@ import {
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect } from "@react-navigation/native";
 
 const AddNotesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState("");
   const [notes, setNotes] = useState([]);
 
+  // Fetch notes every time the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNotes();
+    }, [])
+  );
+
+  const fetchNotes = async () => {
+    // implement fetch notes here
+  };
+
+  const handleNotePress = async (noteId) => {
+    // implement user actions when a note is clicked here
+  };
+
+  const handleDeleteNote = async (noteId) => {
+    // implement delete a single note here
+  };
+
+  const handleDeleteAll = async () => {
+    // implement delete all notes here
+  };
+
   const RenderTopicItem = ({ item }) => {
     return (
-      <TouchableOpacity style={styles.topicButton}>
+      <TouchableOpacity
+        style={styles.topicButton}
+        onPress={() => {
+          handleNotePress(item.id);
+        }}
+      >
         <LinearGradient
           colors={["#ffffff", "#f8f9fa"]}
           style={styles.topicGradient}
@@ -47,25 +76,33 @@ const AddNotesScreen = ({ navigation }) => {
             />
           </View>
 
-          {/* Create new note button */}
-          <TouchableOpacity onPress={() => navigation.navigate("AddNotes")}>
+          {/*create new note button */}
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("AddNotes");
+            }}
+          >
             <LinearGradient
               colors={["#4a90e2", "#357abd"]}
               style={styles.addGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Text style={[styles.addButtonText]}>+</Text>
-              <Text style={[styles.addButtonDescription]}>Create New Note</Text>
+              <Text style={[styles.addButtonText]}>{"+"}</Text>
+              <Text style={[styles.addButtonDescription]}>
+                {"Create New Note"}
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Recently Viewed */}
+          {/* Recent Notes */}
           <View style={styles.row}>
-            <Text style={styles.subtitle}>Recent Notes</Text>
-            <TouchableOpacity
-              onPress={() => Alert.alert("Delete All", "Functionality removed")}
-            >
+            {searchText ? (
+              <Text style={styles.subtitle}>Filtered Notes</Text>
+            ) : (
+              <Text style={styles.subtitle}>Recent Notes</Text>
+            )}
+            <TouchableOpacity onPress={handleDeleteAll}>
               <Text style={styles.deleteAll}>Delete All</Text>
             </TouchableOpacity>
           </View>
