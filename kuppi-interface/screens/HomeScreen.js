@@ -131,7 +131,7 @@ const HomeScreen = ({ navigation }) => {
             "Add Notes",
             "Create and organize your notes",
             buttonScales.addNotes,
-            "AddNotesScreen"
+            "NoteBookScreen"
           )}
 
           {renderButton(

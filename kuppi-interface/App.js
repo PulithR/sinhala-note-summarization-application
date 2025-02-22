@@ -7,9 +7,8 @@ import HomeScreen from "./screens/HomeScreen";
 import SummarizerScreen from "./screens/SummarizerScreen";
 import AnswerGeneratorScreen from "./screens/AnswerGeneratorScreen";
 import NoteBookScreen from "./screens/NoteBookScreen";
-import ScanDocumentScreen from "./screens/ScanDocumentScreen";
 import AddNotesScreen from "./screens/AddNotesScreen";
-import NoteBook from "./screens/NoteBookScreen";
+import ScanDocumentScreen from "./screens/ScanDocumentScreen";
 
 import LoginScreen from "./screens/LoginScreen";
 import SignUpScreen from "./screens/SignUpScreen";
@@ -38,7 +37,7 @@ function AppNavigator() {
             name="GenerateAnswer"
             component={AnswerGeneratorScreen}
           />
-          <Stack.Screen name="NoteBook" component={NoteBookScreen} />
+          <Stack.Screen name="NoteBookScreen" component={NoteBookScreen} />
           <Stack.Screen name="ScanDocument" component={ScanDocumentScreen} />
           <Stack.Screen name="AddNotesScreen" component={AddNotesScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />

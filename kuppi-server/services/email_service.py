@@ -2,6 +2,7 @@ from flask_mail import Message
 from flask import current_app
 
 def send_email(email, otp):
+    print(otp)
     msg = Message('Your OTP for Registration',
                       recipients=[email])
     msg.html = f"""

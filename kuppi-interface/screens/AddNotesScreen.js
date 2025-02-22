@@ -4,256 +4,229 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
+  ScrollView,
   Alert,
+  StyleSheet,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect } from "@react-navigation/native";
-import { BASE_API_URL } from '@env';
 import { AuthContext } from "../authentication/AuthContext";
+import { BASE_API_URL } from "@env";
+import { useNavigation } from "@react-navigation/native";
 
-const AddNotesScreen = ({ navigation }) => {
-
+const AddNotesScreen = () => {
   const { token } = useContext(AuthContext);
 
-  const [searchText, setSearchText] = useState("");
-  const [notes, setNotes] = useState([]);
+  const navigation = useNavigation();
 
-  // Fetch notes every time the screen comes into focus
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchNotes();
-    }, [])
-  );
+  const [noteText, setNoteText] = useState("");
+  const [noteTopic, setNoteTopic] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
 
-  const fetchNotes = async () => {
+  // Count the number of words and characters in the note
+  const wordCount = noteText.trim() ? noteText.trim().split(/\s+/).length : 0;
+  const charCount = noteText.length;
+
+  // Clear note function
+  const clearNote = () => {
+    Alert.alert("Clear Note", "Are you sure you want to clear this note?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Clear",
+        onPress: () => {
+          setNoteText("");
+          setNoteTopic("");
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
+  // Add a new note
+  const handleAddNote = async () => {
+    const title = noteTopic;
+    const content = noteText;
     try {
       const response = await fetch(`${BASE_API_URL}/notes`, {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ title, content }),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setNotes(data.notes);
+        Alert.alert("Success", "Note added successfully!", [
+          {
+            text: "OK",
+            onPress: () =>
+              navigation.reset({
+                index: 1,
+                routes: [{ name: "Home" }, { name: "NoteBookScreen" }],
+              }),
+          },
+        ]);
       } else {
         const errorData = await response.json();
-        Alert.alert("Error", errorData.error || "Failed to fetch notes");
+        Alert.alert("Error", errorData.error || "Failed to add note");
       }
     } catch (error) {
       Alert.alert("Error", error.message);
     }
   };
 
-  const handleNotePress = async (noteId) => {
-    // implement user actions when a note is clicked here
-    // use handleDeleteNote() method here
-    // when user click note ask for two options (using Alert.alert or something)
-    // open or delete
-  };
-
-  const handleDeleteNote = async (noteId) => {
-    // implement delete a single note here
-  };
-
-  const handleDeleteAll = async () => {
-    // implement delete all notes here
-  };
-
-  const RenderTopicItem = ({ item }) => {
-    return (
-      <TouchableOpacity
-        style={styles.topicButton}
-        onPress={() => {
-          handleNotePress(item.id);
-        }}
-      >
-        <LinearGradient
-          colors={["#ffffff", "#f8f9fa"]}
-          style={styles.topicGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Text style={styles.topicText}>{item.title}</Text>
-          <Text style={styles.topicDescription}>{item.description}</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  };
-
   return (
-    <View style={styles.safeContainer}>
-      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
-        <View style={styles.content}>
-          {!searchText && <Text style={styles.mainTopic}>Your Notes</Text>}
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Digital Notebook</Text>
+        <Text style={styles.saveStatus}>
+          {isSaved ? "✓ Saved" : "• Editing"}
+        </Text>
+      </View>
 
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.search}
-              placeholder="Search topics..."
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholderTextColor="#7f8c8d"
-            />
-          </View>
-          {/*create new note button */}
-          {!searchText && (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("NoteBook");
-              }}
-            >
-              <LinearGradient
-                colors={["#4a90e2", "#357abd"]}
-                style={styles.addGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={[styles.addButtonText]}>+</Text>
-                <Text style={[styles.addButtonDescription]}>
-                  Create New Note
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
-          {/* Recent Notes */}
-          <View style={styles.row}>
-            {searchText ? (
-              <Text style={styles.subtitle}>Filtered Notes</Text>
-            ) : (
-              <Text style={styles.subtitle}>Recent Notes</Text>
-            )}
-            {notes.length > 0 && (
-              <TouchableOpacity onPress={handleDeleteAll}>
-                <Text style={styles.deleteAll}>Delete All</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          {/* Topics Grid */}
-          <FlatList
-            data={
-              !searchText
-                ? notes
-                : notes.filter((note) =>
-                    note.title.toLowerCase().includes(searchText.toLowerCase())
-                  )
-            }
-            numColumns={1}
-            keyExtractor={(item) => item.id}
-            renderItem={RenderTopicItem}
-            contentContainerStyle={styles.gridContainer}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      </LinearGradient>
-    </View>
+      <View style={styles.topicContainer}>
+        <Text style={styles.label}>Topic</Text>
+        <TextInput
+          style={styles.topicInput}
+          placeholder="Enter the topic..."
+          value={noteTopic}
+          onChangeText={(text) => {
+            setNoteTopic(text);
+            setIsSaved(false);
+          }}
+          maxLength={50}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, styles.saveButton]}
+          onPress={() => {
+            handleAddNote();
+            setIsSaved(true);
+          }}
+        >
+          <Text style={styles.buttonText}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.clearButton]}
+          onPress={clearNote}
+        >
+          <Text style={styles.buttonText}>Clear</Text>
+        </TouchableOpacity>
+      </View>
+
+      <TextInput
+        style={styles.textarea}
+        placeholder="Start writing your notes..."
+        multiline
+        value={noteText}
+        onChangeText={(text) => {
+          setNoteText(text);
+          setIsSaved(false);
+        }}
+        textAlignVertical="top"
+      />
+
+      <View style={styles.statsContainer}>
+        <Text style={styles.statsText}>Words: {wordCount}</Text>
+        <Text style={styles.statsText}>Characters: {charCount}</Text>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeContainer: {
+  container: {
     flex: 1,
+    backgroundColor: "#f8f9fa",
+    padding: 16,
   },
-  gradient: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  mainTopic: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#2c3e50",
-    marginTop: 40,
-    marginBottom: 20,
-  },
-  searchContainer: {
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  search: {
-    height: 50,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    fontSize: 16,
-  },
-  row: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
-  subtitle: {
-    marginTop: 20,
-    fontSize: 20,
+  title: {
+    fontSize: 28,
     fontWeight: "bold",
     color: "#2c3e50",
   },
-  deleteAll: {
-    marginTop: 20,
+  saveStatus: {
     fontSize: 16,
-    color: "#e33b44",
-    fontWeight: "800",
+    color: "#34495e",
   },
-  gridContainer: {
-    paddingBottom: 20,
+  topicContainer: {
+    marginBottom: 16,
   },
-  topicButton: {
-    flex: 1,
-    margin: 8,
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  topicGradient: {
-    padding: 20,
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addGradient: {
-    padding: 20,
-    height: 120,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  topicText: {
-    fontSize: 20,
-    fontWeight: "bold",
+  label: {
+    fontSize: 18,
+    fontWeight: "600",
     color: "#2c3e50",
     marginBottom: 8,
   },
-  topicDescription: {
-    fontSize: 14,
-    color: "#7f8c8d",
-    textAlign: "center",
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 24,
-  },
-  addButtonDescription: {
-    color: "#fff",
-    opacity: 0.9,
+  topicInput: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#cbd5e0",
+    borderRadius: 12,
+    padding: 12,
     fontSize: 16,
-    paddingBottom: 16,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 4,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+  },
+  clearButton: {
+    backgroundColor: "#f44336",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  textarea: {
+    height: 400,
+    borderWidth: 1,
+    borderColor: "#cbd5e0",
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    backgroundColor: "#fff",
+    lineHeight: 24,
+    textAlignVertical: "top",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+    padding: 8,
+  },
+  statsText: {
+    fontSize: 14,
+    color: "#666",
   },
 });
 
