@@ -1,0 +1,101 @@
+{
+  "team": [
+    {
+      "name": "Pulith Rajanayake",
+      "role": "Team leader",
+      "image": "../img/team/pulith.jpg",
+      "bio": "Pulith leads Kuppi team with a passion for transforming education through AI. Skilled in both frontend and backend development, he ensures seamless integration across the platform.",
+      "social": {
+        "linkedin": "https://www.linkedin.com/in/pulithr/",
+        "github": "https://github.com/PulithR"
+      }
+    },
+    {
+      "name": "Sandeepa Gamage",
+      "role": "Frontend",
+      "image": "../img/team/sandeepa.jpg",
+      "bio": "Sandeepa crafts intuitive and engaging user interfaces while also diving into backend development to deliver well-rounded digital experiences.",
+      "social": {
+        "linkedin": "#",
+        "github": "https://github.com/SandeepaGamage"
+      }
+    },
+    {
+      "name": "Sandev Hettiarachchi",
+      "role": "Lead Developer",
+      "image": "../img/team/sandev.jpg",
+      "bio": "Sandev leads development in both frontend and backend, ensuring robust functionality and smooth user interactions.",
+      "social": {
+        "linkedin": "https://www.linkedin.com/in/sandev-hettiarachchi-3637972b3/",
+        "github": "https://github.com/sandevh"
+      }
+    },
+    {
+      "name": "Sandaru Malshan",
+      "role": "Backend",
+      "image": "../img/team/sandaru.jpg",
+      "bio": "Sandaru specializes in backend systems but often steps into frontend development to create cohesive and responsive applications.",
+      "social": {
+        "linkedin": "https://www.linkedin.com/in/sandaru-malshan-b20a3b2b2/",
+        "github": "https://github.com/Sandaru04"
+      }
+    },
+    {
+      "name": "Semal Yapa",
+      "role": "Backend",
+      "image": "../img/team/semal.jpg",
+      "bio": "Semal oversees backend development while collaborating on frontend design, ensuring both functionality and user experience go hand in hand.",
+      "social": {
+        "linkedin": "https://www.linkedin.com/in/semal-chandeepa-120266310/",
+        "github": "https://github.com/Semal2002"
+      }
+    },
+    {
+      "name": "Reshan Silva",
+      "role": "Frontend",
+      "image": "../img/team/reshan.jpg",
+      "bio": "Reshan focuses on building user-friendly interfaces but also contributes to backend development, bridging the gap between design and functionality.",
+      "social": {
+        "linkedin": "https://www.linkedin.com/in/reshan-silva-08b53034b/",
+        "github": "https://github.com/ReshanSilva"
+      }
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "UserName",
+      "role": "Status",
+      "image": "https://placehold.co/80x80",
+      "text": "Message",
+      "rating": 5
+    },
+    {
+      "name": "UserName",
+      "role": "Status",
+      "image": "https://placehold.co/80x80",
+      "text": "Message",
+      "rating": 4
+    },
+    {
+      "name": "UserName",
+      "role": "Status",
+      "image": "https://placehold.co/80x80",
+      "text": "Message",
+      "rating": 3
+    },
+    {
+      "name": "UserName",
+      "role": "Status",
+      "image": "https://placehold.co/80x80",
+      "text": "Message",
+      "rating": 5
+    },
+    {
+      "name": "UserName",
+      "role": "Status",
+      "image": "https://placehold.co/80x80",
+      "text": "Message",
+      "rating": 5
+    }
+  ]
+}
