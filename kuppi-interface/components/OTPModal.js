@@ -13,31 +13,22 @@ import {
 import { AuthContext } from "../authentication/AuthContext";
 
 const OTPModal = ({ visible, onClose, email }) => {
-
   const { verifyOTP } = useContext(AuthContext);
-
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
 
   const handleVerifyOtp = async () => {
-    if (!email) {
-      setOtpError("Something went wrong. Please sign up again.");
-      return;
-    }
-
-    if (!otp.trim()) {
-      setOtpError("OTP is required.");
-      return;
-    }
+    if (!email)
+      return setOtpError("Something went wrong. Please sign up again.");
+    if (!otp.trim()) return setOtpError("OTP is required.");
 
     try {
       await verifyOTP({ email, otp });
       onClose();
     } catch (error) {
-      setOtpError("Error verifying OTP: " + error.message);
+      setOtpError(error.message);
     }
   };
-
 
   return (
     <Modal animationType="slide" transparent visible={visible}>
