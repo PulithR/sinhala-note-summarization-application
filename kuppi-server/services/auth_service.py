@@ -5,18 +5,23 @@ from models.user_model import users_db, pending_users, otp_storage
 from services.otp_service import generate_otp
 from services.email_service import send_email
 
-# Max OTP verification attempts
 MAX_OTP_ATTEMPTS = 3
 OTP_EXPIRY_SECONDS = 600  # 10 minutes
+OTP_REQUEST_COOLDOWN_SECONDS = 60  # 1 minute
+
 
 def signup_user_service(email, name, password):
     """Handles user signup, generates OTP, and sends it via email."""
-
     if not email or not password or not name:
         return {"error": "Email, name, and password are required!"}, 400
 
     if email in users_db:
         return {"error": "User already exists!"}, 400
+
+    # Check OTP cooldown
+    otp_data = otp_storage.get(email)
+    if otp_data and (datetime.datetime.now() - otp_data.get("timestamp", datetime.datetime.min)).total_seconds() < OTP_REQUEST_COOLDOWN_SECONDS:
+        return {"error": "Please wait before requesting another OTP."}, 429
 
     # Generate and store OTP
     otp = generate_otp()
@@ -43,16 +48,15 @@ def signup_user_service(email, name, password):
         "message": "OTP sent to your email. Please verify to complete registration."
     }, 200
 
+
 def verify_otp_service(email, otp):
     """Verifies OTP, completes registration, and returns JWT token if successful."""
-
     otp_data = otp_storage.get(email)
     if not otp_data:
-        return {"error": "No OTP found for this email"}, 400
+        return {"error": "No OTP found for this email."}, 400
 
     # Check OTP expiry
-    time_diff = datetime.datetime.now() - otp_data["timestamp"]
-    if time_diff.total_seconds() > OTP_EXPIRY_SECONDS:
+    if (datetime.datetime.now() - otp_data["timestamp"]).total_seconds() > OTP_EXPIRY_SECONDS:
         del otp_storage[email]
         return {"error": "OTP has expired. Please request a new one."}, 400
 
@@ -61,6 +65,7 @@ def verify_otp_service(email, otp):
         del otp_storage[email]
         return {"error": "Too many incorrect attempts. Request a new OTP."}, 403
 
+    # Validate OTP
     if otp != otp_data["otp"]:
         otp_data["attempts"] += 1
         return {"error": "Invalid OTP. Please try again."}, 400
@@ -68,7 +73,7 @@ def verify_otp_service(email, otp):
     # Retrieve user data from pending users
     user_data = pending_users.pop(email, None)
     if not user_data:
-        return {"error": "User data not found"}, 400
+        return {"error": "User data not found."}, 400
 
     # Move user from pending to active users
     users_db[email] = {
@@ -89,15 +94,15 @@ def verify_otp_service(email, otp):
         "user": {"email": email, "name": user_data["name"]}
     }, 201
 
+
 def login_user_service(email, password):
     """Handles user login and returns a JWT token if credentials are valid."""
-
     if not email or not password:
         return {"error": "Email and password are required!"}, 400
 
     user = users_db.get(email)
     if not user or not check_password_hash(user["password"], password):
-        return {"error": "Invalid email or password"}, 401
+        return {"error": "Invalid email or password."}, 401
 
     # Generate JWT token
     token = create_access_token(identity=email, expires_delta=datetime.timedelta(hours=24))

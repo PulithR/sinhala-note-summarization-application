@@ -1,160 +1,144 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useCallback, useMemo } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BASE_API_URL } from '@env';
+import { BASE_API_URL } from "@env";
 
-// Auth Context for sharing user state across the app
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  // console.log(BASE_API_URL);
+const STORAGE_KEY = "userToken";
 
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
 
-  // Check authentication status on app load
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  // Check if user has a valid token in AsyncStorage
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
-      const token = await AsyncStorage.getItem("userToken");
-
-      if (token) {
-        setToken(token);
-        const response = await fetch(`${BASE_API_URL}/validate-token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser({ name: data.user.name });
-        } else {
-          const errorData = await response.json();
-          // alert(errorData.error || "User not found or token invalid.");
-        }
-      } else {
-        // alert("No token found.");
-        // return;
+      const storedToken = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!storedToken) {
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      alert("Auth check failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Sign-up function
-  const signUp = async (credentials) => {
-    try {
-      // setLoading(true);
-      const response = await fetch(`${BASE_API_URL}/signup`, {
+      const response = await fetch(`${BASE_API_URL}/validate-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${storedToken}`,
         },
+        timeout: 5000,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setToken(storedToken);
+        setUser({ name: data.user.name, email: data.user.email });
+      } else {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+      }
+    } catch (error) {
+      console.warn("Auth check failed:", error.message);
+      await AsyncStorage.removeItem(STORAGE_KEY); 
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
+
+  const signUp = async (credentials) => {
+    try {
+      const response = await fetch(`${BASE_API_URL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
       });
 
       const data = await response.json();
-
-      if (response.ok) {
-        return { success: true, message: "OTP sent to email" };
-      } else {
-        return {
-          success: false,
-          error: data.error || "Signup initiation failed",
-        };
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed");
       }
+      return { success: true, message: data.message, email: data.email }; 
     } catch (error) {
-      return { success: false, error: "Network error. Please try again." };
-    } finally {
-      setLoading(false);
+      return {
+        success: false,
+        error: error.message || "Network error. Please check your connection.",
+      };
     }
   };
 
-  // Verify OTP and complete signup 
   const verifyOTP = async (otpData) => {
     try {
-      setLoading(true);
       const response = await fetch(`${BASE_API_URL}/verify-otp`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(otpData),
       });
 
       const data = await response.json();
-      if (data.token) {
-        await AsyncStorage.setItem("userToken", data.token);
-        setToken(data.token);
-        setUser({ name: data.user.name });
-      } else {
-        alert(data.error || "OTP verification failed.");
+      if (!response.ok) {
+        throw new Error(data.error || "Invalid OTP");
       }
+
+      await AsyncStorage.setItem(STORAGE_KEY, data.token);
+      setToken(data.token);
+      setUser({ name: data.user.name, email: data.user.email }); 
     } catch (error) {
-      alert("OTP verification failed:", error);
-    } finally {
-      setLoading(false);
+      throw new Error(
+        error.message || "OTP verification failed. Please try again."
+      );
     }
   };
 
-  // Login function
   const login = async (credentials) => {
     try {
-      setLoading(true);
       const response = await fetch(`${BASE_API_URL}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
       });
 
       const data = await response.json();
-      // alert("Login response:", data);
-
-      if (data && data.token) {
-        await AsyncStorage.setItem("userToken", data.token);
-        setToken(data.token);
-        // alert("Token stored in AsyncStorage:", data.token);
-        setUser({ name: data.user.name });
-      } else {
-        alert("Login failed: " + (data.error || "Unknown error"));
+      if (!response.ok) {
+        throw new Error(data.error || "Invalid credentials");
       }
+
+      await AsyncStorage.setItem(STORAGE_KEY, data.token);
+      setToken(data.token);
+      setUser({ name: data.user.name, email: data.user.email });
     } catch (error) {
-      alert("Login error: " + error.message);
-    } finally {
-      setLoading(false);
+      throw new Error(error.message || "Login failed. Please try again.");
     }
   };
 
-  // Logout function
   const logout = async () => {
     try {
-      setLoading(true);
-      await AsyncStorage.removeItem("userToken");
-      // alert("Token removed from AsyncStorage");
+      await AsyncStorage.multiRemove([STORAGE_KEY]); 
       setUser(null);
+      setToken(null);
+      return { success: true };
     } catch (error) {
-      alert("Logout failed:", error);
-    } finally {
-      setLoading(false);
+      console.warn("Logout failed:", error.message);
+      return { success: false, error: "Logout failed" };
     }
   };
 
+  const authValue = useMemo(
+    () => ({
+      user,
+      token,
+      loading,
+      login,
+      signUp,
+      verifyOTP,
+      logout,
+      isAuthenticated: !!token && !!user,
+    }),
+    [user, token, loading]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{ user, login, signUp, verifyOTP, logout, loading, token }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
   );
 };
