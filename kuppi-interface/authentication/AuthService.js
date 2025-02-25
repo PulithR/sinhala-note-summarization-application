@@ -32,7 +32,7 @@ export const verifyOTP = async (otpData) => {
     if (!response.ok) throw new Error(data.error || "Invalid OTP");
 
     await AsyncStorage.setItem(STORAGE_KEY, data.token);
-    return { success: true, user: data.user };
+    return { success: true, user: data.user, token: data.token }; 
   } catch (error) {
     return {
       success: false,
