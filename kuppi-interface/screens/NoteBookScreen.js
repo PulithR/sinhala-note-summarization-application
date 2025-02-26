@@ -112,7 +112,29 @@ const NoteBookScreen = ({ navigation }) => {
   };
 
   const handleDeleteAll = async () => {
-    // implement delete all notes here
+    if (!notes || notes.length === 0) {
+      alert("No Notes to Delete");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/notes`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        Alert.alert("Success", "All notes deleted successfully!");
+        fetchNotes(); 
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.error || "Failed to delete all notes");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const RenderTopicItem = ({ item }) => {
