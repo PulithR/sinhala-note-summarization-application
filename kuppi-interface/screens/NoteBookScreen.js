@@ -50,10 +50,43 @@ const NoteBookScreen = ({ navigation }) => {
   };
 
   const handleNotePress = async (noteId) => {
-    // implement user actions when a note is clicked here
-    // use handleDeleteNote() method here
-    // when user click note ask for two options (using Alert.alert or something)
-    // open or delete
+    try {
+      const response = await fetch(`${API_URL}/notes/${noteId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        Alert.alert("Note Options", `${data.note.title}`, [
+          {
+            text: "Open",
+            onPress: () => {
+              alert(`${data.note.title} : ${data.note.content}`);
+            },
+          },
+          {
+            text: "Delete",
+            onPress: () => {
+              handleDeleteNote(noteId);
+            },
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ]);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.error || "Failed to fetch note");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const handleDeleteNote = async (noteId) => {
