@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Invalid credentials");
+      if (!response.ok) alert(data.error || "Invalid credentials");
 
       await AsyncStorage.setItem(STORAGE_KEY, data.token);
       setToken(data.token);
