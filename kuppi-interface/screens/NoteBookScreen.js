@@ -51,7 +51,7 @@ const NoteBookScreen = ({ navigation }) => {
 
   const handleNotePress = async (noteId) => {
     try {
-      const response = await fetch(`${API_URL}/notes/${noteId}`, {
+      const response = await fetch(`${BASE_API_URL}/notes/${noteId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ const NoteBookScreen = ({ navigation }) => {
 
   const handleDeleteNote = async (noteId) => {
     try {
-          const response = await fetch(`${API_URL}/notes/${noteId}`, {
+          const response = await fetch(`${BASE_API_URL}/notes/${noteId}`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -117,7 +117,7 @@ const NoteBookScreen = ({ navigation }) => {
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/notes`, {
+      const response = await fetch(`${BASE_API_URL}/notes`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -220,7 +220,7 @@ const NoteBookScreen = ({ navigation }) => {
             keyExtractor={(item) => item.id}
             renderItem={RenderTopicItem}
             contentContainerStyle={styles.gridContainer}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
           />
         </View>
       </LinearGradient>
