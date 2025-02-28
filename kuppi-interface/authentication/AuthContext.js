@@ -9,7 +9,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_API_URL } from "@env";
 import {
   signUp as signUpService,
-  verifyOTP as verifyOTPService,
+  verifySignupOTP as verifySignupOTPService,
+  requestPasswordReset as requestPassResetService,
+  verifyPassResetOTP as verifyPassResetOTPService,
 } from "../authentication/AuthService";
 
 export const AuthContext = createContext();
@@ -90,14 +92,22 @@ export const AuthProvider = ({ children }) => {
     return result;
   };
 
-  const verifyOTP = async (otpData) => {
-    const result = await verifyOTPService(otpData);
+  const verifySignupOTP = async (otpData) => {
+    const result = await verifySignupOTPService(otpData);
     if (result.success) {
       setToken(result.token);
       setUser(result.user);
     }
     return result;
   };
+
+  const requestPassReset = async (credentials) => {
+    const result = await requestPassResetService(credentials);
+  }
+
+  const verifyPassResetOTP = async (credentials) => {
+    const result = await verifyPassResetOTPService(credentials);
+  }
 
   const authValue = useMemo(
     () => ({
@@ -106,8 +116,10 @@ export const AuthProvider = ({ children }) => {
       loading,
       login,
       logout,
-      signUp, 
-      verifyOTP,
+      signUp,
+      verifySignupOTP,
+      requestPassReset,
+      verifyPassResetOTP
     }),
     [user, token, loading]
   );

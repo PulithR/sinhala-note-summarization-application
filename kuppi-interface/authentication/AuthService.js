@@ -20,7 +20,7 @@ export const signUp = async (credentials) => {
   }
 };
 
-export const verifyOTP = async (otpData) => {
+export const verifySignupOTP = async (otpData) => {
   try {
     const response = await fetch(`${BASE_API_URL}/verify-otp`, {
       method: "POST",
@@ -32,11 +32,19 @@ export const verifyOTP = async (otpData) => {
     if (!response.ok) throw new Error(data.error || "Invalid OTP");
 
     await AsyncStorage.setItem(STORAGE_KEY, data.token);
-    return { success: true, user: data.user, token: data.token }; 
+    return { success: true, user: data.user, token: data.token };
   } catch (error) {
     return {
       success: false,
       error: error.message || "OTP verification failed",
     };
   }
+};
+
+export const requestPasswordReset = async (email) => {
+  // OTP request for pass reset
+};
+
+export const verifyPassResetOTP = async (otpData) => {
+  // logic to verify OTP
 };

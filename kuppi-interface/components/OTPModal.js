@@ -12,18 +12,20 @@ import {
 } from "react-native";
 import { AuthContext } from "../authentication/AuthContext";
 
-const OTPModal = ({ visible, onClose, email }) => {
-  const { verifyOTP } = useContext(AuthContext);
+const OTPModal = ({ visible, onClose, email, isInSignup }) => {
+  const { verifySignupOTP } = useContext(AuthContext);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
 
   const handleVerifyOtp = async () => {
     if (!email)
-      return setOtpError("Something went wrong. Please sign up again.");
+      return setOtpError("Something went wrong. Please try again.");
     if (!otp.trim()) return setOtpError("OTP is required.");
 
     try {
-      await verifyOTP({ email, otp });
+      {isInSignup
+        ? await verifySignupOTP({ email, otp })
+        : await verifyPassResetOTP({ email, otp })}
       onClose();
     } catch (error) {
       setOtpError(error.message);

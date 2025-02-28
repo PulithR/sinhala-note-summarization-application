@@ -12,16 +12,23 @@ import {
   Keyboard,
   Platform,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import OTPModal from "../components/OTPModal";
 
 const PasswordResetScreen = ({ setShowPasswordReset }) => {
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [verified, setVerified] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false); 
+  const [modalVisible, setModalVisible] = useState(false);
 
   const slideAnim = useRef(new Animated.Value(700)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
@@ -40,6 +47,48 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
       useNativeDriver: true,
       speed: 50,
     }).start();
+  };
+
+  const validateEmail = (text) => {
+    setEmail(text);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(text)) {
+      setEmailError("Enter a valid email");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const requestOTP = () => {
+    setOtpLoading(true); 
+
+    setTimeout(() => {
+      setModalVisible(true);
+      setOtpLoading(false);
+    }, 2000);
+  };
+
+  const verifyOTP = () => {
+    // API call for verify the OTP
+    setVerified(true);
+  }
+
+  const validateNewPassword = (text) => {
+    setNewPassword(text);
+    if (text.length < 6) {
+      setPasswordError("Password must be at least 6 characters long");
+    } else {
+      setPasswordError("");
+    }
+  };
+
+  const validateConfirmNewPassword = (text) => {
+    setConfirmNewPassword(text);
+    if (text !== newPassword) {
+      setConfirmPasswordError("Passwords do not match");
+    } else {
+      setConfirmPasswordError("");
+    }
   };
 
   const handlePressOut = () => {
@@ -62,7 +111,6 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
@@ -89,89 +137,122 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                   style={styles.formContainer}
                 >
                   <Text style={styles.header}>Reset Password</Text>
-                  <Text style={styles.helper}>Enter your new password</Text>
+                  <Text style={styles.helper}>
+                    {verified ? "Enter your new password" : "Verify your Email"}
+                  </Text>
 
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      style={styles.inputWithButton}
-                      placeholder="New Password"
-                      secureTextEntry={!showPassword}
-                      placeholderTextColor="#7f8c8d"
-                      value={newPassword}
-                      onChangeText={(text) => {
-                        setNewPassword(text);
-                        if (text.length < 6) {
-                          setPasswordError(
-                            "Password must be at least 6 characters long"
-                          );
-                        } else {
-                          setPasswordError("");
-                        }
-                      }}
-                    />
-                    <TouchableOpacity
-                      style={styles.visibilityButton}
-                      activeOpacity={1}
-                      onPress={() => setShowPassword(!showPassword)}
-                    >
-                      <Text style={styles.visibilityButtonText}>
-                        {showPassword ? "HIDE" : "SHOW"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {passwordError ? (
-                    <Text style={styles.errorText}>{passwordError}</Text>
-                  ) : null}
+                  {!verified && (
+                    <>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Email"
+                        placeholderTextColor="#7f8c8d"
+                        value={email}
+                        onChangeText={validateEmail}
+                        keyboardType="email-address"
+                      />
+                      {emailError ? (
+                        <Text style={styles.errorText}>{emailError}</Text>
+                      ) : null}
+                    </>
+                  )}
 
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      style={styles.inputWithButton}
-                      placeholder="Confirm New Password"
-                      secureTextEntry={!showConfirmPassword}
-                      placeholderTextColor="#7f8c8d"
-                      value={confirmNewPassword}
-                      onChangeText={(text) => {
-                        setConfirmNewPassword(text);
-                        if (text !== newPassword) {
-                          setConfirmPasswordError("Passwords do not match");
-                        } else {
-                          setConfirmPasswordError("");
-                        }
-                      }}
-                    />
-                    <TouchableOpacity
-                      style={styles.visibilityButton}
-                      activeOpacity={1}
-                      onPress={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      <Text style={styles.visibilityButtonText}>
-                        {showConfirmPassword ? "HIDE" : "SHOW"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {confirmPasswordError ? (
-                    <Text style={styles.errorText}>{confirmPasswordError}</Text>
-                  ) : null}
+                  {verified && (
+                    <>
+                      <View style={styles.inputContainer}>
+                        <TextInput
+                          style={styles.inputWithButton}
+                          placeholder="New Password"
+                          secureTextEntry={!showPassword}
+                          placeholderTextColor="#7f8c8d"
+                          value={newPassword}
+                          onChangeText={validateNewPassword}
+                        />
+                        <TouchableOpacity
+                          style={styles.visibilityButton}
+                          activeOpacity={1}
+                          onPress={() => setShowPassword(!showPassword)}
+                        >
+                          <Text style={styles.visibilityButtonText}>
+                            {showPassword ? "HIDE" : "SHOW"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      {passwordError ? (
+                        <Text style={styles.errorText}>{passwordError}</Text>
+                      ) : null}
+                    </>
+                  )}
+
+                  {verified && (
+                    <>
+                      <View style={styles.inputContainer}>
+                        <TextInput
+                          style={styles.inputWithButton}
+                          placeholder="Confirm New Password"
+                          secureTextEntry={!showConfirmPassword}
+                          placeholderTextColor="#7f8c8d"
+                          value={confirmNewPassword}
+                          onChangeText={validateConfirmNewPassword}
+                        />
+                        <TouchableOpacity
+                          style={styles.visibilityButton}
+                          activeOpacity={1}
+                          onPress={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                        >
+                          <Text style={styles.visibilityButtonText}>
+                            {showConfirmPassword ? "HIDE" : "SHOW"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      {confirmPasswordError ? (
+                        <Text style={styles.errorText}>
+                          {confirmPasswordError}
+                        </Text>
+                      ) : null}
+                    </>
+                  )}
 
                   <Animated.View
                     style={{ transform: [{ scale: buttonScale }] }}
                   >
-                    <TouchableOpacity
-                      onPressIn={handlePressIn}
-                      onPressOut={handlePressOut}
-                      activeOpacity={0.9}
-                    >
-                      <LinearGradient
-                        colors={["#4a90e2", "#357abd"]}
-                        style={styles.resetButton}
+                    {verified ? (
+                      <TouchableOpacity
+                        onPressIn={handlePressIn}
+                        onPressOut={handlePressOut}
+                        activeOpacity={0.9}
                       >
-                        <Text style={styles.resetButtonText}>
-                          Reset Password
-                        </Text>
-                      </LinearGradient>
-                    </TouchableOpacity>
+                        <LinearGradient
+                          colors={["#4a90e2", "#357abd"]}
+                          style={styles.resetButton}
+                        >
+                          <Text style={styles.resetButtonText}>
+                            Reset Password
+                          </Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPressIn={handlePressIn}
+                        onPressOut={requestOTP}
+                        activeOpacity={0.9}
+                      >
+                        <LinearGradient
+                          colors={["#4a90e2", "#357abd"]}
+                          style={styles.resetButton}
+                        >
+                          {otpLoading ? (
+                            <ActivityIndicator color="#fff" />
+                          ) : (
+                            <Text style={styles.resetButtonText}>
+                              Verify Email
+                            </Text>
+                          )}
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    )}
                   </Animated.View>
 
                   <TouchableOpacity
@@ -184,7 +265,11 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
               </Animated.View>
             </LinearGradient>
           </ScrollView>
-        </TouchableWithoutFeedback>
+          <OTPModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            email={email}
+          />
       </KeyboardAvoidingView>
     </View>
   );
@@ -236,6 +321,21 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
     textAlign: "center",
     marginBottom: 40,
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    marginVertical: 10,
+    padding: 15,
+    fontSize: 16,
+    color: "#2c3e50",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   inputContainer: {
     width: "100%",

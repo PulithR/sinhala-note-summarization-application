@@ -1,3 +1,3 @@
 users_db = {}
 pending_users = {}
-otp_storage = {}
+otp_storage_signup = {}
