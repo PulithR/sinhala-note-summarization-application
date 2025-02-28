@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { AuthContext } from "../authentication/AuthContext";
 
-const OTPModal = ({ visible, onClose, email, isInSignup }) => {
+const OTPModal = ({ visible, onClose, email, isInSignup, onVerified }) => {
   
   const { verifySignupOTP } = useContext(AuthContext);
   const { verifyPassResetOTP } = useContext(AuthContext);
@@ -29,6 +29,7 @@ const OTPModal = ({ visible, onClose, email, isInSignup }) => {
       {isInSignup
         ? await verifySignupOTP({ email, otp })
         : await verifyPassResetOTP({ email, otp });}
+      onVerified(true);
       onClose();
     } catch (error) {
       setOtpError(error.message);

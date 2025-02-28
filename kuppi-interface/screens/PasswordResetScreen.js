@@ -8,8 +8,6 @@ import {
   Animated,
   ScrollView,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
   Platform,
   Image,
   ActivityIndicator,
@@ -24,7 +22,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [verified, setVerified] = useState(false);
+  const [isOtpVerified, setisOtpVerified] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -72,11 +70,6 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
       setOtpLoading(false);
     }, 2000);
   };
-
-  const verifyOTP = () => {
-    // API call for verify the OTP
-    setVerified(true);
-  }
 
   const validateNewPassword = (text) => {
     setNewPassword(text);
@@ -143,10 +136,10 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                 >
                   <Text style={styles.header}>Reset Password</Text>
                   <Text style={styles.helper}>
-                    {verified ? "Enter your new password" : "Verify your Email"}
+                    {isOtpVerified ? "Enter your new password" : "Verify your Email"}
                   </Text>
 
-                  {!verified && (
+                  {!isOtpVerified && (
                     <>
                       <TextInput
                         style={styles.input}
@@ -162,7 +155,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                     </>
                   )}
 
-                  {verified && (
+                  {isOtpVerified && (
                     <>
                       <View style={styles.inputContainer}>
                         <TextInput
@@ -189,7 +182,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                     </>
                   )}
 
-                  {verified && (
+                  {isOtpVerified && (
                     <>
                       <View style={styles.inputContainer}>
                         <TextInput
@@ -223,7 +216,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                   <Animated.View
                     style={{ transform: [{ scale: buttonScale }] }}
                   >
-                    {verified ? (
+                    {isOtpVerified ? (
                       <TouchableOpacity
                         onPressIn={handlePressIn}
                         onPressOut={handlePressOut}
@@ -274,6 +267,8 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
             email={email}
+            isInSignup={false}
+            onVerified={(success) => setisOtpVerified(success)}
           />
       </KeyboardAvoidingView>
     </View>
