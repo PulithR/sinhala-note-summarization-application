@@ -1,6 +1,19 @@
-import React, { createContext, useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_API_URL } from "@env";
+import {
+  signUp as signUpService,
+  verifySignupOTP as verifySignupOTPService,
+  requestPasswordReset as requestPassResetService,
+  verifyPassResetOTP as verifyPassResetOTPService,
+  passwordReset as passwordResetService
+} from "../authentication/AuthService";
 
 export const AuthContext = createContext();
 
@@ -14,10 +27,7 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = useCallback(async () => {
     try {
       const storedToken = await AsyncStorage.getItem(STORAGE_KEY);
-      if (!storedToken) {
-        setLoading(false);
-        return;
-      }
+      if (!storedToken) return setLoading(false);
 
       const response = await fetch(`${BASE_API_URL}/validate-token`, {
         method: "POST",
@@ -37,7 +47,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.warn("Auth check failed:", error.message);
-      await AsyncStorage.removeItem(STORAGE_KEY); 
+      await AsyncStorage.removeItem(STORAGE_KEY);
     } finally {
       setLoading(false);
     }
@@ -46,50 +56,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAuthStatus();
   }, [checkAuthStatus]);
-
-  const signUp = async (credentials) => {
-    try {
-      const response = await fetch(`${BASE_API_URL}/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Signup failed");
-      }
-      return { success: true, message: data.message, email: data.email }; 
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || "Network error. Please check your connection.",
-      };
-    }
-  };
-
-  const verifyOTP = async (otpData) => {
-    try {
-      const response = await fetch(`${BASE_API_URL}/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(otpData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Invalid OTP");
-      }
-
-      await AsyncStorage.setItem(STORAGE_KEY, data.token);
-      setToken(data.token);
-      setUser({ name: data.user.name, email: data.user.email }); 
-    } catch (error) {
-      throw new Error(
-        error.message || "OTP verification failed. Please try again."
-      );
-    }
-  };
 
   const login = async (credentials) => {
     try {
@@ -100,9 +66,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Invalid credentials");
-      }
+      if (!response.ok) alert(data.error || "Invalid credentials");
 
       await AsyncStorage.setItem(STORAGE_KEY, data.token);
       setToken(data.token);
@@ -114,7 +78,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await AsyncStorage.multiRemove([STORAGE_KEY]); 
+      await AsyncStorage.multiRemove([STORAGE_KEY]);
       setUser(null);
       setToken(null);
       return { success: true };
@@ -124,16 +88,44 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signUp = async (credentials) => {
+    const result = await signUpService(credentials);
+    return result;
+  };
+
+  const verifySignupOTP = async (otpData) => {
+    const result = await verifySignupOTPService(otpData);
+    if (result.success) {
+      setToken(result.token);
+      setUser(result.user);
+    }
+    return result;
+  };
+
+  const requestPassReset = async (credentials) => {
+    const result = await requestPassResetService(credentials);
+  }
+
+  const verifyPassResetOTP = async (credentials) => {
+    const result = await verifyPassResetOTPService(credentials);
+  }
+
+  const passwordReset = async (credentials) => { 
+    const result = await passwordResetService(credentials);
+  }
+
   const authValue = useMemo(
     () => ({
       user,
       token,
       loading,
       login,
-      signUp,
-      verifyOTP,
       logout,
-      isAuthenticated: !!token && !!user,
+      signUp,
+      verifySignupOTP,
+      requestPassReset,
+      verifyPassResetOTP,
+      passwordReset
     }),
     [user, token, loading]
   );

@@ -1,7 +1,7 @@
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
-from models.user_model import users_db, pending_users, otp_storage
+from models.user_model import users_db, pending_users, otp_storage_signup
 from services.otp_service import generate_otp
 from services.email_service import send_email
 
@@ -19,13 +19,13 @@ def signup_user_service(email, name, password):
         return {"error": "User already exists!"}, 400
 
     # Check OTP cooldown
-    otp_data = otp_storage.get(email)
+    otp_data = otp_storage_signup.get(email)
     if otp_data and (datetime.datetime.now() - otp_data.get("timestamp", datetime.datetime.min)).total_seconds() < OTP_REQUEST_COOLDOWN_SECONDS:
         return {"error": "Please wait before requesting another OTP."}, 429
 
     # Generate and store OTP
     otp = generate_otp()
-    otp_storage[email] = {
+    otp_storage_signup[email] = {
         "otp": otp,
         "timestamp": datetime.datetime.now(),
         "attempts": 0
@@ -86,20 +86,20 @@ def signup_user_service(email, name, password):
     }, 200
 
 
-def verify_otp_service(email, otp):
+def verify_signup_otp_service(email, otp):
     """Verifies OTP, completes registration, and returns JWT token if successful."""
-    otp_data = otp_storage.get(email)
+    otp_data = otp_storage_signup.get(email)
     if not otp_data:
         return {"error": "No OTP found for this email."}, 400
 
     # Check OTP expiry
     if (datetime.datetime.now() - otp_data["timestamp"]).total_seconds() > OTP_EXPIRY_SECONDS:
-        del otp_storage[email]
+        del otp_storage_signup[email]
         return {"error": "OTP has expired. Please request a new one."}, 400
 
     # Check OTP attempts
     if otp_data["attempts"] >= MAX_OTP_ATTEMPTS:
-        del otp_storage[email]
+        del otp_storage_signup[email]
         return {"error": "Too many incorrect attempts. Request a new OTP."}, 403
 
     # Validate OTP
@@ -120,7 +120,7 @@ def verify_otp_service(email, otp):
         "notes": []
     }
 
-    del otp_storage[email]  # OTP verified, remove from storage
+    del otp_storage_signup[email]  # OTP verified, remove from storage
 
     # Generate JWT token
     token = create_access_token(identity=email, expires_delta=datetime.timedelta(days=10))

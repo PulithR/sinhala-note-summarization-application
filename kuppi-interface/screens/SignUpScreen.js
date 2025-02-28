@@ -242,6 +242,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         email={email}
+        isInSignup={true}
       />
     </KeyboardAvoidingView>
   );
