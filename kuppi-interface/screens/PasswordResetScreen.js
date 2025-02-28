@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -16,8 +16,12 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import OTPModal from "../components/OTPModal";
+import { AuthContext } from "../authentication/AuthContext";
 
 const PasswordResetScreen = ({ setShowPasswordReset }) => {
+
+  const { requestPassReset } = useContext(AuthContext);
+
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [verified, setVerified] = useState(false);
@@ -60,7 +64,8 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
   };
 
   const requestOTP = () => {
-    setOtpLoading(true); 
+    // requestPassReset() goes here
+    setOtpLoading(true);
 
     setTimeout(() => {
       setModalVisible(true);

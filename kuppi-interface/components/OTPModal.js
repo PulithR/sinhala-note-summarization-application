@@ -13,7 +13,10 @@ import {
 import { AuthContext } from "../authentication/AuthContext";
 
 const OTPModal = ({ visible, onClose, email, isInSignup }) => {
+  
   const { verifySignupOTP } = useContext(AuthContext);
+  const { verifyPassResetOTP } = useContext(AuthContext);
+
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
 
@@ -25,7 +28,7 @@ const OTPModal = ({ visible, onClose, email, isInSignup }) => {
     try {
       {isInSignup
         ? await verifySignupOTP({ email, otp })
-        : await verifyPassResetOTP({ email, otp })}
+        : await verifyPassResetOTP({ email, otp });}
       onClose();
     } catch (error) {
       setOtpError(error.message);
