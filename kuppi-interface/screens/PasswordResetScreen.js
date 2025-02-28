@@ -19,6 +19,7 @@ import { AuthContext } from "../authentication/AuthContext";
 const PasswordResetScreen = ({ setShowPasswordReset }) => {
 
   const { requestPassReset } = useContext(AuthContext);
+  const { passwordReset } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -99,6 +100,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
 
     if (newPassword.length >= 6 && newPassword === confirmNewPassword) {
       // password reset logic
+      // passwordReset() goes here
       setShowPasswordReset(false);
     }
   };

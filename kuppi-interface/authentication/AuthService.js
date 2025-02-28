@@ -48,3 +48,7 @@ export const requestPasswordReset = async (email) => {
 export const verifyPassResetOTP = async (otpData) => {
   // logic to verify OTP
 };
+
+export const passwordReset = async (credentials) => {
+  // logic to reset password
+}

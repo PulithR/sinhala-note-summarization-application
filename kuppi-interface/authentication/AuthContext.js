@@ -12,6 +12,7 @@ import {
   verifySignupOTP as verifySignupOTPService,
   requestPasswordReset as requestPassResetService,
   verifyPassResetOTP as verifyPassResetOTPService,
+  passwordReset as passwordResetService
 } from "../authentication/AuthService";
 
 export const AuthContext = createContext();
@@ -109,6 +110,10 @@ export const AuthProvider = ({ children }) => {
     const result = await verifyPassResetOTPService(credentials);
   }
 
+  const passwordReset = async (credentials) => { 
+    const result = await passwordResetService(credentials);
+  }
+
   const authValue = useMemo(
     () => ({
       user,
@@ -119,7 +124,8 @@ export const AuthProvider = ({ children }) => {
       signUp,
       verifySignupOTP,
       requestPassReset,
-      verifyPassResetOTP
+      verifyPassResetOTP,
+      passwordReset
     }),
     [user, token, loading]
   );
