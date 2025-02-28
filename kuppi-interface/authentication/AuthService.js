@@ -22,7 +22,7 @@ export const signUp = async (credentials) => {
 
 export const verifySignupOTP = async (otpData) => {
   try {
-    const response = await fetch(`${BASE_API_URL}/verify-otp`, {
+    const response = await fetch(`${BASE_API_URL}/verify-signup-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(otpData),

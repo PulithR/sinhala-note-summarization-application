@@ -86,7 +86,7 @@ def signup_user_service(email, name, password):
     }, 200
 
 
-def verify_otp_service(email, otp):
+def verify_signup_otp_service(email, otp):
     """Verifies OTP, completes registration, and returns JWT token if successful."""
     otp_data = otp_storage_signup.get(email)
     if not otp_data:
