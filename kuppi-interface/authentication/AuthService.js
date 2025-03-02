@@ -42,7 +42,21 @@ export const verifySignupOTP = async (otpData) => {
 };
 
 export const requestPasswordReset = async (email) => {
-  // OTP request for pass reset
+  try {
+    const response = await fetch(`${BASE_API_URL}/request-pass-reset`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(email),
+    });
+
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.error || "Failed to request password reset");
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    return { success: false, error: error.message || "Network error" };
+  }
 };
 
 export const verifyPassResetOTP = async (otpData) => {
