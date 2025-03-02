@@ -66,6 +66,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
         if (response.success) {
           setModalVisible(true);
         } else {
+          setShowSignUp(false);
           alert(response.error);
         }
       } else {
