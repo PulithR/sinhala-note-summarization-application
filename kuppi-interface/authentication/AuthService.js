@@ -60,7 +60,23 @@ export const requestPasswordReset = async (email) => {
 };
 
 export const verifyPassResetOTP = async (otpData) => {
-  // logic to verify OTP
+  try {
+    const response = await fetch(`${BASE_API_URL}/verify-pass-reset-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(otpData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Invalid OTP");
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message || "OTP verification failed",
+    };
+  }
 };
 
 export const passwordReset = async (credentials) => {
