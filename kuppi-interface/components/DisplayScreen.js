@@ -43,7 +43,7 @@ const DisplayScreen = ({ title, content, onBackPress }) => {
         <View style={styles.container}>
           <View style={styles.contentContainer}>
             {/* Added ScrollView to Handle Long Content */}
-            <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={styles.contentText}>{content}</Text>
             </ScrollView>
           </View>
