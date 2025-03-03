@@ -63,5 +63,10 @@ def verify_password_reset_otp_service(email, otp):
 
 
 
-def reset_password_service():
-  pass
+def reset_password_service(email, newPassword):
+    """Resets the user's password after OTP verification."""
+    if email not in users_db:
+        return {"error": "User not found."}, 404
+
+    users_db[email]["password"] = generate_password_hash(newPassword)
+    return {"success": True, "message": "Password reset successful."}, 200
