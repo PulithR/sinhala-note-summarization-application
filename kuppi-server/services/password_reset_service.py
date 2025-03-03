@@ -39,8 +39,28 @@ def request_password_reset_service(email):
     return {"success": True, "message": "OTP sent to your email."}, 200
 
 
-def verify_password_reset_otp_service():
-  pass
+def verify_password_reset_otp_service(email, otp):
+    """Verifies the OTP for password reset."""
+    otp_data = otp_storage_password_reset.get(email)
+    if not otp_data:
+        return {"error": "No OTP found for this email."}, 400
+
+    if (datetime.datetime.now() - otp_data["timestamp"]).total_seconds() > OTP_EXPIRY_SECONDS:
+        del otp_storage_password_reset[email]
+        return {"error": "OTP has expired. Please request a new one."}, 400
+
+    if otp_data["attempts"] >= MAX_OTP_ATTEMPTS:
+        del otp_storage_password_reset[email]
+        return {"error": "Too many incorrect attempts. Request a new OTP."}, 403
+
+    if otp != otp_data["otp"]:
+        otp_data["attempts"] += 1
+        return {"error": "Invalid OTP. Please try again."}, 400
+
+    del otp_storage_password_reset[email]  # OTP verified, remove from storage
+    return {"success": True, "message": "OTP verified. You can now reset your password."}, 200
+
+
 
 
 def reset_password_service():
