@@ -87,49 +87,36 @@ def signup_user_service(email, name, password):
 
 
 def verify_signup_otp_service(email, otp):
-    """Verifies OTP, completes registration, and returns JWT token if successful."""
-    otp_data = otp_storage_signup.get(email)
-    if not otp_data:
-        return {"error": "No OTP found for this email."}, 400
-
-    # Check OTP expiry
+    
+    
     if (datetime.datetime.now() - otp_data["timestamp"]).total_seconds() > OTP_EXPIRY_SECONDS:
-        del otp_storage_signup[email]
+        otp_storage_signup_collection.delete_one({"email": email})
         return {"error": "OTP has expired. Please request a new one."}, 400
-
-    # Check OTP attempts
+    
     if otp_data["attempts"] >= MAX_OTP_ATTEMPTS:
-        del otp_storage_signup[email]
+        otp_storage_signup_collection.delete_one({"email": email})
         return {"error": "Too many incorrect attempts. Request a new OTP."}, 403
-
-    # Validate OTP
+    
     if otp != otp_data["otp"]:
-        otp_data["attempts"] += 1
+        otp_storage_signup_collection.update_one({"email": email}, {"$inc": {"attempts": 1}})
         return {"error": "Invalid OTP. Please try again."}, 400
-
-    # Retrieve user data from pending users
-    user_data = pending_users.pop(email, None)
+    
+    user_data = pending_users_collection.find_one_and_delete({"email": email})
     if not user_data:
         return {"error": "User data not found."}, 400
-
-    # Move user from pending to active users
-    users_db[email] = {
+    
+    users_collection.insert_one({
         "email": user_data["email"],
         "password": user_data["password"],
         "name": user_data["name"],
         "notes": []
-    }
-
-    del otp_storage_signup[email]  # OTP verified, remove from storage
-
-    # Generate JWT token
+    })
+    
+    otp_storage_signup_collection.delete_one({"email": email})
+    
     token = create_access_token(identity=email, expires_delta=datetime.timedelta(days=10))
-
-    return {
-        "success": True,
-        "token": token,
-        "user": {"email": email, "name": user_data["name"]}
-    }, 201
+    
+    return {"success": True, "token": token, "user": {"email": email, "name": user_data["name"]}}, 201
 
 
 def login_user_service(email, password):
