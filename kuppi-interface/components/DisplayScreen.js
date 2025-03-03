@@ -68,10 +68,12 @@ const DisplayScreen = ({ title, content, onBackPress }) => {
 
 const styles = StyleSheet.create({
   safeContainer: { 
-    flex: 1 
+    flex: 1 ,
+    backgroundColor: '#F8F9FA'
 },
   content: { 
-    flex: 1 
+    flex: 1 ,
+    backgroundColor: '#FFFFFF'
 },
   header: { 
     alignItems: 'center', 
@@ -88,9 +90,16 @@ const styles = StyleSheet.create({
     padding: 20 
 },
   contentContainer: { 
-    flex: 1, 
-    padding: 15, 
-    marginBottom: 20 
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, 
 },
   contentText: { 
     fontSize: 16 
