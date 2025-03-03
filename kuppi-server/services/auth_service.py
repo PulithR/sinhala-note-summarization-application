@@ -88,6 +88,9 @@ def signup_user_service(email, name, password):
 
 def verify_signup_otp_service(email, otp):
     
+    otp_data = otp_storage_signup_collection.find_one({"email": email})
+    if not otp_data:
+        return {"error": "No OTP found for this email."}, 400
     
     if (datetime.datetime.now() - otp_data["timestamp"]).total_seconds() > OTP_EXPIRY_SECONDS:
         otp_storage_signup_collection.delete_one({"email": email})
