@@ -42,7 +42,8 @@ const DisplayScreen = ({ title, content, onBackPress }) => {
         {/* Main Content */}
         <View style={styles.container}>
           <View style={styles.contentContainer}>
-            <ScrollView>
+            {/* Added ScrollView to Handle Long Content */}
+            <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
               <Text style={styles.contentText}>{content}</Text>
             </ScrollView>
           </View>
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
 buttonGradient: {
     paddingVertical: 16,
     alignItems: 'center',
-  },
+},
   buttonText: { 
     color: '#fff', 
     textAlign: 'center', 
