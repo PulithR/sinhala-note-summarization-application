@@ -113,19 +113,13 @@ def verify_signup_otp_service(email, otp):
     return {"success": True, "token": token, "user": {"email": email, "name": user_data["name"]}}, 201
 
 def login_user_service(email, password):
-    """Handles user login and returns a JWT token if credentials are valid."""
     if not email or not password:
         return {"error": "Email and password are required!"}, 400
-
-    user = users_db.get(email)
+    
+    user = users_collection.find_one({"email": email})
     if not user or not check_password_hash(user["password"], password):
         return {"error": "Invalid email or password."}, 401
-
-    # Generate JWT token
+    
     token = create_access_token(identity=email, expires_delta=datetime.timedelta(hours=24))
-
-    return {
-        "success": True,
-        "token": token,
-        "user": {"email": user["email"], "name": user["name"]}
-    }, 200
+    
+    return {"success": True, "token": token, "user": {"email": user["email"], "name": user["name"]}}, 200
