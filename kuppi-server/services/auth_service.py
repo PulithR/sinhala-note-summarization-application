@@ -1,9 +1,9 @@
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
-from models.user_model import users_db, pending_users, otp_storage_signup
 from services.otp_service import generate_otp
 from services.email_service import send_email
+from db import users_collection, pending_users_collection, otp_storage_signup_collection
 
 MAX_OTP_ATTEMPTS = 3
 OTP_EXPIRY_SECONDS = 600  # 10 minutes
@@ -11,35 +11,31 @@ OTP_REQUEST_COOLDOWN_SECONDS = 60  # 1 minute
 
 
 def signup_user_service(email, name, password):
-    """Handles user signup, generates OTP, and sends it via email."""
     if not email or not password or not name:
         return {"error": "Email, name, and password are required!"}, 400
-
-    if email in users_db:
+    
+    if users_collection.find_one({"email": email}):
         return {"error": "User already exists!"}, 400
-
-    # Check OTP cooldown
-    otp_data = otp_storage_signup.get(email)
-    if otp_data and (datetime.datetime.now() - otp_data.get("timestamp", datetime.datetime.min)).total_seconds() < OTP_REQUEST_COOLDOWN_SECONDS:
+    
+    otp_data = otp_storage_signup_collection.find_one({"email": email})
+    if otp_data and (datetime.datetime.now() - otp_data.get("timestamp")).total_seconds() < OTP_REQUEST_COOLDOWN_SECONDS:
         return {"error": "Please wait before requesting another OTP."}, 429
-
-    # Generate and store OTP
+    
     otp = generate_otp()
-    otp_storage_signup[email] = {
-        "otp": otp,
-        "timestamp": datetime.datetime.now(),
-        "attempts": 0
-    }
-
-    # Store pending user data securely
-    pending_users[email] = {
-        "email": email,
-        "name": name,
-        "password": generate_password_hash(password)
-    }
-
+    
+    otp_storage_signup_collection.update_one(
+        {"email": email},
+        {"$set": {"otp": otp, "timestamp": datetime.datetime.now(), "attempts": 0}},
+        upsert=True
+    )
+    
+    pending_users_collection.update_one(
+        {"email": email},
+        {"$set": {"email": email, "name": name, "password": generate_password_hash(password)}},
+        upsert=True
+    )
+    
     subject = "Your OTP for Kuppi Registration"
-
     content = f"""
             <div style="max-width: 600px; margin: 40px auto; padding: 25px 20px; 
             border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
@@ -74,16 +70,12 @@ def signup_user_service(email, name, password):
                 </p>
             </div>
             """
-
-    # Send OTP via email
+    
     if not send_email(email, subject, content):
-        del pending_users[email]  # Cleanup if email sending fails
+        pending_users_collection.delete_one({"email": email})
         return {"error": "Failed to send OTP. Please try again."}, 500
-
-    return {
-        "success": True,
-        "message": "OTP sent to your email. Please verify to complete registration."
-    }, 200
+    
+    return {"success": True, "message": "OTP sent to your email. Please verify to complete registration."}, 200
 
 
 def verify_signup_otp_service(email, otp):

@@ -15,7 +15,7 @@ def verify_pass_reset_otp():
     response, status = request_password_reset_service()
     return jsonify(response), status
 
-@pass_reset_bp.route("reset-password", methods=["POST"])
+@pass_reset_bp.route("/reset-password", methods=["POST"])
 def reset_password():
     data = request.json
     response, status = reset_password_service()
