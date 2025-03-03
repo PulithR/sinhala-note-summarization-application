@@ -1,5 +1,6 @@
 import React, { useEffect, useRef }  from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const DisplayScreen = ({ title, content, onBackPress }) => {
   // Animation state variables
@@ -50,7 +51,14 @@ const DisplayScreen = ({ title, content, onBackPress }) => {
             style={styles.backButton}
             onPress={onBackPress}
           >
-            <Text style={styles.buttonText}>Back</Text>
+            <LinearGradient
+              colors={['#4a90e2', '#357abd']}
+              style={styles.buttonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+                <Text style={styles.buttonText}>Back</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -88,14 +96,24 @@ const styles = StyleSheet.create({
     fontSize: 16 
 },
   backButton: { 
-    padding: 10, 
-    backgroundColor: '#4a90e2', 
-    borderRadius: 10 
+    borderRadius: 16, 
+    overflow: 'hidden', 
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5
 },
+buttonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
   buttonText: { 
     color: '#fff', 
     textAlign: 'center', 
-    fontSize: 18 
+    fontSize: 18 ,
+    fontWeight: 'bold'
 },
 });
 
