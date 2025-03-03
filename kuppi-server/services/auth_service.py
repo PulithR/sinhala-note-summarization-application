@@ -78,16 +78,39 @@ def signup_user_service(email, name, password):
     return {"success": True, "message": "OTP sent to your email. Please verify to complete registration."}, 200
 
 
-def send_email(email, subject, content):
-    msg = Message(subject, recipients=[email])
-    msg.html = content
-    try:
-        mail = current_app.extensions['mail']
-        mail.send(msg)
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        return False
-    return True
+def verify_signup_otp_service(email, otp):
+    otp_data = otp_storage_signup_collection.find_one({"email": email})
+    if not otp_data:
+        return {"error": "No OTP found for this email."}, 400
+    
+    if (datetime.datetime.now() - otp_data["timestamp"]).total_seconds() > OTP_EXPIRY_SECONDS:
+        otp_storage_signup_collection.delete_one({"email": email})
+        return {"error": "OTP has expired. Please request a new one."}, 400
+    
+    if otp_data["attempts"] >= MAX_OTP_ATTEMPTS:
+        otp_storage_signup_collection.delete_one({"email": email})
+        return {"error": "Too many incorrect attempts. Request a new OTP."}, 403
+    
+    if otp != otp_data["otp"]:
+        otp_storage_signup_collection.update_one({"email": email}, {"$inc": {"attempts": 1}})
+        return {"error": "Invalid OTP. Please try again."}, 400
+    
+    user_data = pending_users_collection.find_one_and_delete({"email": email})
+    if not user_data:
+        return {"error": "User data not found."}, 400
+    
+    users_collection.insert_one({
+        "email": user_data["email"],
+        "password": user_data["password"],
+        "name": user_data["name"],
+        "notes": []
+    })
+    
+    otp_storage_signup_collection.delete_one({"email": email})
+    
+    token = create_access_token(identity=email, expires_delta=datetime.timedelta(days=10))
+    
+    return {"success": True, "token": token, "user": {"email": email, "name": user_data["name"]}}, 201
 
 def login_user_service(email, password):
     """Handles user login and returns a JWT token if credentials are valid."""
