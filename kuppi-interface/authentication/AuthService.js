@@ -80,5 +80,18 @@ export const verifyPassResetOTP = async (otpData) => {
 };
 
 export const passwordReset = async (credentials) => {
-  // logic to reset password
+  try {
+    const response = await fetch(`${BASE_API_URL}/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Password reset failed");
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    return { success: false, error: error.message || "Network error" };
+  }
 }
