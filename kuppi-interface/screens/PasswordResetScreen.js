@@ -1,3 +1,4 @@
+PassWordResetScreen.js
 import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   View,
@@ -18,8 +19,7 @@ import { AuthContext } from "../authentication/AuthContext";
 
 const PasswordResetScreen = ({ setShowPasswordReset }) => {
 
-  const { requestPassReset } = useContext(AuthContext);
-  const { passwordReset } = useContext(AuthContext);
+  const { requestPassReset, passwordReset } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -62,14 +62,20 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
     }
   };
 
-  const requestOTP = () => {
-    // requestPassReset() goes here
+  const requestOTP = async () => {
     setOtpLoading(true);
+    try {
+      const response = await requestPassReset({ email });
 
-    setTimeout(() => {
-      setModalVisible(true);
-      setOtpLoading(false);
-    }, 2000);
+      if (response?.success) {
+        setModalVisible(true);
+      } else {
+        setEmailError(response?.error || "Failed to request OTP.");
+      }
+    } catch (error) {
+      setEmailError("Something went wrong. Please try again.");
+    }
+    setOtpLoading(false);
   };
 
   const validateNewPassword = (text) => {
@@ -90,7 +96,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
     }
   };
 
-  const handlePressOut = () => {
+  const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
       friction: 3,
@@ -99,11 +105,20 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
     }).start();
 
     if (newPassword.length >= 6 && newPassword === confirmNewPassword) {
-      // password reset logic
-      // passwordReset() goes here
-      setShowPasswordReset(false);
+      try {
+        const response = await passwordReset({ email, newPassword });
+
+        if (response?.success) {
+          setShowPasswordReset(false);
+        } else {
+          setPasswordError(response?.error || "Failed to reset password.");
+        }
+      } catch (error) {
+        setPasswordError("Something went wrong. Please try again.");
+      }
     }
   };
+
 
   return (
     <View style={styles.container}>
