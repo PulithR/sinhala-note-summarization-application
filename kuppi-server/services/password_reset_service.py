@@ -7,12 +7,12 @@ from services.email_service import send_email
 
 MAX_OTP_ATTEMPTS = 3
 OTP_EXPIRY_SECONDS = 600  # 10 minutes
-OTP_REQUEST_COOLDOWN_SECONDS = 60 
+OTP_REQUEST_COOLDOWN_SECONDS = 60  # 1 minute
 
 def request_password_reset_service(email):
     """Handles password reset requests by generating an OTP and sending it via email."""
-    if email not in users_db:  # Proper indentation
-        return {"error": "User not found."}, 404  
+    if email not in users_db:
+        return {"error": "User not found."}, 404
 
     otp_data = otp_storage_password_reset.get(email)
     if otp_data and (datetime.datetime.now() - otp_data.get("timestamp", datetime.datetime.min)).total_seconds() < OTP_REQUEST_COOLDOWN_SECONDS:
@@ -38,7 +38,6 @@ def request_password_reset_service(email):
 
     return {"success": True, "message": "OTP sent to your email."}, 200
 
-
 def verify_password_reset_otp_service(email, otp):
     """Verifies the OTP for password reset."""
     otp_data = otp_storage_password_reset.get(email)
@@ -59,9 +58,6 @@ def verify_password_reset_otp_service(email, otp):
 
     del otp_storage_password_reset[email]  # OTP verified, remove from storage
     return {"success": True, "message": "OTP verified. You can now reset your password."}, 200
-
-
-
 
 def reset_password_service(email, newPassword):
     """Resets the user's password after OTP verification."""

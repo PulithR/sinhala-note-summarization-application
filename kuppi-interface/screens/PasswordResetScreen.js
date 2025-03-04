@@ -17,9 +17,7 @@ import OTPModal from "../components/OTPModal";
 import { AuthContext } from "../authentication/AuthContext";
 
 const PasswordResetScreen = ({ setShowPasswordReset }) => {
-
-  const { requestPassReset } = useContext(AuthContext);
-  const { passwordReset } = useContext(AuthContext);
+  const { requestPassReset, passwordReset } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -30,7 +28,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false); 
+  const [otpLoading, setOtpLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const slideAnim = useRef(new Animated.Value(700)).current;
@@ -62,14 +60,20 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
     }
   };
 
-  const requestOTP = () => {
-    // requestPassReset() goes here
+  const requestOTP = async () => {
     setOtpLoading(true);
+    try {
+      const response = await requestPassReset({ email });
 
-    setTimeout(() => {
-      setModalVisible(true);
-      setOtpLoading(false);
-    }, 2000);
+      if (response?.success) {
+        setModalVisible(true);
+      } else {
+        setEmailError(response?.error || "Failed to request OTP.");
+      }
+    } catch (error) {
+      setEmailError("Something went wrong. Please try again.");
+    }
+    setOtpLoading(false);
   };
 
   const validateNewPassword = (text) => {
@@ -90,7 +94,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
     }
   };
 
-  const handlePressOut = () => {
+  const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
       friction: 3,
@@ -99,9 +103,17 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
     }).start();
 
     if (newPassword.length >= 6 && newPassword === confirmNewPassword) {
-      // password reset logic
-      // passwordReset() goes here
-      setShowPasswordReset(false);
+      try {
+        const response = await passwordReset({ email, newPassword });
+
+        if (response?.success) {
+          setShowPasswordReset(false);
+        } else {
+          setPasswordError(response?.error || "Failed to reset password.");
+        }
+      } catch (error) {
+        setPasswordError("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -111,167 +123,167 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-          <ScrollView
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <LinearGradient
+            colors={["#f0f8ff", "#e6f3ff"]}
+            style={styles.background}
           >
-            <LinearGradient
-              colors={["#f0f8ff", "#e6f3ff"]}
-              style={styles.background}
+            <View style={styles.topHalf}>
+              <Image
+                source={require("../assets/login.png")}
+                style={styles.image}
+              />
+            </View>
+
+            <Animated.View
+              style={[
+                styles.bottomHalf,
+                { transform: [{ translateY: slideAnim }] },
+              ]}
             >
-              <View style={styles.topHalf}>
-                <Image
-                  source={require("../assets/login.png")}
-                  style={styles.image}
-                />
-              </View>
-
-              <Animated.View
-                style={[
-                  styles.bottomHalf,
-                  { transform: [{ translateY: slideAnim }] },
-                ]}
+              <LinearGradient
+                colors={["#ffffff", "#f8f9ff"]}
+                style={styles.formContainer}
               >
-                <LinearGradient
-                  colors={["#ffffff", "#f8f9ff"]}
-                  style={styles.formContainer}
-                >
-                  <Text style={styles.header}>Reset Password</Text>
-                  <Text style={styles.helper}>
-                    {isOtpVerified ? "Enter your new password" : "Verify your Email"}
-                  </Text>
+                <Text style={styles.header}>Reset Password</Text>
+                <Text style={styles.helper}>
+                  {isOtpVerified
+                    ? "Enter your new password"
+                    : "Verify your Email"}
+                </Text>
 
-                  {!isOtpVerified && (
-                    <>
+                {!isOtpVerified && (
+                  <>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Email"
+                      placeholderTextColor="#7f8c8d"
+                      value={email}
+                      onChangeText={validateEmail}
+                      keyboardType="email-address"
+                    />
+                    {emailError ? (
+                      <Text style={styles.errorText}>{emailError}</Text>
+                    ) : null}
+                  </>
+                )}
+
+                {isOtpVerified && (
+                  <>
+                    <View style={styles.inputContainer}>
                       <TextInput
-                        style={styles.input}
-                        placeholder="Email"
+                        style={styles.inputWithButton}
+                        placeholder="New Password"
+                        secureTextEntry={!showPassword}
                         placeholderTextColor="#7f8c8d"
-                        value={email}
-                        onChangeText={validateEmail}
-                        keyboardType="email-address"
+                        value={newPassword}
+                        onChangeText={validateNewPassword}
                       />
-                      {emailError ? (
-                        <Text style={styles.errorText}>{emailError}</Text>
-                      ) : null}
-                    </>
-                  )}
-
-                  {isOtpVerified && (
-                    <>
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          style={styles.inputWithButton}
-                          placeholder="New Password"
-                          secureTextEntry={!showPassword}
-                          placeholderTextColor="#7f8c8d"
-                          value={newPassword}
-                          onChangeText={validateNewPassword}
-                        />
-                        <TouchableOpacity
-                          style={styles.visibilityButton}
-                          activeOpacity={1}
-                          onPress={() => setShowPassword(!showPassword)}
-                        >
-                          <Text style={styles.visibilityButtonText}>
-                            {showPassword ? "HIDE" : "SHOW"}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      {passwordError ? (
-                        <Text style={styles.errorText}>{passwordError}</Text>
-                      ) : null}
-                    </>
-                  )}
-
-                  {isOtpVerified && (
-                    <>
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          style={styles.inputWithButton}
-                          placeholder="Confirm New Password"
-                          secureTextEntry={!showConfirmPassword}
-                          placeholderTextColor="#7f8c8d"
-                          value={confirmNewPassword}
-                          onChangeText={validateConfirmNewPassword}
-                        />
-                        <TouchableOpacity
-                          style={styles.visibilityButton}
-                          activeOpacity={1}
-                          onPress={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                        >
-                          <Text style={styles.visibilityButtonText}>
-                            {showConfirmPassword ? "HIDE" : "SHOW"}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      {confirmPasswordError ? (
-                        <Text style={styles.errorText}>
-                          {confirmPasswordError}
+                      <TouchableOpacity
+                        style={styles.visibilityButton}
+                        activeOpacity={1}
+                        onPress={() => setShowPassword(!showPassword)}
+                      >
+                        <Text style={styles.visibilityButtonText}>
+                          {showPassword ? "HIDE" : "SHOW"}
                         </Text>
-                      ) : null}
-                    </>
-                  )}
+                      </TouchableOpacity>
+                    </View>
+                    {passwordError ? (
+                      <Text style={styles.errorText}>{passwordError}</Text>
+                    ) : null}
+                  </>
+                )}
 
-                  <Animated.View
-                    style={{ transform: [{ scale: buttonScale }] }}
-                  >
-                    {isOtpVerified ? (
+                {isOtpVerified && (
+                  <>
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        style={styles.inputWithButton}
+                        placeholder="Confirm New Password"
+                        secureTextEntry={!showConfirmPassword}
+                        placeholderTextColor="#7f8c8d"
+                        value={confirmNewPassword}
+                        onChangeText={validateConfirmNewPassword}
+                      />
                       <TouchableOpacity
-                        onPressIn={handlePressIn}
-                        onPressOut={handlePressOut}
-                        activeOpacity={0.9}
+                        style={styles.visibilityButton}
+                        activeOpacity={1}
+                        onPress={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                       >
-                        <LinearGradient
-                          colors={["#4a90e2", "#357abd"]}
-                          style={styles.resetButton}
-                        >
+                        <Text style={styles.visibilityButtonText}>
+                          {showConfirmPassword ? "HIDE" : "SHOW"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    {confirmPasswordError ? (
+                      <Text style={styles.errorText}>
+                        {confirmPasswordError}
+                      </Text>
+                    ) : null}
+                  </>
+                )}
+
+                <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+                  {isOtpVerified ? (
+                    <TouchableOpacity
+                      onPressIn={handlePressIn}
+                      onPressOut={handlePressOut}
+                      activeOpacity={0.9}
+                    >
+                      <LinearGradient
+                        colors={["#4a90e2", "#357abd"]}
+                        style={styles.resetButton}
+                      >
+                        <Text style={styles.resetButtonText}>
+                          Reset Password
+                        </Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPressIn={handlePressIn}
+                      onPressOut={requestOTP}
+                      activeOpacity={0.9}
+                    >
+                      <LinearGradient
+                        colors={["#4a90e2", "#357abd"]}
+                        style={styles.resetButton}
+                      >
+                        {otpLoading ? (
+                          <ActivityIndicator color="#fff" />
+                        ) : (
                           <Text style={styles.resetButtonText}>
-                            Reset Password
+                            Verify Email
                           </Text>
-                        </LinearGradient>
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity
-                        onPressIn={handlePressIn}
-                        onPressOut={requestOTP}
-                        activeOpacity={0.9}
-                      >
-                        <LinearGradient
-                          colors={["#4a90e2", "#357abd"]}
-                          style={styles.resetButton}
-                        >
-                          {otpLoading ? (
-                            <ActivityIndicator color="#fff" />
-                          ) : (
-                            <Text style={styles.resetButtonText}>
-                              Verify Email
-                            </Text>
-                          )}
-                        </LinearGradient>
-                      </TouchableOpacity>
-                    )}
-                  </Animated.View>
+                        )}
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  )}
+                </Animated.View>
 
-                  <TouchableOpacity
-                    onPress={() => setShowPasswordReset(false)}
-                    style={styles.backButton}
-                  >
-                    <Text style={styles.backButtonText}>Back to Login</Text>
-                  </TouchableOpacity>
-                </LinearGradient>
-              </Animated.View>
-            </LinearGradient>
-          </ScrollView>
-          <OTPModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            email={email}
-            isInSignup={false}
-            onVerified={(success) => setisOtpVerified(success)}
-          />
+                <TouchableOpacity
+                  onPress={() => setShowPasswordReset(false)}
+                  style={styles.backButton}
+                >
+                  <Text style={styles.backButtonText}>Back to Login</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </Animated.View>
+          </LinearGradient>
+        </ScrollView>
+        <OTPModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          email={email}
+          isInSignup={false}
+          onVerified={(success) => setisOtpVerified(success)}
+        />
       </KeyboardAvoidingView>
     </View>
   );
