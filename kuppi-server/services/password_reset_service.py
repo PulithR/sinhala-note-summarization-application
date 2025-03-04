@@ -9,6 +9,7 @@ MAX_OTP_ATTEMPTS = 3
 OTP_EXPIRY_SECONDS = 600  # 10 minutes
 OTP_REQUEST_COOLDOWN_SECONDS = 60 
 
+
 def request_password_reset_service(email):
     """Handles password reset requests by generating an OTP and sending it via email."""
     user = users_collection.find_one({"email": email})
@@ -93,7 +94,13 @@ def verify_password_reset_otp_service(email, otp):
     return {"success": True, "message": "OTP verified. You can now reset your password."}, 200
 
 
+def reset_password_service(email, new_password):
+    """Resets the user's password after OTP verification."""
+    user = users_collection.find_one({"email": email})
+    if not user:
+        return {"error": "User not found."}, 404
 
+    hashed_password = generate_password_hash(new_password)
+    users_collection.update_one({"email": email}, {"$set": {"password": hashed_password}})
 
-def reset_password_service(email, newPassword):
-    pass
+    return {"success": True, "message": "Password reset successful."}, 200
