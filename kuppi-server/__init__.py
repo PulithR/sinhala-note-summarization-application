@@ -6,6 +6,7 @@ from config import Config
 from routes.auth_routes import auth_bp
 from routes.notes_routes import notes_bp
 from routes.password_reset_routes import pass_reset_bp
+from db import db
 
 def create_app():
     app = Flask(__name__)
@@ -14,6 +15,8 @@ def create_app():
     CORS(app)
     JWTManager(app)
     mail = Mail(app)  
+
+    app.mongo = db
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(notes_bp)

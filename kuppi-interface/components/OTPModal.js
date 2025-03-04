@@ -1,3 +1,4 @@
+OTPModal.js
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useContext, useState } from "react";
 import {
