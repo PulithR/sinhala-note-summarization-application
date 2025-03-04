@@ -1,3 +1,4 @@
+PassWordResetScreen.js
 import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   View,
@@ -17,6 +18,8 @@ import OTPModal from "../components/OTPModal";
 import { AuthContext } from "../authentication/AuthContext";
 
 const PasswordResetScreen = ({ setShowPasswordReset }) => {
+  const { requestPassReset, passwordReset } = useContext(AuthContext);
+
   const { requestPassReset, passwordReset } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
@@ -61,10 +64,22 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
   };
 
   const requestOTP = async () => {
+  const requestOTP = async () => {
     setOtpLoading(true);
     try {
       const response = await requestPassReset({ email });
+    try {
+      const response = await requestPassReset({ email });
 
+      if (response?.success) {
+        setModalVisible(true);
+      } else {
+        setEmailError(response?.error || "Failed to request OTP.");
+      }
+    } catch (error) {
+      setEmailError("Something went wrong. Please try again.");
+    }
+    setOtpLoading(false);
       if (response?.success) {
         setModalVisible(true);
       } else {
@@ -95,6 +110,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
   };
 
   const handlePressOut = async () => {
+  const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
       friction: 3,
@@ -114,8 +130,20 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
       } catch (error) {
         setPasswordError("Something went wrong. Please try again.");
       }
+      try {
+        const response = await passwordReset({ email, newPassword });
+
+        if (response?.success) {
+          setShowPasswordReset(false);
+        } else {
+          setPasswordError(response?.error || "Failed to reset password.");
+        }
+      } catch (error) {
+        setPasswordError("Something went wrong. Please try again.");
+      }
     }
   };
+
 
   return (
     <View style={styles.container}>
