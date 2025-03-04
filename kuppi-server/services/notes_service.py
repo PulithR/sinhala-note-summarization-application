@@ -21,7 +21,15 @@ def add_note_service(data):
     return {"success": True, "note": note}, 201
 
 def get_notes_service():
-    pass
+    current_user_email = get_jwt_identity()
+    user = users_collection.find_one({"email": current_user_email})
+
+    if not user:
+        return {"error": "User not found"}, 404
+
+    notes_preview = [{"_id": str(note["_id"]) if "_id" in note else None, "title": note["title"]} for note in user.get("notes", [])]
+    return {"notes": notes_preview}, 200
+
 
 def get_note_by_id_service(note_id):
     pass
