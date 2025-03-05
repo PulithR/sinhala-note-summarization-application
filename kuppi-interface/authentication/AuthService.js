@@ -94,4 +94,4 @@ export const passwordReset = async (credentials) => {
   } catch (error) {
     return { success: false, error: error.message || "Network error" };
   }
-}
+};

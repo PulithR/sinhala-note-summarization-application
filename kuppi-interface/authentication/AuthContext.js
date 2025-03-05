@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${storedToken}`,
+          Authorization: Bearer `${storedToken}`,
         },
         timeout: 5000,
       });
@@ -103,15 +103,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const requestPassReset = async (credentials) => {
-    const result = await requestPassResetService(credentials);
+    return await requestPassResetService(credentials);
   }
 
   const verifyPassResetOTP = async (credentials) => {
-    const result = await verifyPassResetOTPService(credentials);
+    return await verifyPassResetOTPService(credentials);
   }
 
   const passwordReset = async (credentials) => { 
-    const result = await passwordResetService(credentials);
+    return await passwordResetService(credentials);
   }
 
   const authValue = useMemo(
@@ -125,9 +125,20 @@ export const AuthProvider = ({ children }) => {
       verifySignupOTP,
       requestPassReset,
       verifyPassResetOTP,
-      passwordReset
+      passwordReset,
     }),
-    [user, token, loading]
+    [
+      user,
+      token,
+      loading,
+      login,
+      logout,
+      signUp,
+      verifySignupOTP,
+      requestPassReset,
+      verifyPassResetOTP,
+      passwordReset,
+    ]
   );
 
   return (

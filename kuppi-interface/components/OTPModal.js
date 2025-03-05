@@ -13,26 +13,28 @@ import {
 import { AuthContext } from "../authentication/AuthContext";
 
 const OTPModal = ({ visible, onClose, email, isInSignup, onVerified }) => {
-  
-  const { verifySignupOTP } = useContext(AuthContext);
-  const { verifyPassResetOTP } = useContext(AuthContext);
-
+  const { verifySignupOTP, verifyPassResetOTP } = useContext(AuthContext);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
 
   const handleVerifyOtp = async () => {
-    if (!email)
-      return setOtpError("Something went wrong. Please try again.");
+    setOtpError(""); // Clear previous errors
+    if (!email) return setOtpError("Something went wrong. Please try again.");
     if (!otp.trim()) return setOtpError("OTP is required.");
 
     try {
-      {isInSignup
+      const response = isInSignup
         ? await verifySignupOTP({ email, otp })
-        : await verifyPassResetOTP({ email, otp });}
-      onVerified(true);
-      onClose();
+        : await verifyPassResetOTP({ email, otp });
+
+      if (response?.success) {
+        onVerified(true);
+        onClose();
+      } else {
+        setOtpError(response?.error || "Invalid OTP. Please try again.");
+      }
     } catch (error) {
-      setOtpError(error.message);
+      setOtpError("Something went wrong. Please try again.");
     }
   };
 
