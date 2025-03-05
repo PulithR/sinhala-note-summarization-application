@@ -17,13 +17,13 @@ def get_notes():
     response, status = get_notes_service()
     return jsonify(response), status
 
-@notes_bp.route("/notes/<int:note_id>", methods=["GET"])
+@notes_bp.route("/notes/<string:note_id>", methods=["GET"])
 @jwt_required()
 def get_note_by_id(note_id):
     response, status = get_note_by_id_service(note_id)
     return jsonify(response), status
 
-@notes_bp.route("/notes/<int:note_id>", methods=["DELETE"])
+@notes_bp.route("/notes/<string:note_id>", methods=["DELETE"])
 @jwt_required()
 def delete_note(note_id):
     response, status = delete_note_service(note_id)

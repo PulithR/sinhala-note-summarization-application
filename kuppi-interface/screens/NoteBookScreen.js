@@ -91,24 +91,24 @@ const NoteBookScreen = ({ navigation }) => {
 
   const handleDeleteNote = async (noteId) => {
     try {
-          const response = await fetch(`${BASE_API_URL}/notes/${noteId}`, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-    
-          if (response.ok) {
-            Alert.alert("Success", "Note deleted successfully!");
-            fetchNotes();
-          } else {
-            const errorData = await response.json();
-            Alert.alert("Error", errorData.error || "Failed to delete note");
-          }
-        } catch (error) {
-          Alert.alert("Error", error.message);
-        }
+      const response = await fetch(`${BASE_API_URL}/notes/${noteId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        Alert.alert("Success", "Note deleted successfully!");
+        fetchNotes();
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.error || "Failed to delete note");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const handleDeleteAll = async () => {
@@ -127,7 +127,7 @@ const NoteBookScreen = ({ navigation }) => {
 
       if (response.ok) {
         Alert.alert("Success", "All notes deleted successfully!");
-        fetchNotes(); 
+        fetchNotes();
       } else {
         const errorData = await response.json();
         Alert.alert("Error", errorData.error || "Failed to delete all notes");
@@ -142,7 +142,7 @@ const NoteBookScreen = ({ navigation }) => {
       <TouchableOpacity
         style={styles.topicButton}
         onPress={() => {
-          handleNotePress(item.id);
+          handleNotePress(item._id); // ✅ Fix: Use `_id` instead of `id`
         }}
       >
         <LinearGradient
@@ -157,6 +157,7 @@ const NoteBookScreen = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+
 
   return (
     <View style={styles.safeContainer}>

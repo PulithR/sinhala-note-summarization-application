@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: Bearer `${storedToken}`,
+          Authorization: `Bearer ${storedToken}`,
         },
         timeout: 5000,
       });

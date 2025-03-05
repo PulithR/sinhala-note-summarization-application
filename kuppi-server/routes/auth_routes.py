@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.auth_service import signup_user_service, login_user_service, verify_signup_otp_service
-from models.user_model import users_db
+from db import users_collection
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -36,7 +36,7 @@ def login_user():
 @jwt_required()
 def validate_token():
     current_user_email = get_jwt_identity()
-    user = users_db.get(current_user_email)
+    user = users_collection.find_one({"email": current_user_email})
 
     if not user:
         return jsonify({"success": False, "error": "Invalid token or user not found"}), 404
