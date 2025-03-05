@@ -217,7 +217,9 @@ const NoteBookScreen = ({ navigation }) => {
                   )
             }
             numColumns={1}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) =>
+              item.id?.toString() || index.toString()
+            }
             renderItem={RenderTopicItem}
             contentContainerStyle={styles.gridContainer}
             showsVerticalScrollIndicator={true}

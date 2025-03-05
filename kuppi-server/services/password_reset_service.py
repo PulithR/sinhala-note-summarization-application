@@ -103,4 +103,4 @@ def reset_password_service(email, new_password):
     hashed_password = generate_password_hash(new_password)
     users_collection.update_one({"email": email}, {"$set": {"password": hashed_password}})
 
-    return {"success": True, "message": "Password reset successful."}, 200
+    return {"success": True, "message": "Password reset successful."}, 200
