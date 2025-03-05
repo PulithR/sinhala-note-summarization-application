@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from services.password_reset_service import request_password_reset_service, verify_password_reset_otp_service, reset_password_service
 
-pass_reset_bp = Blueprint("pass_reset", _name_)
+pass_reset_bp = Blueprint("pass_reset", __name__)
 
 @pass_reset_bp.route("/request-pass-reset", methods=["POST"])
 def request_password_reset():
