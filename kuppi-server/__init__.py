@@ -5,6 +5,7 @@ from flask_mail import Mail
 from config import Config
 from routes.auth_routes import auth_bp
 from routes.notes_routes import notes_bp
+from routes.ocr_routes import ocr_bp
 from routes.password_reset_routes import pass_reset_bp
 from db import db
 
@@ -21,5 +22,6 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(notes_bp)
     app.register_blueprint(pass_reset_bp)
+    app.register_blueprint(ocr_bp)
 
     return app
