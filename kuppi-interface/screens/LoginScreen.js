@@ -16,7 +16,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
 
-const LoginScreen = ({ setShowSignUp, setShowPasswordReset }) => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -131,7 +131,14 @@ const LoginScreen = ({ setShowSignUp, setShowPasswordReset }) => {
                     </TouchableOpacity>
                   </View>
 
-                  <TouchableOpacity onPress={() => {setShowPasswordReset(true)}}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: "PasswordReset" }],
+                      })
+                    }
+                  >
                     <Text style={styles.forgotPassword}>Forgot Password?</Text>
                   </TouchableOpacity>
 
@@ -154,7 +161,14 @@ const LoginScreen = ({ setShowSignUp, setShowPasswordReset }) => {
 
                   <Text style={styles.signupText}>
                     Don't have an account?{" "}
-                    <TouchableOpacity onPress={() => setShowSignUp(true)}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.reset({
+                          index: 0,
+                          routes: [{ name: "SignUp" }],
+                        })
+                      }
+                    >
                       <Text style={styles.signupLink}>Sign Up</Text>
                     </TouchableOpacity>
                   </Text>

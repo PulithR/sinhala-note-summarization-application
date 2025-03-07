@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import OTPModal from "../components/OTPModal";
 import { AuthContext } from "../authentication/AuthContext";
 
-const PasswordResetScreen = ({ setShowPasswordReset }) => {
+const PasswordResetScreen = ({ navigation }) => {
   const { requestPassReset, passwordReset } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
@@ -68,13 +68,17 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
       if (response?.success) {
         setModalVisible(true);
       } else {
-        setEmailError(response?.error || "Failed to request OTP.");
+        setEmailError((response?.error || "Failed to request OTP."));
+        if (isFirstOTPRequested) {
+          setModalVisible(true);
+        }
       }
     } catch (error) {
       setEmailError("Something went wrong. Please try again.");
     }
     setOtpLoading(false);
   };
+
 
   const validateNewPassword = (text) => {
     setNewPassword(text);
@@ -268,7 +272,7 @@ const PasswordResetScreen = ({ setShowPasswordReset }) => {
                 </Animated.View>
 
                 <TouchableOpacity
-                  onPress={() => setShowPasswordReset(false)}
+                  onPress={() => navigation.navigate("Login")}
                   style={styles.backButton}
                 >
                   <Text style={styles.backButtonText}>Back to Login</Text>

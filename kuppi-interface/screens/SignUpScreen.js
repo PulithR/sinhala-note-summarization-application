@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
 import OTPModal from "../components/OTPModal";
 
-const SignUpScreen = ({ setShowSignUp }) => {
+const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +26,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [otpLoading, setOtpLoading] = useState(false); 
+  const [otpLoading, setOtpLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const { signUp } = useContext(AuthContext);
@@ -57,7 +57,7 @@ const SignUpScreen = ({ setShowSignUp }) => {
       tension: 40,
       useNativeDriver: true,
     }).start();
-    
+
     try {
       if (email && password && confirmPassword) {
         setOtpLoading(true);
@@ -73,6 +73,9 @@ const SignUpScreen = ({ setShowSignUp }) => {
       }
     } catch (error) {
       alert("Error initiating sign-up: " + error.message);
+    } finally {
+      setOtpLoading(false);
+      setModalVisible(false);
     }
   };
 
@@ -229,7 +232,14 @@ const SignUpScreen = ({ setShowSignUp }) => {
 
               <Text style={styles.signupText}>
                 Already have an account?{" "}
-                <TouchableOpacity onPress={() => setShowSignUp(false)}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.reset({
+                      index: 0,
+                      routes: [{ name: "Login" }],
+                    })
+                  }}
+                >
                   <Text style={styles.loginLink}>Log In</Text>
                 </TouchableOpacity>
               </Text>

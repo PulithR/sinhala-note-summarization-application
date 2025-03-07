@@ -16,12 +16,65 @@ import SplashScreen from "./screens/SplashScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import PasswordResetScreen from "./screens/PasswordResetScreen";
 
-const Stack = createStackNavigator();
+
+function AuthStack() {
+  const Stack = createStackNavigator();
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PasswordReset"
+        component={PasswordResetScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function HomeStack() {
+  const Stack = createStackNavigator();
+  return (
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+      />
+      <Stack.Screen name="Summarizer" component={SummarizerScreen} />
+      <Stack.Screen
+        name="GenerateAnswer"
+        component={AnswerGeneratorScreen}
+      />
+      <Stack.Screen
+        name="NoteBookScreen"
+        component={NoteBookScreen}
+      />
+      <Stack.Screen
+        name="ScanDocument"
+        component={ScanDocumentScreen}
+      />
+      <Stack.Screen
+        name="AddNotesScreen"
+        component={AddNotesScreen}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+      />
+    </Stack.Navigator>
+  );
+}
 
 function AppNavigator() {
   const { user, loading } = useContext(AuthContext);
-  const [showSignUp, setShowSignUp] = useState(false);
-  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   if (loading) {
     return <SplashScreen />;
@@ -29,36 +82,11 @@ function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {user ? (
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Summarizer" component={SummarizerScreen} />
-          <Stack.Screen
-            name="GenerateAnswer"
-            component={AnswerGeneratorScreen}
-          />
-          <Stack.Screen name="NoteBookScreen" component={NoteBookScreen} />
-          <Stack.Screen name="ScanDocument" component={ScanDocumentScreen} />
-          <Stack.Screen name="AddNotesScreen" component={AddNotesScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-        </Stack.Navigator>
-      ) : (
-        <>
-          {showSignUp ? (
-            <SignUpScreen setShowSignUp={setShowSignUp} />
-          ) : showPasswordReset ? (
-            <PasswordResetScreen setShowPasswordReset={setShowPasswordReset} />
-          ) : (
-            <LoginScreen
-              setShowSignUp={setShowSignUp}
-              setShowPasswordReset={setShowPasswordReset}
-            />
-          )}
-        </>
-      )}
+      {user ? <HomeStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }
+
 
 export default function App() {
   return (
