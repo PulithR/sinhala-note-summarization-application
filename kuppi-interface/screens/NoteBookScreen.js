@@ -66,7 +66,7 @@ const NoteBookScreen = ({ navigation }) => {
           {
             text: "Open",
             onPress: () => {
-              alert(`${data.note.title} : ${data.note.content}`);
+              navigation.navigate("DisplayScreen", { note: data.note });
             },
           },
           {
