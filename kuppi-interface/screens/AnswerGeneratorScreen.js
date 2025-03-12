@@ -22,10 +22,10 @@ const AnswerGeneratorScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const renderCharacterCount = () => {
-    const maxLength = 200;
+    const maxLength = 3000; 
     const remaining = maxLength - text.length;
     const color =
-      remaining < 20 ? "#e74c3c" : remaining < 50 ? "#f39c12" : "#7f8c8d";
+      remaining < 200 ? "#e74c3c" : remaining < 500 ? "#f39c12" : "#7f8c8d";
 
     return (
       <View style={styles.charCountContainer}>
@@ -95,7 +95,7 @@ const AnswerGeneratorScreen = () => {
                   onChangeText={setText}
                   style={styles.customTextArea}
                   placeholder="Type your question here..."
-                  maxLength={200}
+                  maxLength={3000} 
                 />
                 {renderCharacterCount()}
               </View>
@@ -258,12 +258,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2c3e50",
     marginBottom: 6,
-    textAlign: 'center',
+    textAlign: "center",
   },
   answerDivider: {
-    marginLeft: '24%',
+    marginLeft: "24%",
     height: 2,
-    width: '52%',
+    width: "52%",
     backgroundColor: "#4a90e2",
     borderRadius: 2,
   },
