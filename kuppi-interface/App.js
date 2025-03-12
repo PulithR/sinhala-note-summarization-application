@@ -15,6 +15,7 @@ import SignUpScreen from "./screens/SignUpScreen";
 import SplashScreen from "./screens/SplashScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import PasswordResetScreen from "./screens/PasswordResetScreen";
+import DisplayScreen from "./components/DisplayScreen";
 
 
 function AuthStack() {
@@ -44,30 +45,37 @@ function HomeStack() {
   const Stack = createStackNavigator();
   return (
     <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
+      <Stack.Screen 
+        name="Home" 
+        component={HomeScreen} 
       />
-      <Stack.Screen name="Summarizer" component={SummarizerScreen} />
-      <Stack.Screen
-        name="GenerateAnswer"
-        component={AnswerGeneratorScreen}
+      <Stack.Screen 
+        name="Summarizer"  
+        component={SummarizerScreen} 
       />
-      <Stack.Screen
-        name="NoteBookScreen"
-        component={NoteBookScreen}
+      <Stack.Screen 
+        name="GenerateAnswer" 
+        component={AnswerGeneratorScreen} 
       />
-      <Stack.Screen
-        name="ScanDocument"
-        component={ScanDocumentScreen}
+      <Stack.Screen 
+        name="NoteBookScreen" 
+        component={NoteBookScreen} 
       />
-      <Stack.Screen
-        name="AddNotesScreen"
-        component={AddNotesScreen}
+      <Stack.Screen 
+        name="ScanDocument" 
+        component={ScanDocumentScreen} 
       />
-      <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
+      <Stack.Screen 
+        name="AddNotesScreen" 
+        component={AddNotesScreen} 
+      />
+      <Stack.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+      />
+      <Stack.Screen 
+        name="DisplayScreen" 
+        component={DisplayScreen} 
       />
     </Stack.Navigator>
   );

@@ -1,71 +1,45 @@
-import React, { useEffect, useRef }  from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const DisplayScreen = ({ title, content, onBackPress }) => {
-  // Animation state variables
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  
-  // Run animations on mount
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
-  
+const DisplayScreen = ({ route, navigation }) => {
+  const { note } = route.params;
+
   return (
     <SafeAreaView style={styles.safeContainer}>
-      <Animated.View 
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
-        ]}
-      >
+      <View style={styles.content}>
         {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.mainTopic}>{title}</Text>
+          <Text style={styles.mainTopic}>{note.title}</Text>
         </View>
 
         {/* Main Content */}
         <View style={styles.container}>
           <View style={styles.contentContainer}>
-            {/* Added ScrollView to Handle Long Content */}
+            {/* ScrollView to Handle Long Content */}
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.contentText}>{content}</Text>
+              <Text style={styles.contentText}>{note.content}</Text>
             </ScrollView>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
-            onPress={onBackPress}
+            onPress={() => navigation.goBack()}
           >
             <LinearGradient
-              colors={['#4a90e2', '#357abd']}
+              colors={["#4a90e2", "#357abd"]}
               style={styles.buttonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-                <Text style={styles.buttonText}>Back</Text>
+              <Text style={styles.buttonText}>Back</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   safeContainer: { 
