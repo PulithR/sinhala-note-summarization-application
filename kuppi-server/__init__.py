@@ -7,6 +7,7 @@ from routes.auth_routes import auth_bp
 from routes.notes_routes import notes_bp
 from routes.ocr_routes import ocr_bp
 from routes.password_reset_routes import pass_reset_bp
+from routes.generate_answer_routes import generate_answer_bp
 from db import db
 
 def create_app():
@@ -23,5 +24,6 @@ def create_app():
     app.register_blueprint(notes_bp)
     app.register_blueprint(pass_reset_bp)
     app.register_blueprint(ocr_bp)
+    app.register_blueprint(generate_answer_bp)
 
     return app

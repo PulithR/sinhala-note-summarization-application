@@ -15,3 +15,4 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME') 
     MONGO_URI = os.getenv('MONGO_URI')
     TESSERACT_PATH = os.getenv('TESSERACT_PATH')
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')

@@ -29,14 +29,19 @@ export const AuthProvider = ({ children }) => {
       const storedToken = await AsyncStorage.getItem(STORAGE_KEY);
       if (!storedToken) return setLoading(false);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const response = await fetch(`${BASE_API_URL}/validate-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${storedToken}`,
         },
-        timeout: 5000,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
