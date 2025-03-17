@@ -10,7 +10,7 @@ export default function TextArea({ value, onChangeText }) {
       onChangeText={onChangeText}
       multiline
       numberOfLines={4}
-      maxLength={200}
+      maxLength={3000}
     />
   );
 }
