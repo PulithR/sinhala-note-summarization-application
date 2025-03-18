@@ -1,0 +1,22 @@
+{
+    "light": {
+      "background": ["#d9ebe7", "#CCFBF1", "#A5F3FC"],
+      "text": "#0F172A",
+      "subText": "#334155",
+      "cardBackground": "rgba(244, 203, 203, 0.8)",
+      "toggleBg": ["#F0F9FF", "#DBEAFE"],
+      "toggleText": "#4F46E5",
+      "inputBackground": "rgba(255, 255, 255, 0.9)",
+      "buttonColors": ["#6366F1", "#8B5CF6"]
+    },
+    "dark": {
+      "background": ["#0F172A", "#1E293B", "#334155"],
+      "text": "#F1F5F9",
+      "subText": "#CBD5E1",
+      "cardBackground": "rgba(30, 41, 59, 0.8)",
+      "toggleBg": ["#334155", "#475569"],
+      "toggleText": "#A5B4FC",
+      "inputBackground": "rgba(51, 65, 85, 0.7)", 
+      "buttonColors": ["#6366F1", "#8B5CF6"]
+    }
+  }
