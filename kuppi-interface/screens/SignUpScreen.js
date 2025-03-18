@@ -75,7 +75,7 @@ const SignUpScreen = ({ navigation }) => {
       alert("Error initiating sign-up: " + error.message);
     } finally {
       setOtpLoading(false);
-      setModalVisible(false);
+      // setModalVisible(false);
     }
   };
 
