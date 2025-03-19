@@ -20,7 +20,7 @@ def add_note_service(data):
         "_id": ObjectId(),  
         "title": title,
         "content": content,
-        "created_at": datetime.datetime.utcnow()
+        "created_at": datetime.datetime.now(datetime.UTC)
     }
 
     users_collection.update_one(

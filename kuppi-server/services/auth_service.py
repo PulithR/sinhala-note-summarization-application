@@ -72,6 +72,7 @@ def signup_user_service(email, name, password):
             """
     
     if not send_email(email, subject, content):
+        otp_storage_signup_collection.delete_one({"email": email})
         pending_users_collection.delete_one({"email": email})
         return {"error": "Failed to send OTP. Please try again."}, 500
     
