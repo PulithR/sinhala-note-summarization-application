@@ -7,24 +7,29 @@ import {
   FlatList,
   StyleSheet,
   Alert,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
 import { BASE_API_URL } from '@env';
 import { AuthContext } from "../authentication/AuthContext";
+import { ThemeContext } from '../user_preference/ThemeContext'; // Added ThemeContext
+import { LanguageContext } from '../user_preference/LanguageContext'; // Added LanguageContext
+import { Ionicons } from "@expo/vector-icons";
+import themeColors from '../assets/ThemeColors.json';
 
 const NoteBookScreen = ({ navigation }) => {
-
   const { token } = useContext(AuthContext);
-
+  const { currentTheme, toggleTheme } = useContext(ThemeContext); // Theme context
+  const { t, toggleLanguage } = useContext(LanguageContext); // Language context
   const [searchText, setSearchText] = useState("");
   const [notes, setNotes] = useState([]);
 
-  // Fetch notes every time the screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
       fetchNotes();
-    }, [])
+      StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    }, [currentTheme])
   );
 
   const fetchNotes = async () => {
@@ -42,7 +47,7 @@ const NoteBookScreen = ({ navigation }) => {
         setNotes(data.notes);
       } else {
         const errorData = await response.json();
-        Alert.alert("Error", errorData.error || "Failed to fetch notes");
+        Alert.alert("Error", errorData.error || t.failed_to_fetch_notes || "Failed to fetch notes");
       }
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -61,28 +66,27 @@ const NoteBookScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
-
-        Alert.alert("Note Options", `${data.note.title}`, [
+        Alert.alert(t.note_options || "Note Options", `${data.note.title}`, [
           {
-            text: "Open",
+            text: t.open || "Open",
             onPress: () => {
               navigation.navigate("DisplayScreen", { note: data.note });
             },
           },
           {
-            text: "Delete",
+            text: t.delete || "Delete",
             onPress: () => {
               handleDeleteNote(noteId);
             },
           },
           {
-            text: "Cancel",
+            text: t.cancel || "Cancel",
             style: "cancel",
           },
         ]);
       } else {
         const errorData = await response.json();
-        Alert.alert("Error", errorData.error || "Failed to fetch note");
+        Alert.alert("Error", errorData.error || t.failed_to_fetch_note || "Failed to fetch note");
       }
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -100,11 +104,11 @@ const NoteBookScreen = ({ navigation }) => {
       });
 
       if (response.ok) {
-        Alert.alert("Success", "Note deleted successfully!");
+        Alert.alert(t.success || "Success", t.note_deleted || "Note deleted successfully!");
         fetchNotes();
       } else {
         const errorData = await response.json();
-        Alert.alert("Error", errorData.error || "Failed to delete note");
+        Alert.alert("Error", errorData.error || t.failed_to_delete_note || "Failed to delete note");
       }
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -113,7 +117,7 @@ const NoteBookScreen = ({ navigation }) => {
 
   const handleDeleteAll = async () => {
     if (!notes || notes.length === 0) {
-      alert("No Notes to Delete");
+      Alert.alert(t.no_notes_to_delete || "No Notes to Delete");
       return;
     }
     try {
@@ -126,105 +130,131 @@ const NoteBookScreen = ({ navigation }) => {
       });
 
       if (response.ok) {
-        Alert.alert("Success", "All notes deleted successfully!");
+        Alert.alert(t.success || "Success", t.all_notes_deleted || "All notes deleted successfully!");
         fetchNotes();
       } else {
         const errorData = await response.json();
-        Alert.alert("Error", errorData.error || "Failed to delete all notes");
+        Alert.alert("Error", errorData.error || t.failed_to_delete_all || "Failed to delete all notes");
       }
     } catch (error) {
       Alert.alert("Error", error.message);
     }
   };
 
-  const RenderTopicItem = ({ item }) => {
+  const RenderNoteItem = ({ item }) => {
     return (
       <TouchableOpacity
-        style={styles.topicButton}
-        onPress={() => {
-          handleNotePress(item._id); // ✅ Fix: Use `_id` instead of `id`
-        }}
+        style={styles.noteContainer}
+        onPress={() => handleNotePress(item._id)}
       >
-        <LinearGradient
-          colors={["#ffffff", "#f8f9fa"]}
-          style={styles.topicGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Text style={styles.topicText}>{item.title}</Text>
-          <Text style={styles.topicDescription}>{item.description}</Text>
-        </LinearGradient>
+        <View style={styles.blurContainer}>
+          <Text style={[styles.noteTitle, { color: themeColors[currentTheme].text }]}>
+            {item.title}
+          </Text>
+          <Text style={[styles.noteDescription, { color: themeColors[currentTheme].subText }]}>
+            {item.description}
+          </Text>
+        </View>
       </TouchableOpacity>
     );
   };
 
-
   return (
-    <View style={styles.safeContainer}>
-      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={themeColors[currentTheme].background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
         <View style={styles.content}>
-          {!searchText && <Text style={styles.mainTopic}>Your Notes</Text>}
+          <View style={styles.header}>
+            <Text style={[styles.sectionTitle, { color: themeColors[currentTheme].text }]}>
+              {t.your_notes || "Your Notes"}
+            </Text>
+          </View>
 
-          {/* Search Bar */}
           <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.search}
-              placeholder="Search topics..."
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholderTextColor="#7f8c8d"
-            />
+            <View style={[styles.searchBar, { backgroundColor: themeColors[currentTheme].cardBg }]}>
+              <Ionicons
+                name="search"
+                size={20}
+                color={themeColors[currentTheme].subText}
+                style={styles.searchIcon}
+              />
+              <TextInput
+                style={[styles.searchInput, { color: themeColors[currentTheme].text }]}
+                placeholder={t.search_notes || "Search notes..."}
+                placeholderTextColor={themeColors[currentTheme].subText}
+                value={searchText}
+                onChangeText={setSearchText}
+              />
+            </View>
           </View>
-          {/*create new note button */}
+
           {!searchText && (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("AddNotesScreen");
-              }}
-            >
-              <LinearGradient
-                colors={["#4a90e2", "#357abd"]}
-                style={styles.addGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+            <View style={styles.createButtonContainer}>
+              <TouchableOpacity
+                style={styles.createButton}
+                onPress={() => navigation.navigate("AddNotesScreen")}
               >
-                <Text style={[styles.addButtonText]}>+</Text>
-                <Text style={[styles.addButtonDescription]}>
-                  Create New Note
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
-          {/* Recent Notes */}
-          <View style={styles.row}>
-            {searchText ? (
-              <Text style={styles.subtitle}>Filtered Notes</Text>
-            ) : (
-              <Text style={styles.subtitle}>Recent Notes</Text>
-            )}
-            {notes.length > 0 && (
-              <TouchableOpacity onPress={handleDeleteAll}>
-                <Text style={styles.deleteAll}>Delete All</Text>
+                <LinearGradient
+                  colors={['#10B981', '#059669']}
+                  style={styles.createButtonGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.createButtonContent}>
+                    <Text style={styles.createButtonIcon}>+</Text>
+                    <Text style={styles.createButtonText}>
+                      {t.create_new_note || "Create New Note"}
+                    </Text>
+                  </View>
+                </LinearGradient>
               </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.notesSection}>
+            <View style={styles.notesHeader}>
+              <Text style={[styles.notesHeaderText, { color: themeColors[currentTheme].text }]}>
+                {searchText ? (t.filtered_notes || "Filtered Notes") : (t.recent_notes || "Recent Notes")}
+              </Text>
+              {notes.length > 0 && (
+                <TouchableOpacity onPress={handleDeleteAll}>
+                  <Text style={styles.deleteText}>{t.delete_all || "Delete All"}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {notes.length === 0 ? (
+              <View style={styles.emptyNotesContainer}>
+                <Ionicons
+                  name="document-text-outline"
+                  size={50}
+                  color={themeColors[currentTheme].subText}
+                />
+                <Text style={[styles.emptyNotesText, { color: themeColors[currentTheme].subText }]}>
+                  {t.no_notes_yet || "No notes yet. Create your first note!"}
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={
+                  !searchText
+                    ? notes
+                    : notes.filter((note) =>
+                        note.title.toLowerCase().includes(searchText.toLowerCase())
+                      )
+                }
+                keyExtractor={(item, index) => item._id?.toString() || index.toString()}
+                renderItem={RenderNoteItem}
+                contentContainerStyle={styles.notesList}
+                showsVerticalScrollIndicator={false}
+              />
             )}
           </View>
-          {/* Topics Grid */}
-          <FlatList
-            data={
-              !searchText
-                ? notes
-                : notes.filter((note) =>
-                    note.title.toLowerCase().includes(searchText.toLowerCase())
-                  )
-            }
-            numColumns={1}
-            keyExtractor={(item, index) =>
-              item.id?.toString() || index.toString()
-            }
-            renderItem={RenderTopicItem}
-            contentContainerStyle={styles.gridContainer}
-            showsVerticalScrollIndicator={true}
-          />
         </View>
       </LinearGradient>
     </View>
@@ -232,104 +262,135 @@ const NoteBookScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safeContainer: {
+  container: {
     flex: 1,
   },
-  gradient: {
+  background: {
     flex: 1,
   },
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 100,
   },
-  mainTopic: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#2c3e50",
-    marginTop: 40,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
   },
   searchContainer: {
-    marginBottom: 20,
-    shadowColor: "#000",
+    marginVertical: 16,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
   },
-  search: {
-    height: 50,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingHorizontal: 20,
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
     fontSize: 16,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  createButtonContainer: {
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    borderRadius: 18,
+    overflow: 'hidden',
   },
-  subtitle: {
-    marginTop: 20,
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
+  createButton: {
+    height: 100,
+    borderRadius: 18,
+    overflow: 'hidden',
   },
-  deleteAll: {
-    marginTop: 20,
+  createButtonGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  createButtonContent: {
+    alignItems: 'center',
+  },
+  createButtonIcon: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  createButtonText: {
     fontSize: 16,
-    color: "#e33b44",
-    fontWeight: "800",
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  gridContainer: {
+  notesSection: {
+    flex: 1,
+  },
+  notesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  notesHeaderText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  deleteText: {
+    fontSize: 16,
+    color: '#EC4899',
+    fontWeight: 'bold',
+  },
+  notesList: {
     paddingBottom: 20,
   },
-  topicButton: {
-    flex: 1,
-    margin: 8,
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  noteContainer: {
+    marginBottom: 16,
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  topicGradient: {
+  blurContainer: {
     padding: 20,
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
+    minHeight: 100,
+    alignItems: 'center',
   },
-  addGradient: {
-    padding: 20,
-    height: 120,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  topicText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
+  noteTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 8,
   },
-  topicDescription: {
+  noteDescription: {
     fontSize: 14,
-    color: "#7f8c8d",
-    textAlign: "center",
+    opacity: 0.8,
   },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 24,
+  emptyNotesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
   },
-  addButtonDescription: {
-    color: "#fff",
-    opacity: 0.9,
+  emptyNotesText: {
     fontSize: 16,
-    paddingBottom: 16,
+    marginTop: 16,
+    textAlign: 'center',
   },
 });
 
