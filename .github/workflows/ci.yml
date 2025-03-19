@@ -21,6 +21,7 @@ jobs:
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r kuppi-server/requirements.txt
+          pip install pytest
       - name: Run Tests
         run: |
           source venv/bin/activate
