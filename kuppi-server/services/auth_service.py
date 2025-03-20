@@ -23,60 +23,71 @@ def signup_user_service(email, name, password):
     
     otp = generate_otp()
     
-    otp_storage_signup_collection.update_one(
-        {"email": email},
-        {"$set": {"otp": otp, "timestamp": datetime.datetime.now(), "attempts": 0}},
-        upsert=True
-    )
-    
-    pending_users_collection.update_one(
-        {"email": email},
-        {"$set": {"email": email, "name": name, "password": generate_password_hash(password)}},
-        upsert=True
-    )
-    
-    subject = "Your OTP for Kuppi Registration"
-    content = f"""
-            <div style="max-width: 600px; margin: 40px auto; padding: 25px 20px; 
-            border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-            background-color: #000000; text-align: center; font-family: Arial, sans-serif; border: 2px solid #ffffff;" >
+    try:
+        # Store OTP data in the OTP storage collection
+        otp_storage_signup_collection.update_one(
+            {"email": email},
+            {"$set": {"otp": otp, "timestamp": datetime.datetime.now(), "attempts": 0}},
+            upsert=True
+        )
+        
+        # Store pending user data
+        pending_users_collection.update_one(
+            {"email": email},
+            {"$set": {"email": email, "name": name, "password": generate_password_hash(password)}},
+            upsert=True
+        )
+        
+        # Prepare the email content
+        subject = "Your OTP for Kuppi Registration"
+        content = f"""
+                <div style="max-width: 600px; margin: 40px auto; padding: 25px 20px; 
+                border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+                background-color: #000000; text-align: center; font-family: Arial, sans-serif; border: 2px solid #ffffff;" >
 
-                <h1 style="background-color: #2581eb; color: #ffffff; 
-                        padding: 20px; border-radius: 12px; 
-                        margin: 20px 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-                        font-size: 24px; font-weight: bold;">
-                    Hello from Kuppi
-                </h1>
+                    <h1 style="background-color: #2581eb; color: #ffffff; 
+                            padding: 20px; border-radius: 12px; 
+                            margin: 20px 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+                            font-size: 24px; font-weight: bold;">
+                        Hello from Kuppi
+                    </h1>
 
-                <p style="font-size: 20px; font-weight: 600; color: #ffffff; margin-bottom: 40px;">
-                    Use the OTP below to complete your registration.
-                </p>
+                    <p style="font-size: 20px; font-weight: 600; color: #ffffff; margin-bottom: 40px;">
+                        Use the OTP below to complete your registration.
+                    </p>
 
-                <div style="display: inline-block; background-color: #f4f4f4; 
-                            padding: 15px 30px; border-radius: 12px; 
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-                            font-size: 32px; font-weight: bold; color: #2c3e50; margin: 20px 0;">
-                    {otp}
+                    <div style="display: inline-block; background-color: #f4f4f4; 
+                                padding: 15px 30px; border-radius: 12px; 
+                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+                                font-size: 32px; font-weight: bold; color: #2c3e50; margin: 20px 0;">
+                        {otp}
+                    </div>
+
+                    <p style="font-size: 16px; color: #cfdadb; margin-top: 20px;">
+                        This OTP will expire in <strong>10 minutes</strong>.
+                    </p>
+
+                    <hr style="border: none; border-top: 1px solid #444;">
+
+                    <p style="font-size: 14px; color: #cfdadb;">
+                        If you did not request this OTP, please ignore this email.
+                    </p>
                 </div>
-
-                <p style="font-size: 16px; color: #cfdadb; margin-top: 20px;">
-                    This OTP will expire in <strong>10 minutes</strong>.
-                </p>
-
-                <hr style="border: none; border-top: 1px solid #444;">
-
-                <p style="font-size: 14px; color: #cfdadb;">
-                    If you did not request this OTP, please ignore this email.
-                </p>
-            </div>
-            """
-    
-    if not send_email(email, subject, content):
+                """
+        
+        # Send the OTP email
+        if not send_email(email, subject, content):
+            # Clean up if email sending fails
+            otp_storage_signup_collection.delete_one({"email": email})
+            pending_users_collection.delete_one({"email": email})
+            return {"error": "Failed to send OTP. Please try again."}, 500
+        
+        return {"success": True, "message": "OTP sent to your email. Please verify to complete registration."}, 200
+    except Exception as e:
+        # Cleanup in case of any other errors
         otp_storage_signup_collection.delete_one({"email": email})
         pending_users_collection.delete_one({"email": email})
-        return {"error": "Failed to send OTP. Please try again."}, 500
-    
-    return {"success": True, "message": "OTP sent to your email. Please verify to complete registration."}, 200
+        return {"error": f"An error occurred: {str(e)}"}, 500
 
 
 def verify_signup_otp_service(email, otp):
@@ -112,6 +123,7 @@ def verify_signup_otp_service(email, otp):
     token = create_access_token(identity=email, expires_delta=datetime.timedelta(days=10))
     
     return {"success": True, "token": token, "user": {"email": email, "name": user_data["name"]}}, 201
+
 
 def login_user_service(email, password):
     if not email or not password:
