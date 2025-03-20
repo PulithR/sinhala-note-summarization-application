@@ -22,10 +22,6 @@ jobs:
         run: |
           docker run -d --name mongodb -p 27017:27017 mongo:latest
 
-      - name: Wait for MongoDB to be ready
-        run: |
-          docker exec mongodb mongo --eval "db.runCommand({ connectionStatus: 1 })"
-
       - name: Set Environment Variables
         run: |
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
@@ -41,16 +37,8 @@ jobs:
           pip install -r kuppi-server/requirements.txt
           pip install pytest
 
-      - name: Cache Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: venv
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
-
       - name: Run Tests
         run: |
           source venv/bin/activate
           export PYTHONPATH=$PYTHONPATH:$(pwd)/kuppi-server
-          pytest --maxfail=1 --disable-warnings -v kuppi-server/tests/
+          pytest kuppi-server/tests/
