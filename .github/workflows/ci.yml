@@ -26,10 +26,14 @@ jobs:
           pip install -r kuppi-server/requirements.txt
           pip install pytest
 
-      - name: Set Environment Variables (if using secrets)
-        run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+      - name: Set Environment Variables
+        run: |
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+          echo "FLASK_ENV=testing" >> $GITHUB_ENV  # Optional: Set testing mode
 
       - name: Run Tests
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}  # Ensure secrets are loaded in test runtime
         run: |
           source venv/bin/activate
           export PYTHONPATH=$PYTHONPATH:$(pwd)/kuppi-server
