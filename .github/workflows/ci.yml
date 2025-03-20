@@ -24,7 +24,7 @@ jobs:
           pip install pytest
       - name: Run Tests
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PYTHONPATH: ${{ github.workspace }}/kuppi-server
         run: |
           source venv/bin/activate
           pytest kuppi-server/tests/
