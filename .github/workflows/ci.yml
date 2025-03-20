@@ -18,6 +18,17 @@ jobs:
         with:
           python-version: "3.9"
 
+      - name: Start MongoDB
+        run: |
+          docker run -d --name mongodb -p 27017:27017 mongo:latest
+
+      - name: Set Environment Variables
+        run: |
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+          echo "JWT_SECRET_KEY=supersecretkey" >> $GITHUB_ENV
+          echo "FLASK_ENV=testing" >> $GITHUB_ENV
+          echo "MONGO_URI=mongodb://localhost:27017/testdb" >> $GITHUB_ENV
+
       - name: Install Dependencies
         run: |
           python -m venv venv
@@ -26,14 +37,7 @@ jobs:
           pip install -r kuppi-server/requirements.txt
           pip install pytest
 
-      - name: Set Environment Variables
-        run: |
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
-          echo "FLASK_ENV=testing" >> $GITHUB_ENV  # Optional: Set testing mode
-
       - name: Run Tests
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}  # Ensure secrets are loaded in test runtime
         run: |
           source venv/bin/activate
           export PYTHONPATH=$PYTHONPATH:$(pwd)/kuppi-server
