@@ -22,9 +22,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r kuppi-server/requirements.txt
           pip install pytest
-          
       - name: Run Tests
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           source venv/bin/activate
-          export PYTHONPATH=$PYTHONPATH:$(pwd)/kuppi-server
           pytest kuppi-server/tests/
