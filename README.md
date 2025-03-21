@@ -78,7 +78,7 @@
     <tr>
       <td>R.M.P.I.P.S.Rajanayake</td>
       <td>Role 1</td>
-      <td><img src="path/to/linuka_photo.png" alt="Linuka" width="50"></td>
+      <td><img src="path/to/linuka_photo.png" alt="Member 1" width="50"></td>
       <td><a href="YOUR_LINUKA_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
       <td><a href="pulith.20230870@iit.ac.lk">pulith.20230870@iit.ac.lk</a></td>
     </tr>
