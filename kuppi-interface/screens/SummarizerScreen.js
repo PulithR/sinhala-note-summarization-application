@@ -75,13 +75,17 @@ const SummarizerScreen = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify({ 
+          content: text,
+          percentage: percentage, // New: Add percentage parameter
+          style: style // New: Add style parameter
+        }),
       });
-
+  
       if (!response.ok) {
         throw new Error(t.errorFetchSummary || "Failed to fetch summary");
       }
-
+  
       const data = await response.json();
       setSummary(data.summary);
     } catch (error) {
