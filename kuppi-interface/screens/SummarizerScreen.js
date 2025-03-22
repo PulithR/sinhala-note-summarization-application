@@ -23,11 +23,11 @@ const SummarizerScreen = () => {
   const { t } = useContext(LanguageContext);
   const { currentTheme } = useContext(ThemeContext);
   
-  const [text, setText] = useState(""); // Used in TextArea and fetch body
+  const [text, setText] = useState("");
   const [summary, setSummary] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Used in button and ActivityIndicator
-  const [percentage, setPercentage] = useState(50); // Used in options and fetch body
-  const [style, setStyle] = useState("casual"); // Used in options and fetch body
+  const [isLoading, setIsLoading] = useState(false);
+  const [percentage, setPercentage] = useState(50); // Default: 50%
+  const [style, setStyle] = useState("casual"); // Default: casual
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -49,7 +49,7 @@ const SummarizerScreen = () => {
     ]).start();
   }, []);
 
-  const handlePressIn = () => { // Used in TouchableOpacity
+  const handlePressIn = () => {
     Animated.spring(buttonScale, {
       toValue: 0.97,
       useNativeDriver: true,
@@ -77,15 +77,15 @@ const SummarizerScreen = () => {
         },
         body: JSON.stringify({ 
           content: text,
-          percentage: percentage, // New: Add percentage parameter
-          style: style // New: Add style parameter
+          percentage: percentage,
+          style: style
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(t.errorFetchSummary || "Failed to fetch summary");
       }
-  
+
       const data = await response.json();
       setSummary(data.summary);
     } catch (error) {
@@ -95,7 +95,7 @@ const SummarizerScreen = () => {
     }
   };
 
-  const renderCharacterCount = () => { // Used in TextArea
+  const renderCharacterCount = () => {
     const maxLength = 5000;
     const remaining = maxLength - text.length;
     const color = remaining < 500 ? '#ef4444' : remaining < 1000 ? '#f59e0b' : themeColors[currentTheme].subText;
@@ -107,8 +107,7 @@ const SummarizerScreen = () => {
     );
   };
 
-  // Define the option components within the main component
-  const PercentageOption = ({ value }) => ( // Used in options container
+  const PercentageOption = ({ value }) => (
     <TouchableOpacity
       style={[
         styles.optionButton,
@@ -127,7 +126,7 @@ const SummarizerScreen = () => {
     </TouchableOpacity>
   );
 
-  const StyleOption = ({ value, label }) => ( // Used in options container
+  const StyleOption = ({ value, label }) => (
     <TouchableOpacity
       style={[
         styles.optionButton,
@@ -203,7 +202,6 @@ const SummarizerScreen = () => {
               </BlurView>
             </View>
 
-            {/* Add the options container here */}
             <View style={styles.optionsContainer}>
               <View style={styles.optionSection}>
                 <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
@@ -347,43 +345,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 14,
   },
-  buttonContainer: {
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  buttonGradient: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  summaryContainer: {
-    marginBottom: 20,
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  summaryLabel: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  summaryText: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
   optionsContainer: {
     marginBottom: 20,
   },
@@ -419,11 +380,48 @@ const styles = StyleSheet.create({
   optionTextSelected: {
     color: '#FFFFFF',
   },
+  buttonContainer: {
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  summaryContainer: {
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  summaryLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
   summaryInfo: {
     fontSize: 14,
     marginBottom: 12,
     textAlign: 'center',
     opacity: 0.8,
+  },
+  summaryText: {
+    fontSize: 16,
+    lineHeight: 24,
   },
 });
 
