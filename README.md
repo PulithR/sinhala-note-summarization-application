@@ -1,7 +1,7 @@
 <h1 align="center"> Kuppi</h1>
 
 <p align="center">
-  <img src="path/to/your/project_icon.png" alt="Kuppi Project Icon" width="150">
+  <img src="landing-page\public\img\kuppi-icon.png" alt="Kuppi Project Icon" width="150">
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@
 
 <p>
   <strong>Home Page</strong><br>
-  <img src="path/to/your/home_page_screenshot.png" alt="Home Page Screenshot" width="400">
+  <img src="landing-page\public\img\home.jpg" alt="Home Page Screenshot" width="230">
 </p>
 
 <p>
@@ -77,59 +77,59 @@
   <tbody>
     <tr>
       <td>R.M.P.I.P.S.Rajanayake</td>
-      <td>Role 1</td>
-      <td><img src="path/to/linuka_photo.png" alt="Member 1" width="50"></td>
-      <td><a href="YOUR_LINUKA_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
-      <td><a href="pulith.20230870@iit.ac.lk">pulith.20230870@iit.ac.lk</a></td>
+      <td>Team Leader</td>
+      <td><img src="landing-page\public\img\team\pulith.jpg" alt="Member 1" width="50"></td>
+      <td><a href="https://www.linkedin.com/in/pulithr/" target="_blank">LinkedIn</a></td>
+      <td><a href="mailto:pulith.20230870@iit.ac.lk">pulith.20230870@iit.ac.lk</a></td>
     </tr>
     <tr>
       <td>D.G.P.S.Gamage</td>
-      <td>Role 2</td>
-      <td><img src="path/to/member2_photo.png" alt="Member 2" width="50"></td>
-      <td><a href="YOUR_MEMBER2_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
-      <td><a href="mailto:member2@example.com">member2@example.com</a></td>
+      <td>Frontend Developer</td>
+      <td><img src="landing-page\public\img\team\sandeepa.jpg" alt="Member 2" width="50"></td>
+      <td><a href="#" target="_blank">LinkedIn</a></td>
+      <td><a href="mailto:pemitha.20232542@iit.ac.lk">pemitha.20232542@iit.ac.lk</a></td>
     </tr>
         <tr>
       <td>Sandev Anusara Hettiarachchi</td>
-      <td>Role 3</td>
-      <td><img src="path/to/member3_photo.png" alt="Member 3" width="50"></td>
-      <td><a href="YOUR_MEMBER3_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
-      <td><a href="mailto:member3@example.com">member3@example.com</a></td>
+      <td>Lead Developer</td>
+      <td><img src="landing-page\public\img\team\sandev.jpg" alt="Member 3" width="50"></td>
+      <td><a href="https://www.linkedin.com/in/sandev-hettiarachchi-3637972b3/" target="_blank">LinkedIn</a></td>
+      <td><a href="mailto:sandev.20232680@iit.ac.lk">sandev.20232680@iit.ac.lk</a></td>
     </tr>
         <tr>
       <td>Y.A.S.C.Yapa</td>
-      <td>Role 4</td>
-      <td><img src="path/to/member4_photo.png" alt="Member 4" width="50"></td>
-      <td><a href="YOUR_MEMBER4_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
-      <td><a href="mailto:member4@example.com">mailto:member4@example.com</a></td>
+      <td>Backend Developer</td>
+      <td><img src="landing-page\public\img\team\semal.jpg" alt="Member 4" width="50"></td>
+      <td><a href="https://www.linkedin.com/in/semal-chandeepa-120266310/" target="_blank">LinkedIn</a></td>
+      <td><a href="mailto:semal.20232872@iit.ac.lk">semal.20232872@iit.ac.lk</a></td>
     </tr>
         <tr>
       <td>Reshan Silva</td>
-      <td>Role 5</td>
-      <td><img src="path/to/member5_photo.png" alt="Member 5" width="50"></td>
-      <td><a href="YOUR_MEMBER5_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
-      <td><a href="mailto:member5@example.com">member5@example.com</a></td>
+      <td>Frontend Developer</td>
+      <td><img src="landing-page\public\img\team\reshan.jpg" alt="Member 5" width="50"></td>
+      <td><a href="https://www.linkedin.com/in/reshan-silva-08b53034b/" target="_blank">LinkedIn</a></td>
+      <td><a href="mailto:reshan.20232809@iit.ac.lk">reshan.20232809@iit.ac.lk</a></td>
     </tr>
         <tr>
       <td>Sandaru Malshan</td>
-      <td>Role 6</td>
-      <td><img src="path/to/member6_photo.png" alt="Member 6" width="50"></td>
-      <td><a href="YOUR_MEMBER6_LINKEDIN_URL" target="_blank">LinkedIn</a></td>
-      <td><a href="Sandaru.20230184@iit.ac.lk">Sandaru.20230184@iit.ac.lk</a></td>
+      <td>Backend Developer</td>
+      <td><img src="landing-page\public\img\team\sandaru.jpg" alt="Member 6" width="50"></td>
+      <td><a href="https://www.linkedin.com/in/sandaru-malshan-b20a3b2b2/" target="_blank">LinkedIn</a></td>
+      <td><a href="mailto:sandaru.20230184@iit.ac.lk">sandaru.20230184@iit.ac.lk</a></td>
     </tr>
   </tbody>
 </table>
 
-<h2>⭐️ Support Our Project</h2>
+<h2>⭐ Support Our Project</h2>
 
 <p>
   Love Kuppi? Give us a star on GitHub to help us grow! Your support means the world to us.
 </p>
 
 <p align="center">
-  Show some ❤️ by starring this awesome repository!
+  Show some ❤ by starring this awesome repository!
   <br>
   <a href="https://github.com/PulithR/sinhala-note-summarization-application/stargazers" target="_blank">
     <img src="https://img.shields.io/github/stars/PulithR/sinhala-note-summarization-applicationE?style=social" alt="GitHub Stars">
-  </a>
+  </a>
 </p>
