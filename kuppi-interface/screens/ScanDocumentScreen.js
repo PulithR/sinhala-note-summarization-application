@@ -7,33 +7,46 @@ import {
   StyleSheet,
   ActivityIndicator,
   StatusBar,
+  Modal,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { LanguageContext } from '../user_preference/LanguageContext';
-import { ThemeContext } from '../user_preference/ThemeContext';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
-import themeColors from '../assets/ThemeColors.json';
+import { LanguageContext } from "../user_preference/LanguageContext";
+import { ThemeContext } from "../user_preference/ThemeContext";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
+import themeColors from "../assets/ThemeColors.json";
 import { Ionicons } from "@expo/vector-icons";
+import { BASE_API_URL } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ScanDocumentScreen = () => {
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [extractedText, setExtractedText] = useState("");
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("extract");
+  const [processedResult, setProcessedResult] = useState("");
+  const [processingOption, setProcessingOption] = useState(false);
 
   const { t } = useContext(LanguageContext);
   const { currentTheme } = useContext(ThemeContext);
 
   const buttonColors = {
     camera: themeColors[currentTheme].buttonColors,
-    gallery: ['#F59E0B', '#EA580C'],
-    retake: ['#EC4899', '#F43F5E'],
+    gallery: ["#F59E0B", "#EA580C"],
+    retake: ["#EC4899", "#F43F5E"],
     submit: themeColors[currentTheme].buttonColors,
+    summarize: ["#3B82F6", "#2563EB"],
+    generate: ["#10B981", "#059669"],
   };
 
   useEffect(() => {
-    StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    StatusBar.setBarStyle(
+      currentTheme === "light" ? "dark-content" : "light-content"
+    );
     (async () => {
       await ImagePicker.getMediaLibraryPermissionsAsync();
     })();
@@ -71,9 +84,12 @@ const ScanDocumentScreen = () => {
       const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
 
       if (status !== "granted") {
-        const { status: newStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status: newStatus } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (newStatus !== "granted") {
-          alert(t.gallery_permission_required || "Gallery permission is required.");
+          alert(
+            t.gallery_permission_required || "Gallery permission is required."
+          );
           setLoading(false);
           return;
         }
@@ -120,7 +136,8 @@ const ScanDocumentScreen = () => {
       });
 
       const data = await response.json();
-      alert((t.extracted_text || "Extracted Text") + ": " + data.text);
+      setExtractedText(data.text);
+      setShowResultModal(true);
     } catch (error) {
       console.error("Error uploading image:", error);
       alert(t.failed_to_process || "Failed to process image.");
@@ -129,24 +146,84 @@ const ScanDocumentScreen = () => {
     }
   };
 
+  const handleProcessText = async () => {
+    if (!extractedText) return;
+
+    try {
+      setProcessingOption(true);
+      const token = await AsyncStorage.getItem("userToken");
+
+      if (selectedOption === "summarize") {
+        try {
+          const response = await fetch(`${BASE_API_URL}/generate-summary`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ content: extractedText }),
+          });
+
+          if (!response.ok) {
+            throw new Error(t.errorFetchSummary || "Failed to fetch summary");
+          }
+
+          const data = await response.json();
+          setProcessedResult(data.summary);
+        } catch (error) {
+          alert(error.message);
+        }
+      } else if (selectedOption === "generate") {
+        try {
+          const response = await fetch(`${BASE_API_URL}/generate-answer`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ question: extractedText }),
+          });
+
+          if (!response.ok) {
+            throw new Error(t.errorFetchAnswer || "Failed to fetch answer");
+          }
+
+          const data = await response.json();
+          setProcessedResult(data.answer);
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+    } catch (error) {
+      console.error("Error processing text:", error);
+      alert(t.failed_to_process || "Failed to process text.");
+    } finally {
+      setProcessingOption(false);
+    }
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       setPhoto(null);
       setLoading(false);
+      setExtractedText("");
+      setShowResultModal(false);
+      setSelectedOption("extract");
+      setProcessedResult("");
     }, [])
   );
 
-  const renderButton = (icon, title, action, colorScheme) => (
-    <View style={styles.buttonContainer}>
+  const renderButton = (icon, title, action, colorScheme, disabled = false) => (
+    <View style={[styles.buttonContainer, disabled && { opacity: 0.7 }]}>
       <TouchableOpacity
         style={styles.button}
         onPress={action}
         activeOpacity={0.9}
-        disabled={loading}
+        disabled={loading || disabled}
       >
-        <BlurView 
-          intensity={currentTheme === 'light' ? 50 : 30} 
-          tint={currentTheme === 'light' ? 'light' : 'dark'} 
+        <BlurView
+          intensity={currentTheme === "light" ? 50 : 30}
+          tint={currentTheme === "light" ? "light" : "dark"}
           style={styles.blurContainer}
         >
           <View style={styles.iconContainer}>
@@ -160,11 +237,52 @@ const ScanDocumentScreen = () => {
             </LinearGradient>
           </View>
           <View style={styles.buttonTextContainer}>
-            <Text style={[styles.buttonTitle, {color: themeColors[currentTheme].text}]}>{title}</Text>
+            <Text
+              style={[
+                styles.buttonTitle,
+                { color: themeColors[currentTheme].text },
+              ]}
+            >
+              {title}
+            </Text>
           </View>
         </BlurView>
       </TouchableOpacity>
     </View>
+  );
+
+  const renderOptionButton = (option, icon, title, colorScheme) => (
+    <TouchableOpacity
+      style={[
+        styles.optionButton,
+        selectedOption === option && {
+          borderColor: colorScheme[0],
+          borderWidth: 2,
+        },
+      ]}
+      onPress={() => setSelectedOption(option)}
+      disabled={processingOption}
+    >
+      <LinearGradient
+        colors={
+          selectedOption === option ? colorScheme : ["#64748B", "#475569"]
+        }
+        style={styles.optionGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <MaterialIcons name={icon} size={20} color="#FFFFFF" />
+      </LinearGradient>
+      <Text
+        style={[
+          styles.optionText,
+          { color: themeColors[currentTheme].text },
+          selectedOption === option && { fontWeight: "bold" },
+        ]}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -175,11 +293,18 @@ const ScanDocumentScreen = () => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
-        
+        <StatusBar
+          barStyle={currentTheme === "light" ? "dark-content" : "light-content"}
+        />
+
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={[styles.screenTitle, {color: themeColors[currentTheme].text}]}>
+            <Text
+              style={[
+                styles.screenTitle,
+                { color: themeColors[currentTheme].text },
+              ]}
+            >
               {t.scan_document || "Scan Document"}
             </Text>
           </View>
@@ -187,15 +312,15 @@ const ScanDocumentScreen = () => {
           {photo ? (
             <View style={styles.previewContainer}>
               <View style={styles.imageWrapper}>
-                <BlurView 
-                  intensity={currentTheme === 'light' ? 50 : 30} 
-                  tint={currentTheme === 'light' ? 'light' : 'dark'} 
+                <BlurView
+                  intensity={currentTheme === "light" ? 50 : 30}
+                  tint={currentTheme === "light" ? "light" : "dark"}
                   style={styles.blurImageContainer}
                 >
                   <Image source={{ uri: photo }} style={styles.preview} />
                 </BlurView>
               </View>
-              
+
               <View style={styles.buttonsRow}>
                 {renderButton(
                   "upload",
@@ -214,16 +339,21 @@ const ScanDocumentScreen = () => {
           ) : (
             <View style={styles.optionsContainer}>
               <View style={styles.iconWrapper}>
-                <Ionicons 
-                  name="document-text-outline" 
-                  size={80} 
-                  color={themeColors[currentTheme].text} 
+                <Ionicons
+                  name="document-text-outline"
+                  size={80}
+                  color={themeColors[currentTheme].text}
                 />
               </View>
-              <Text style={[styles.instructionText, {color: themeColors[currentTheme].subText}]}>
+              <Text
+                style={[
+                  styles.instructionText,
+                  { color: themeColors[currentTheme].subText },
+                ]}
+              >
                 {t.scan_instruction || "Capture or select a document to scan"}
               </Text>
-              
+
               <View style={styles.buttonsRow}>
                 {renderButton(
                   "photo-camera",
@@ -231,7 +361,7 @@ const ScanDocumentScreen = () => {
                   openCamera,
                   buttonColors.camera
                 )}
-                
+
                 {renderButton(
                   "photo-library",
                   t.pick_from_gallery || "Pick from Gallery",
@@ -243,18 +373,172 @@ const ScanDocumentScreen = () => {
           )}
         </View>
 
+        {/* Result Modal */}
+        <Modal
+          visible={showResultModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowResultModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View
+              style={[
+                styles.modalContainer,
+                {
+                  backgroundColor:
+                    currentTheme === "light"
+                      ? "rgba(255, 255, 255, 0.95)"
+                      : "rgba(30, 30, 30, 0.95)",
+                },
+              ]}
+            >
+              <View style={styles.modalHeader}>
+                <Text
+                  style={[
+                    styles.modalTitle,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                >
+                  {processedResult
+                    ? selectedOption === "summarize"
+                      ? t.summary || "Summary"
+                      : t.generated_answer || "Generated Answer"
+                    : t.extracted_text || "Extracted Text"}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowResultModal(false);
+                    setProcessedResult("");
+                  }}
+                >
+                  <MaterialIcons
+                    name="close"
+                    size={24}
+                    color={themeColors[currentTheme].text}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                style={styles.modalContent}
+                contentContainerStyle={styles.modalContentContainer}
+              >
+                <Text
+                  style={[
+                    styles.resultText,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                >
+                  {processedResult || extractedText}
+                </Text>
+              </ScrollView>
+
+              {!processedResult && (
+                <View style={styles.processingOptions}>
+                  <Text
+                    style={[
+                      styles.optionsTitle,
+                      { color: themeColors[currentTheme].subText },
+                    ]}
+                  >
+                    {t.process_text || "Process Text"}
+                  </Text>
+
+                  <View style={styles.optionsRow}>
+                    {renderOptionButton(
+                      "summarize",
+                      "summarize",
+                      t.summarize || "Summarize",
+                      buttonColors.summarize
+                    )}
+
+                    {renderOptionButton(
+                      "generate",
+                      "question-answer",
+                      t.generate_answer || "Generate Answer",
+                      buttonColors.generate
+                    )}
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.processButton,
+                      {
+                        opacity: processingOption ? 0.7 : 1,
+                      },
+                    ]}
+                    onPress={handleProcessText}
+                    disabled={processingOption}
+                  >
+                    <LinearGradient
+                      colors={
+                        selectedOption === "summarize"
+                          ? buttonColors.summarize
+                          : buttonColors.generate
+                      }
+                      style={styles.processButtonGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      {processingOption ? (
+                        <ActivityIndicator color="#FFFFFF" size="small" />
+                      ) : (
+                        <Text style={styles.processButtonText}>
+                          {selectedOption === "summarize"
+                            ? t.summarize || "Summarize"
+                            : t.generate_answer || "Generate Answer"}
+                        </Text>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+
         {loading && (
           <View style={styles.loadingOverlay}>
-            <BlurView 
-              intensity={60} 
-              tint={currentTheme === 'light' ? 'light' : 'dark'} 
-              style={styles.loadingBlur}
+            <View
+              style={[
+                styles.loadingContainer,
+                {
+                  backgroundColor:
+                    currentTheme === "light"
+                      ? "rgba(255, 255, 255, 0.95)"
+                      : "rgba(30, 30, 30, 0.95)",
+                },
+              ]}
             >
-              <ActivityIndicator size="large" color={themeColors[currentTheme === 'light' ? 'dark' : 'light'].text} />
-              <Text style={[styles.loadingText, {color: themeColors[currentTheme].text}]}>
-                {t.loading || "Loading..."}
-              </Text>
-            </BlurView>
+              <View style={styles.loadingContent}>
+                <View style={styles.loadingIconContainer}>
+                  <LinearGradient
+                    colors={buttonColors.submit}
+                    style={styles.loadingGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <ActivityIndicator size="large" color="#FFFFFF" />
+                  </LinearGradient>
+                </View>
+                <Text
+                  style={[
+                    styles.loadingTitle,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                >
+                  {t.processing_document || "Processing Document"}
+                </Text>
+                <Text
+                  style={[
+                    styles.loadingSubtitle,
+                    { color: themeColors[currentTheme].subText },
+                  ]}
+                >
+                  {t.please_wait || "Please wait while we extract the text"}
+                </Text>
+              </View>
+            </View>
           </View>
         )}
       </LinearGradient>
@@ -275,45 +559,45 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 30,
   },
   screenTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   instructionText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 40,
     marginTop: 20,
   },
   optionsContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingBottom: 50,
   },
   iconWrapper: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 40,
     padding: 20,
     marginBottom: 20,
   },
   buttonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    flexWrap: "wrap",
   },
   buttonContainer: {
-    width: '45%',
+    width: "45%",
     marginBottom: 16,
     borderRadius: 18,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -321,14 +605,14 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 18,
-    overflow: 'hidden',
+    overflow: "hidden",
     height: 160,
   },
   blurContainer: {
     flex: 1,
     padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   iconContainer: {
     marginBottom: 16,
@@ -337,28 +621,28 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonTextContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   previewContainer: {
     flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 20,
   },
   imageWrapper: {
-    width: '100%',
-    height: '70%',
+    width: "100%",
+    height: "70%",
     borderRadius: 24,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -367,36 +651,164 @@ const styles = StyleSheet.create({
   blurImageContainer: {
     flex: 1,
     padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   preview: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 16,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   loadingOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 999,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
-  loadingBlur: {
-    paddingHorizontal: 40,
-    paddingVertical: 30,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  loadingContainer: {
+    width: "80%",
+    maxWidth: 320,
+    borderRadius: 24,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
   },
-  loadingText: {
-    marginTop: 15,
+  loadingContent: {
+    padding: 30,
+    alignItems: "center",
+  },
+  loadingIconContainer: {
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  loadingGradient: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  loadingSubtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    opacity: 0.8,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: "90%",
+    maxHeight: "80%",
+    borderRadius: 24,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 0, 0, 0.1)",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalContent: {
+    padding: 16,
+    maxHeight: 300,
+  },
+  modalContentContainer: {
+    flexGrow: 1,
+    paddingBottom: 16,
+  },
+  resultText: {
     fontSize: 16,
-    fontWeight: '500',
+    lineHeight: 24,
+    flexWrap: "wrap",
+    width: "100%",
+  },
+  processingOptions: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0, 0, 0, 0.1)",
+  },
+  optionsTitle: {
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  optionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+  },
+  optionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
+  },
+  optionGradient: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  optionText: {
+    fontSize: 14,
+  },
+  processButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  processButtonGradient: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: "center",
+  },
+  processButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
