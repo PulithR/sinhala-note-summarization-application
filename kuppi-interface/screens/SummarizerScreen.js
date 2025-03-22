@@ -9,7 +9,6 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import Markdown from "react-native-markdown-display";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import TextArea from "../components/TextArea";
@@ -24,9 +23,11 @@ const SummarizerScreen = () => {
   const { t } = useContext(LanguageContext);
   const { currentTheme } = useContext(ThemeContext);
   
-  const [text, setText] = useState("");
+  const [text, setText] = useState(""); // Used in TextArea and fetch body
   const [summary, setSummary] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Used in button and ActivityIndicator
+  const [percentage, setPercentage] = useState(50); // Used in options and fetch body
+  const [style, setStyle] = useState("casual"); // Used in options and fetch body
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -48,7 +49,7 @@ const SummarizerScreen = () => {
     ]).start();
   }, []);
 
-  const handlePressIn = () => {
+  const handlePressIn = () => { // Used in TouchableOpacity
     Animated.spring(buttonScale, {
       toValue: 0.97,
       useNativeDriver: true,
@@ -74,13 +75,17 @@ const SummarizerScreen = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify({ 
+          content: text,
+          percentage: percentage, // New: Add percentage parameter
+          style: style // New: Add style parameter
+        }),
       });
-
+  
       if (!response.ok) {
         throw new Error(t.errorFetchSummary || "Failed to fetch summary");
       }
-
+  
       const data = await response.json();
       setSummary(data.summary);
     } catch (error) {
@@ -90,7 +95,7 @@ const SummarizerScreen = () => {
     }
   };
 
-  const renderCharacterCount = () => {
+  const renderCharacterCount = () => { // Used in TextArea
     const maxLength = 5000;
     const remaining = maxLength - text.length;
     const color = remaining < 500 ? '#ef4444' : remaining < 1000 ? '#f59e0b' : themeColors[currentTheme].subText;
@@ -102,6 +107,45 @@ const SummarizerScreen = () => {
     );
   };
 
+  // Define the option components within the main component
+  const PercentageOption = ({ value }) => ( // Used in options container
+    <TouchableOpacity
+      style={[
+        styles.optionButton,
+        percentage === value && styles.optionButtonSelected,
+        { borderColor: themeColors[currentTheme].accentColor }
+      ]}
+      onPress={() => setPercentage(value)}
+    >
+      <Text style={[
+        styles.optionText,
+        percentage === value && styles.optionTextSelected,
+        { color: percentage === value ? '#FFFFFF' : themeColors[currentTheme].text }
+      ]}>
+        {value}%
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const StyleOption = ({ value, label }) => ( // Used in options container
+    <TouchableOpacity
+      style={[
+        styles.optionButton,
+        style === value && styles.optionButtonSelected,
+        { borderColor: themeColors[currentTheme].accentColor }
+      ]}
+      onPress={() => setStyle(value)}
+    >
+      <Text style={[
+        styles.optionText,
+        style === value && styles.optionTextSelected,
+        { color: style === value ? '#FFFFFF' : themeColors[currentTheme].text }
+      ]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -110,75 +154,48 @@ const SummarizerScreen = () => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <StatusBar
-          barStyle={currentTheme === "light" ? "dark-content" : "light-content"}
-        />
-
+        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
+        
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <Animated.View
-            style={[
-              styles.content,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
+          <Animated.View style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}>
             <View style={styles.header}>
-              <Text
-                style={[
-                  styles.headerTitle,
-                  { color: themeColors[currentTheme].text },
-                ]}
-              >
-                {t.summarizer || "Summarizer"}
+              <Text style={[styles.headerTitle, {color: themeColors[currentTheme].text}]}>
+                {t.summarizer || 'Summarizer'}
               </Text>
               <View style={styles.placeholder}></View>
             </View>
 
             <View style={styles.labelContainer}>
-              <Text
-                style={[
-                  styles.label,
-                  { color: themeColors[currentTheme].text },
-                ]}
-              >
-                {t.whatCanIHelpYouSummarize || "What can I help you summarize?"}
+              <Text style={[styles.label, {color: themeColors[currentTheme].text}]}>
+                {t.whatCanIHelpYouSummarize || 'What can I help you summarize?'}
               </Text>
-              <Text
-                style={[
-                  styles.sublabel,
-                  { color: themeColors[currentTheme].subText },
-                ]}
-              >
-                {t.pasteTextAndCreateSummary ||
-                  "Paste your text below and I'll create a concise summary"}
+              <Text style={[styles.sublabel, {color: themeColors[currentTheme].subText}]}>
+                {t.pasteTextAndCreateSummary || "Paste your text below and I'll create a concise summary"}
               </Text>
             </View>
 
             <View style={styles.textAreaContainer}>
-              <BlurView
-                intensity={currentTheme === "light" ? 50 : 30}
-                tint={currentTheme === "light" ? "light" : "dark"}
+              <BlurView 
+                intensity={currentTheme === 'light' ? 50 : 30}
+                tint={currentTheme === 'light' ? 'light' : 'dark'}
                 style={styles.blurContainer}
               >
                 <TextArea
                   value={text}
                   onChangeText={setText}
-                  style={[
-                    styles.customTextArea,
-                    { color: themeColors[currentTheme].text },
-                  ]}
-                  placeholder={
-                    t.enterTextHere || "Enter or paste your text here..."
-                  }
-                  placeholderTextColor={
-                    themeColors[currentTheme].subText + "80"
-                  }
+                  style={[styles.customTextArea, {color: themeColors[currentTheme].text}]}
+                  placeholder={t.enterTextHere || 'Enter or paste your text here...'}
+                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
                   maxLength={5000}
                   multiline
                 />
@@ -186,10 +203,35 @@ const SummarizerScreen = () => {
               </BlurView>
             </View>
 
-            <Animated.View
+            {/* Add the options container here */}
+            <View style={styles.optionsContainer}>
+              <View style={styles.optionSection}>
+                <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.summaryLength || 'Summary Length'}
+                </Text>
+                <View style={styles.optionsRow}>
+                  <PercentageOption value={25} />
+                  <PercentageOption value={50} />
+                  <PercentageOption value={75} />
+                </View>
+              </View>
+
+              <View style={styles.optionSection}>
+                <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.summaryStyle || 'Summary Style'}
+                </Text>
+                <View style={styles.optionsRow}>
+                  <StyleOption value="casual" label={t.casual || "Casual"} />
+                  <StyleOption value="formal" label={t.formal || "Formal"} />
+                  <StyleOption value="academic" label={t.academic || "Academic"} />
+                </View>
+              </View>
+            </View>
+
+            <Animated.View 
               style={[
                 styles.buttonContainer,
-                { transform: [{ scale: buttonScale }] },
+                { transform: [{ scale: buttonScale }] }
               ]}
             >
               <TouchableOpacity
@@ -209,7 +251,7 @@ const SummarizerScreen = () => {
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
                     <Text style={styles.buttonText}>
-                      {t.generateSummary || "Generate Summary"}
+                      {t.generateSummary || 'Generate Summary'}
                     </Text>
                   )}
                 </LinearGradient>
@@ -218,22 +260,17 @@ const SummarizerScreen = () => {
 
             {summary !== "" && (
               <View style={styles.summaryContainer}>
-                <Text
-                  style={[
-                    styles.summaryLabel,
-                    { color: themeColors[currentTheme].text },
-                  ]}
-                >
-                  {t.generatedSummary || "Generated Summary"}
+                <Text style={[styles.summaryLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.generatedSummary || 'Generated Summary'}
                 </Text>
-                <Markdown
-                  style={[
-                    styles.summaryText,
-                    { color: themeColors[currentTheme].subText },
-                  ]}
-                >
+                <Text style={[styles.summaryInfo, {color: themeColors[currentTheme].subText}]}>
+                  {percentage}% • {style === 'casual' ? (t.casual || 'Casual') : 
+                    style === 'formal' ? (t.formal || 'Formal') : 
+                    (t.academic || 'Academic')}
+                </Text>
+                <Text style={[styles.summaryText, {color: themeColors[currentTheme].subText}]}>
                   {summary}
-                </Markdown>
+                </Text>
               </View>
             )}
           </Animated.View>
@@ -346,6 +383,47 @@ const styles = StyleSheet.create({
   summaryText: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  optionsContainer: {
+    marginBottom: 20,
+  },
+  optionSection: {
+    marginBottom: 16,
+  },
+  optionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginHorizontal: 5,
+    alignItems: 'center',
+  },
+  optionButtonSelected: {
+    backgroundColor: '#6366f1',
+    borderColor: '#6366f1',
+  },
+  optionText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  optionTextSelected: {
+    color: '#FFFFFF',
+  },
+  summaryInfo: {
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });
 
