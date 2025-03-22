@@ -79,7 +79,6 @@ const PasswordResetScreen = ({ navigation }) => {
     setOtpLoading(false);
   };
 
-
   const validateNewPassword = (text) => {
     setNewPassword(text);
     if (text.length < 6) {
@@ -132,7 +131,7 @@ const PasswordResetScreen = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <LinearGradient
-            colors={["#f0f8ff", "#e6f3ff"]}
+            colors={["#f0f8ff", "#e6f3ff"]} // Matching HomeScreen light theme
             style={styles.background}
           >
             <View style={styles.topHalf}>
@@ -164,7 +163,7 @@ const PasswordResetScreen = ({ navigation }) => {
                     <TextInput
                       style={styles.input}
                       placeholder="Email"
-                      placeholderTextColor="#7f8c8d"
+                      placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
                       value={email}
                       onChangeText={validateEmail}
                       keyboardType="email-address"
@@ -182,7 +181,7 @@ const PasswordResetScreen = ({ navigation }) => {
                         style={styles.inputWithButton}
                         placeholder="New Password"
                         secureTextEntry={!showPassword}
-                        placeholderTextColor="#7f8c8d"
+                        placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
                         value={newPassword}
                         onChangeText={validateNewPassword}
                       />
@@ -209,7 +208,7 @@ const PasswordResetScreen = ({ navigation }) => {
                         style={styles.inputWithButton}
                         placeholder="Confirm New Password"
                         secureTextEntry={!showConfirmPassword}
-                        placeholderTextColor="#7f8c8d"
+                        placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
                         value={confirmNewPassword}
                         onChangeText={validateConfirmNewPassword}
                       />
@@ -241,7 +240,7 @@ const PasswordResetScreen = ({ navigation }) => {
                       activeOpacity={0.9}
                     >
                       <LinearGradient
-                        colors={["#4a90e2", "#357abd"]}
+                        colors={["#4F46E5", "#7C3AED"]} // Matching HomeScreen summarizer button
                         style={styles.resetButton}
                       >
                         <Text style={styles.resetButtonText}>
@@ -256,7 +255,7 @@ const PasswordResetScreen = ({ navigation }) => {
                       activeOpacity={0.9}
                     >
                       <LinearGradient
-                        colors={["#4a90e2", "#357abd"]}
+                        colors={["#4F46E5", "#7C3AED"]} // Matching HomeScreen summarizer button
                         style={styles.resetButton}
                       >
                         {otpLoading ? (
@@ -332,11 +331,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 8,
-    color: "#2c3e50",
+    color: "#2c3e50", // Matching HomeScreen text
   },
   helper: {
     fontSize: 24,
-    color: "#7f8c8d",
+    color: "#7f8c8d", // Matching HomeScreen subText
     textAlign: "center",
     marginBottom: 40,
   },
@@ -348,7 +347,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     padding: 15,
     fontSize: 16,
-    color: "#2c3e50",
+    color: "#2c3e50", // Matching HomeScreen text
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -370,7 +369,7 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingRight: 70,
     fontSize: 16,
-    color: "#2c3e50",
+    color: "#2c3e50", // Matching HomeScreen text
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -394,7 +393,7 @@ const styles = StyleSheet.create({
   visibilityButtonText: {
     fontSize: 14,
     fontWeight: "900",
-    color: "blue",
+    color: "#4F46E5", // Matching HomeScreen button gradient start
   },
   errorText: {
     color: "#e74c3c",
@@ -425,7 +424,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    color: "#4a90e2",
+    color: "#4F46E5", // Matching HomeScreen button gradient start
   },
 });
 
