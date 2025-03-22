@@ -211,6 +211,69 @@ const SummarizerScreen = () => {
   );
 };
 
+// Add these new component functions inside the SummarizerScreen component
+const PercentageOption = ({ value }) => (
+  <TouchableOpacity
+    style={[
+      styles.optionButton,
+      percentage === value && styles.optionButtonSelected,
+      { borderColor: themeColors[currentTheme].accentColor }
+    ]}
+    onPress={() => setPercentage(value)}
+  >
+    <Text style={[
+      styles.optionText,
+      percentage === value && styles.optionTextSelected,
+      { color: percentage === value ? '#FFFFFF' : themeColors[currentTheme].text }
+    ]}>
+      {value}%
+    </Text>
+  </TouchableOpacity>
+);
+
+const StyleOption = ({ value, label }) => (
+  <TouchableOpacity
+    style={[
+      styles.optionButton,
+      style === value && styles.optionButtonSelected,
+      { borderColor: themeColors[currentTheme].accentColor }
+    ]}
+    onPress={() => setStyle(value)}
+  >
+    <Text style={[
+      styles.optionText,
+      style === value && styles.optionTextSelected,
+      { color: style === value ? '#FFFFFF' : themeColors[currentTheme].text }
+    ]}>
+      {label}
+    </Text>
+  </TouchableOpacity>
+);
+
+<View style={styles.optionsContainer}>
+  <View style={styles.optionSection}>
+    <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
+      {t.summaryLength || 'Summary Length'}
+    </Text>
+    <View style={styles.optionsRow}>
+      <PercentageOption value={25} />
+      <PercentageOption value={50} />
+      <PercentageOption value={75} />
+    </View>
+  </View>
+
+  <View style={styles.optionSection}>
+    <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
+      {t.summaryStyle || 'Summary Style'}
+    </Text>
+    <View style={styles.optionsRow}>
+      <StyleOption value="casual" label={t.casual || "Casual"} />
+      <StyleOption value="formal" label={t.formal || "Formal"} />
+      <StyleOption value="academic" label={t.academic || "Academic"} />
+    </View>
+  </View>
+</View>
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
