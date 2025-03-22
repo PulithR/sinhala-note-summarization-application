@@ -1,104 +1,156 @@
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect, useContext } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { ThemeContext } from '../user_preference/ThemeContext';
+import { LanguageContext } from '../user_preference/LanguageContext';
+import themeColors from '../assets/ThemeColors.json';
 
 const DisplayScreen = ({ route, navigation }) => {
   const { note } = route.params;
+  const { currentTheme } = useContext(ThemeContext);
+  const { t } = useContext(LanguageContext);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const buttonScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const handlePressIn = () => {
+    Animated.spring(buttonScale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      speed: 5,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(buttonScale, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start(() => navigation.goBack());
+  };
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <View style={styles.content}>
+    <LinearGradient
+      colors={themeColors[currentTheme].background}
+      style={styles.background}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      <Animated.View style={[
+        styles.content,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }]
+        }
+      ]}>
         {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.mainTopic}>{note.title}</Text>
+          <Text style={[styles.mainTopic, { color: themeColors[currentTheme].text }]}>
+            {note.title}
+          </Text>
         </View>
 
         {/* Main Content */}
         <View style={styles.container}>
-          <View style={styles.contentContainer}>
-            {/* ScrollView to Handle Long Content */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.contentText}>{note.content}</Text>
-            </ScrollView>
-          </View>
-
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
+          <BlurView 
+            intensity={currentTheme === 'light' ? 80 : 100} 
+            tint={currentTheme} 
+            style={styles.contentContainer}
           >
-            <LinearGradient
-              colors={["#4a90e2", "#357abd"]}
-              style={styles.buttonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={[styles.contentText, { color: themeColors[currentTheme].text }]}>
+                {note.content}
+              </Text>
+            </ScrollView>
+          </BlurView>
+
+          <Animated.View style={[styles.buttonContainer, { transform: [{ scale: buttonScale }] }]}>
+            <TouchableOpacity
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              activeOpacity={0.9}
             >
-              <Text style={styles.buttonText}>Back</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={["#4a90e2", "#357abd"]}
+                style={styles.buttonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.buttonText}>{t.back || 'Back'}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
         </View>
-      </View>
-    </SafeAreaView>
+      </Animated.View>
+    </LinearGradient>
   );
 };
 
-
 const styles = StyleSheet.create({
-  safeContainer: { 
-    flex: 1 ,
-    backgroundColor: '#F8F9FA'
-},
-  content: { 
-    flex: 1 ,
-    backgroundColor: '#FFFFFF'
-},
-  header: { 
-    alignItems: 'center', 
-    paddingTop: 60, 
-    marginBottom: 20 
-},
-  mainTopic: { 
-    fontSize: 28, 
-    fontWeight: 'bold', 
-    textAlign: 'center' 
-},
-  container: { 
-    flex: 1, 
-    padding: 20 
-},
-  contentContainer: { 
+  background: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, 
-},
-  contentText: { 
-    fontSize: 16 
-},
-  backButton: { 
-    borderRadius: 16, 
-    overflow: 'hidden', 
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5
-},
-buttonGradient: {
-    paddingVertical: 16,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  header: {
     alignItems: 'center',
-},
-  buttonText: { 
-    color: '#fff', 
-    textAlign: 'center', 
-    fontSize: 18 ,
-    fontWeight: 'bold'
-},
+    marginBottom: 40,
+  },
+  mainTopic: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  contentText: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  buttonContainer: {
+    width: '100%',
+    borderRadius: 20,
+  },
+  buttonGradient: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
 });
 
 export default DisplayScreen;
