@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import Markdown from "react-native-markdown-display";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import TextArea from "../components/TextArea";
@@ -109,48 +110,75 @@ const SummarizerScreen = () => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
-        
+        <StatusBar
+          barStyle={currentTheme === "light" ? "dark-content" : "light-content"}
+        />
+
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <Animated.View style={[
-            styles.content,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }]
-            }
-          ]}>
+          <Animated.View
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
             <View style={styles.header}>
-              <Text style={[styles.headerTitle, {color: themeColors[currentTheme].text}]}>
-                {t.summarizer || 'Summarizer'}
+              <Text
+                style={[
+                  styles.headerTitle,
+                  { color: themeColors[currentTheme].text },
+                ]}
+              >
+                {t.summarizer || "Summarizer"}
               </Text>
               <View style={styles.placeholder}></View>
             </View>
 
             <View style={styles.labelContainer}>
-              <Text style={[styles.label, {color: themeColors[currentTheme].text}]}>
-                {t.whatCanIHelpYouSummarize || 'What can I help you summarize?'}
+              <Text
+                style={[
+                  styles.label,
+                  { color: themeColors[currentTheme].text },
+                ]}
+              >
+                {t.whatCanIHelpYouSummarize || "What can I help you summarize?"}
               </Text>
-              <Text style={[styles.sublabel, {color: themeColors[currentTheme].subText}]}>
-                {t.pasteTextAndCreateSummary || "Paste your text below and I'll create a concise summary"}
+              <Text
+                style={[
+                  styles.sublabel,
+                  { color: themeColors[currentTheme].subText },
+                ]}
+              >
+                {t.pasteTextAndCreateSummary ||
+                  "Paste your text below and I'll create a concise summary"}
               </Text>
             </View>
 
             <View style={styles.textAreaContainer}>
-              <BlurView 
-                intensity={currentTheme === 'light' ? 50 : 30}
-                tint={currentTheme === 'light' ? 'light' : 'dark'}
+              <BlurView
+                intensity={currentTheme === "light" ? 50 : 30}
+                tint={currentTheme === "light" ? "light" : "dark"}
                 style={styles.blurContainer}
               >
                 <TextArea
                   value={text}
                   onChangeText={setText}
-                  style={[styles.customTextArea, {color: themeColors[currentTheme].text}]}
-                  placeholder={t.enterTextHere || 'Enter or paste your text here...'}
-                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
+                  style={[
+                    styles.customTextArea,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                  placeholder={
+                    t.enterTextHere || "Enter or paste your text here..."
+                  }
+                  placeholderTextColor={
+                    themeColors[currentTheme].subText + "80"
+                  }
                   maxLength={5000}
                   multiline
                 />
@@ -158,10 +186,10 @@ const SummarizerScreen = () => {
               </BlurView>
             </View>
 
-            <Animated.View 
+            <Animated.View
               style={[
                 styles.buttonContainer,
-                { transform: [{ scale: buttonScale }] }
+                { transform: [{ scale: buttonScale }] },
               ]}
             >
               <TouchableOpacity
@@ -181,7 +209,7 @@ const SummarizerScreen = () => {
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
                     <Text style={styles.buttonText}>
-                      {t.generateSummary || 'Generate Summary'}
+                      {t.generateSummary || "Generate Summary"}
                     </Text>
                   )}
                 </LinearGradient>
@@ -190,12 +218,22 @@ const SummarizerScreen = () => {
 
             {summary !== "" && (
               <View style={styles.summaryContainer}>
-                <Text style={[styles.summaryLabel, {color: themeColors[currentTheme].text}]}>
-                  {t.generatedSummary || 'Generated Summary'}
+                <Text
+                  style={[
+                    styles.summaryLabel,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                >
+                  {t.generatedSummary || "Generated Summary"}
                 </Text>
-                <Text style={[styles.summaryText, {color: themeColors[currentTheme].subText}]}>
+                <Markdown
+                  style={[
+                    styles.summaryText,
+                    { color: themeColors[currentTheme].subText },
+                  ]}
+                >
                   {summary}
-                </Text>
+                </Markdown>
               </View>
             )}
           </Animated.View>

@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
+import Markdown from "react-native-markdown-display";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import TextArea from "../components/TextArea";
@@ -110,48 +111,81 @@ const AnswerGeneratorScreen = () => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
-        
+        <StatusBar
+          barStyle={currentTheme === "light" ? "dark-content" : "light-content"}
+        />
+
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <Animated.View style={[
-            styles.content,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }]
-            }
-          ]}>
+          <Animated.View
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
             <View style={styles.header}>
-              <Text style={[styles.headerTitle, {color: themeColors[currentTheme].text}]}>
-                {t.answerGenerator || 'Answer Generator'}
+              <Text
+                style={[
+                  styles.headerTitle,
+                  { color: themeColors[currentTheme].text },
+                ]}
+              >
+                {t.answerGenerator || "Answer Generator"}
               </Text>
               <View style={styles.placeholder}></View>
             </View>
 
             <View style={styles.labelContainer}>
-              <Text style={[styles.label, {color: themeColors[currentTheme].text}]}>
-                {t.whatIsYourQuestion || 'What is your question?'}
+              <Text
+                style={[
+                  styles.label,
+                  { color: themeColors[currentTheme].text },
+                ]}
+              >
+                {t.whatIsYourQuestion || "What is your question?"}
               </Text>
-              <Text style={[styles.sublabel, {color: themeColors[currentTheme].subText}]}>
-                {t.enterQuestionBelow || "Enter your question below and I'll generate a detailed answer"}
+              <Text
+                style={[
+                  styles.sublabel,
+                  { color: themeColors[currentTheme].subText },
+                ]}
+              >
+                {t.enterQuestionBelow ||
+                  "Enter your question below and I'll generate a detailed answer"}
               </Text>
             </View>
 
             <View style={styles.textAreaContainer}>
-              <BlurView 
-                intensity={Platform.OS === 'android' ? 20 : (currentTheme === 'light' ? 50 : 30)}
-                tint={currentTheme === 'light' ? 'light' : 'dark'}
+              <BlurView
+                intensity={
+                  Platform.OS === "android"
+                    ? 20
+                    : currentTheme === "light"
+                    ? 50
+                    : 30
+                }
+                tint={currentTheme === "light" ? "light" : "dark"}
                 style={styles.blurContainer}
               >
                 <TextArea
                   value={text}
                   onChangeText={setText}
-                  style={[styles.customTextArea, {color: themeColors[currentTheme].text}]}
-                  placeholder={t.typeYourQuestionHere || 'Type your question here...'}
-                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
+                  style={[
+                    styles.customTextArea,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                  placeholder={
+                    t.typeYourQuestionHere || "Type your question here..."
+                  }
+                  placeholderTextColor={
+                    themeColors[currentTheme].subText + "80"
+                  }
                   maxLength={3000}
                   multiline
                 />
@@ -159,10 +193,10 @@ const AnswerGeneratorScreen = () => {
               </BlurView>
             </View>
 
-            <Animated.View 
+            <Animated.View
               style={[
                 styles.buttonContainer,
-                { transform: [{ scale: buttonScale }] }
+                { transform: [{ scale: buttonScale }] },
               ]}
             >
               <TouchableOpacity
@@ -182,7 +216,7 @@ const AnswerGeneratorScreen = () => {
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
                     <Text style={styles.buttonText}>
-                      {t.generateAnswer || 'Generate Answer'}
+                      {t.generateAnswer || "Generate Answer"}
                     </Text>
                   )}
                 </LinearGradient>
@@ -191,12 +225,22 @@ const AnswerGeneratorScreen = () => {
 
             {answer !== "" && (
               <View style={styles.answerContainer}>
-                <Text style={[styles.answerLabel, {color: themeColors[currentTheme].text}]}>
-                  {t.generatedAnswer || 'Generated Answer'}
+                <Text
+                  style={[
+                    styles.answerLabel,
+                    { color: themeColors[currentTheme].text },
+                  ]}
+                >
+                  {t.generatedAnswer || "Generated Answer"}
                 </Text>
-                <Text style={[styles.answerText, {color: themeColors[currentTheme].subText}]}>
+                <Markdown
+                  style={[
+                    styles.answerText,
+                    { color: themeColors[currentTheme].subText },
+                  ]}
+                >
                   {answer}
-                </Text>
+                </Markdown>
               </View>
             )}
           </Animated.View>
