@@ -26,6 +26,8 @@ const SummarizerScreen = () => {
   const [text, setText] = useState("");
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [percentage, setPercentage] = useState(50); // New: Default 50%
+  const [style, setStyle] = useState("casual"); // New: Default casual
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
