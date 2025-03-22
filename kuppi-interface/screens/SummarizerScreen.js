@@ -199,6 +199,11 @@ const SummarizerScreen = () => {
                 <Text style={[styles.summaryLabel, {color: themeColors[currentTheme].text}]}>
                   {t.generatedSummary || 'Generated Summary'}
                 </Text>
+                <Text style={[styles.summaryInfo, {color: themeColors[currentTheme].subText}]}>
+                  {percentage}% • {style === 'casual' ? (t.casual || 'Casual') : 
+                    style === 'formal' ? (t.formal || 'Formal') : 
+                    (t.academic || 'Academic')}
+                </Text>
                 <Text style={[styles.summaryText, {color: themeColors[currentTheme].subText}]}>
                   {summary}
                 </Text>
@@ -377,6 +382,47 @@ const styles = StyleSheet.create({
   summaryText: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  optionsContainer: {
+    marginBottom: 20,
+  },
+  optionSection: {
+    marginBottom: 16,
+  },
+  optionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginHorizontal: 5,
+    alignItems: 'center',
+  },
+  optionButtonSelected: {
+    backgroundColor: '#6366f1',
+    borderColor: '#6366f1',
+  },
+  optionText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  optionTextSelected: {
+    color: '#FFFFFF',
+  },
+  summaryInfo: {
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });
 
