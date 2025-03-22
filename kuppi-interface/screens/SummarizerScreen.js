@@ -1,44 +1,70 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
+  Animated,
   TouchableOpacity,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  StatusBar,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import TextArea from "../components/TextArea";
 import { BASE_API_URL } from "@env";
 import { AuthContext } from "../authentication/AuthContext";
+import { LanguageContext } from "../user_preference/LanguageContext";
+import { ThemeContext } from "../user_preference/ThemeContext";
+import themeColors from "../assets/ThemeColors.json";
 
 const SummarizerScreen = () => {
   const { token } = useContext(AuthContext);
+  const { t } = useContext(LanguageContext);
+  const { currentTheme } = useContext(ThemeContext);
+  
   const [text, setText] = useState("");
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const buttonScale = useRef(new Animated.Value(1)).current;
 
-  const renderCharacterCount = () => {
-    const maxLength = 3000;
-    const remaining = maxLength - text.length;
-    const color =
-      remaining < 200 ? "#e74c3c" : remaining < 500 ? "#f39c12" : "#7f8c8d";
+  useEffect(() => {
+    StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
-    return (
-      <View style={styles.charCountContainer}>
-        <Text style={[styles.charCount, { color }]}>
-          {remaining} characters remaining
-        </Text>
-      </View>
-    );
+  const handlePressIn = () => {
+    Animated.spring(buttonScale, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 50,
+    }).start();
   };
 
-  const handleSummarizeText = async () => {
+  const handlePressOut = async () => {
+    Animated.spring(buttonScale, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+    
     if (text.trim().length === 0) return;
-
+    
     setIsLoading(true);
     try {
       const response = await fetch(`${BASE_API_URL}/generate-summary`, {
@@ -51,7 +77,7 @@ const SummarizerScreen = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch summary");
+        throw new Error(t.errorFetchSummary || "Failed to fetch summary");
       }
 
       const data = await response.json();
@@ -63,214 +89,224 @@ const SummarizerScreen = () => {
     }
   };
 
+  const renderCharacterCount = () => {
+    const maxLength = 5000;
+    const remaining = maxLength - text.length;
+    const color = remaining < 500 ? '#ef4444' : remaining < 1000 ? '#f59e0b' : themeColors[currentTheme].subText;
+
+    return (
+      <Text style={[styles.charCount, { color }]}>
+        {remaining} {t.charactersRemaining || 'characters remaining'}
+      </Text>
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardAvoid}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={themeColors[currentTheme].background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
+        
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Header Section */}
+          <Animated.View style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}>
             <View style={styles.header}>
-              <Text style={styles.mainTopic}>Summarizer</Text>
-              <View style={styles.headerDivider} />
+              <Text style={[styles.headerTitle, {color: themeColors[currentTheme].text}]}>
+                {t.summarizer || 'Summarizer'}
+              </Text>
+              <View style={styles.placeholder}></View>
             </View>
 
-            {/* Main Content */}
-            <View style={styles.container}>
-              <View style={styles.labelContainer}>
-                <Text style={styles.label}>What can I help you summarize?</Text>
-                <Text style={styles.sublabel}>
-                  Paste your text below and I'll create a concise summary.
-                </Text>
-              </View>
+            <View style={styles.labelContainer}>
+              <Text style={[styles.label, {color: themeColors[currentTheme].text}]}>
+                {t.whatCanIHelpYouSummarize || 'What can I help you summarize?'}
+              </Text>
+              <Text style={[styles.sublabel, {color: themeColors[currentTheme].subText}]}>
+                {t.pasteTextAndCreateSummary || "Paste your text below and I'll create a concise summary"}
+              </Text>
+            </View>
 
-              <View style={styles.textAreaContainer}>
+            <View style={styles.textAreaContainer}>
+              <BlurView 
+                intensity={currentTheme === 'light' ? 50 : 30}
+                tint={currentTheme === 'light' ? 'light' : 'dark'}
+                style={styles.blurContainer}
+              >
                 <TextArea
                   value={text}
                   onChangeText={setText}
-                  style={styles.customTextArea}
-                  placeholder="Enter or paste your text here..."
-                  maxLength={3000} 
+                  style={[styles.customTextArea, {color: themeColors[currentTheme].text}]}
+                  placeholder={t.enterTextHere || 'Enter or paste your text here...'}
+                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
+                  maxLength={5000}
+                  multiline
                 />
                 {renderCharacterCount()}
-              </View>
+              </BlurView>
+            </View>
 
+            <Animated.View 
+              style={[
+                styles.buttonContainer,
+                { transform: [{ scale: buttonScale }] }
+              ]}
+            >
               <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  { opacity: text.trim().length > 0 ? 1 : 0.6 },
-                ]}
-                disabled={text.trim().length === 0 || isLoading}
-                onPress={handleSummarizeText}
+                style={[styles.button, { opacity: text.length > 0 ? 1 : 0.6 }]}
+                disabled={text.length === 0 || isLoading}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                activeOpacity={0.9}
               >
                 <LinearGradient
-                  colors={["#4a90e2", "#357abd"]}
-                  style={styles.submitGradient}
+                  colors={themeColors[currentTheme].buttonColors}
+                  style={styles.buttonGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
                   {isLoading ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
-                    <Text style={styles.submitButtonText}>
-                      Generate Summary
+                    <Text style={styles.buttonText}>
+                      {t.generateSummary || 'Generate Summary'}
                     </Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
+            </Animated.View>
 
-              {/* Display Generated Summary */}
-              {summary !== "" && (
-                <View style={styles.summaryContainer}>
-                  <View style={styles.summaryHeaderContainer}>
-                    <Text style={styles.summaryLabel}>Generated Summary</Text>
-                    <View style={styles.summaryDivider} />
-                  </View>
-                  <Text style={styles.summaryText}>{summary}</Text>
-                </View>
-              )}
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+            {summary !== "" && (
+              <View style={styles.summaryContainer}>
+                <Text style={[styles.summaryLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.generatedSummary || 'Generated Summary'}
+                </Text>
+                <Text style={[styles.summaryText, {color: themeColors[currentTheme].subText}]}>
+                  {summary}
+                </Text>
+              </View>
+            )}
+          </Animated.View>
+        </ScrollView>
       </LinearGradient>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeContainer: {
+  container: {
     flex: 1,
   },
-  gradient: {
+  background: {
     flex: 1,
   },
-  keyboardAvoid: {
+  scrollView: {
     flex: 1,
   },
-  scrollContainer: {
+  scrollContent: {
     flexGrow: 1,
     paddingBottom: 30,
   },
-  header: {
-    alignItems: "center",
-    paddingTop: 60,
+  content: {
+    flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 100,
+  },
+  header: {
+    alignItems: 'center',
     marginBottom: 30,
   },
-  headerDivider: {
-    height: 2,
-    width: 60,
-    backgroundColor: "#4a90e2",
-    marginTop: 10,
-    borderRadius: 2,
-  },
-  mainTopic: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#2c3e50",
-  },
-  container: {
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
     flex: 1,
-    paddingHorizontal: 25,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
   },
   labelContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
+    alignItems: 'center'
   },
   label: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 10,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   sublabel: {
     fontSize: 16,
-    color: "#7f8c8d",
     lineHeight: 22,
   },
   textAreaContainer: {
-    marginBottom: 25,
+    flex: 1,
+    marginBottom: 20,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  blurContainer: {
+    flex: 1,
+    padding: 16,
+    minHeight: 250,
   },
   customTextArea: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 18,
-    minHeight: 180,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "rgba(74, 144, 226, 0.2)",
-  },
-  charCountContainer: {
-    marginTop: 10,
-    alignItems: "flex-end",
+    flex: 1,
+    fontSize: 16,
+    minHeight: 200,
   },
   charCount: {
+    marginTop: 10,
+    textAlign: 'right',
     fontSize: 14,
-    fontWeight: "500",
   },
-  submitButton: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginVertical: 15,
-    shadowColor: "#357abd",
+  buttonContainer: {
+    marginBottom: 20,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  submitGradient: {
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    height: 56,
-  },
-  submitButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
-  },
-  summaryContainer: {
-    marginTop: 25,
-    padding: 22,
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
-    borderWidth: 1,
-    borderColor: "rgba(74, 144, 226, 0.15)",
   },
-  summaryHeaderContainer: {
-    marginBottom: 15,
+  button: {
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  summaryContainer: {
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   summaryLabel: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    textAlign: "center",
-  },
-  summaryDivider: {
-    height: 2,
-    width: "52%",
-    backgroundColor: "#4a90e2",
-    borderRadius: 2,
-    alignSelf: "center",
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   summaryText: {
     fontSize: 16,
-    color: "#34495e",
     lineHeight: 24,
   },
 });

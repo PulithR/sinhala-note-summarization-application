@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -7,40 +7,88 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
+  Animated,
+  StatusBar,
 } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { AuthContext } from "../authentication/AuthContext";
 import { BASE_API_URL } from "@env";
 import { useNavigation } from "@react-navigation/native";
+import { ThemeContext } from '../user_preference/ThemeContext';
+import { LanguageContext } from '../user_preference/LanguageContext';
+import themeColors from '../assets/ThemeColors.json';
 
 const AddNotesScreen = () => {
   const { token } = useContext(AuthContext);
-
+  const { currentTheme } = useContext(ThemeContext);
+  const { t } = useContext(LanguageContext);
+  
   const navigation = useNavigation();
-
+  
   const [noteText, setNoteText] = useState("");
   const [noteTopic, setNoteTopic] = useState("");
   const [isSaved, setIsSaved] = useState(false);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const saveButtonScale = useRef(new Animated.Value(1)).current;
+  const clearButtonScale = useRef(new Animated.Value(1)).current;
 
-  // Count the number of words and characters in the note
+  useEffect(() => {
+    StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const wordCount = noteText.trim() ? noteText.trim().split(/\s+/).length : 0;
   const charCount = noteText.length;
 
-  // Clear note function
-  const clearNote = () => {
-    Alert.alert("Clear Note", "Are you sure you want to clear this note?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Clear",
-        onPress: () => {
-          setNoteText("");
-          setNoteTopic("");
-        },
-        style: "destructive",
-      },
-    ]);
+  const handleButtonPressIn = (scaleRef) => {
+    Animated.spring(scaleRef, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 50,
+    }).start();
   };
 
-  // Add a new note
+  const handleButtonPressOut = (scaleRef) => {
+    Animated.spring(scaleRef, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const clearNote = () => {
+    Alert.alert(
+      t.clear_note_title || "Clear Note",
+      t.clear_note_message || "Are you sure you want to clear this note?",
+      [
+        { text: t.cancel || "Cancel", style: "cancel" },
+        {
+          text: t.clear || "Clear",
+          onPress: () => {
+            setNoteText("");
+            setNoteTopic("");
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
   const handleAddNote = async () => {
     const title = noteTopic;
     const content = noteText;
@@ -55,91 +103,175 @@ const AddNotesScreen = () => {
       });
 
       if (response.ok) {
-        Alert.alert("Success", "Note added successfully!", [
-          {
-            text: "OK",
-            onPress: () =>
-              navigation.reset({
-                index: 1,
-                routes: [{ name: "Home" }, { name: "NoteBookScreen" }],
-              }),
-          },
-        ]);
+        setIsSaved(true);
+        Alert.alert(
+          t.note_saved_title || "Success",
+          t.note_saved_message || "Note added successfully!",
+          [{
+            text: t.ok || "OK",
+            onPress: () => navigation.reset({
+              index: 1,
+              routes: [{ name: "Home" }, { name: "NoteBookScreen" }],
+            }),
+          }]
+        );
       } else {
         const errorData = await response.json();
-        Alert.alert("Error", errorData.error || "Failed to add note");
+        Alert.alert(t.error || "Error", errorData.error || t.failed_to_add_note || "Failed to add note");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert(t.error || "Error", error.message);
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Digital Notebook</Text>
-        <Text style={styles.saveStatus}>
-          {isSaved ? "✓ Saved" : "• Editing"}
-        </Text>
-      </View>
-
-      <View style={styles.topicContainer}>
-        <Text style={styles.label}>Topic</Text>
-        <TextInput
-          style={styles.topicInput}
-          placeholder="Enter the topic..."
-          value={noteTopic}
-          onChangeText={(text) => {
-            setNoteTopic(text);
-            setIsSaved(false);
-          }}
-          maxLength={50}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.saveButton]}
-          onPress={() => {
-            handleAddNote();
-            setIsSaved(true);
-          }}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={themeColors[currentTheme].background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.clearButton]}
-          onPress={clearNote}
-        >
-          <Text style={styles.buttonText}>Clear</Text>
-        </TouchableOpacity>
-      </View>
+          <Animated.View style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}>
+            <View style={styles.header}>
+              <Text style={[styles.title, { color: themeColors[currentTheme].text }]}>
+                {t.digital_notebook || "Digital Notebook"}
+              </Text>
+              <Text style={[styles.saveStatus, { color: themeColors[currentTheme].subText }]}>
+                {isSaved ? (t.saved || "✓ Saved") : (t.editing || "• Editing")}
+              </Text>
+            </View>
 
-      <TextInput
-        style={styles.textarea}
-        placeholder="Start writing your notes..."
-        multiline
-        value={noteText}
-        onChangeText={(text) => {
-          setNoteText(text);
-          setIsSaved(false);
-        }}
-        textAlignVertical="top"
-      />
+            <View style={styles.inputContainer}>
+              <BlurView 
+                intensity={currentTheme === 'light' ? 50 : 30}
+                tint={currentTheme === 'light' ? 'light' : 'dark'}
+                style={styles.blurContainer}
+              >
+                <Text style={[styles.label, { color: themeColors[currentTheme].text }]}>
+                  {t.topic || "Topic"}
+                </Text>
+                <TextInput
+                  style={[styles.topicInput, { color: themeColors[currentTheme].text }]}
+                  placeholder={t.enter_topic || "Enter the topic..."}
+                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
+                  value={noteTopic}
+                  onChangeText={(text) => {
+                    setNoteTopic(text);
+                    setIsSaved(false);
+                  }}
+                  maxLength={50}
+                />
+              </BlurView>
+            </View>
 
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Words: {wordCount}</Text>
-        <Text style={styles.statsText}>Characters: {charCount}</Text>
-      </View>
-    </ScrollView>
+            <View style={styles.buttonContainer}>
+              <Animated.View style={[styles.buttonWrapper, { transform: [{ scale: saveButtonScale }] }]}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPressIn={() => handleButtonPressIn(saveButtonScale)}
+                  onPressOut={() => {
+                    handleButtonPressOut(saveButtonScale);
+                    handleAddNote();
+                  }}
+                >
+                  <LinearGradient
+                    colors={themeColors[currentTheme].buttonColors}
+                    style={styles.buttonGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={styles.buttonText}>{t.save || "Save"}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+
+              <Animated.View style={[styles.buttonWrapper, { transform: [{ scale: clearButtonScale }] }]}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPressIn={() => handleButtonPressIn(clearButtonScale)}
+                  onPressOut={() => {
+                    handleButtonPressOut(clearButtonScale);
+                    clearNote();
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#F59E0B', '#EA580C']}
+                    style={styles.buttonGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={styles.buttonText}>{t.clear || "Clear"}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+
+            <View style={styles.textareaContainer}>
+              <BlurView 
+                intensity={currentTheme === 'light' ? 50 : 30}
+                tint={currentTheme === 'light' ? 'light' : 'dark'}
+                style={styles.textareaBlurContainer}
+              >
+                <TextInput
+                  style={[styles.textarea, { color: themeColors[currentTheme].text }]}
+                  placeholder={t.start_writing || "Start writing your notes..."}
+                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
+                  multiline
+                  value={noteText}
+                  onChangeText={(text) => {
+                    setNoteText(text);
+                    setIsSaved(false);
+                  }}
+                  textAlignVertical="top"
+                />
+              </BlurView>
+            </View>
+
+            <View style={styles.statsContainer}>
+              <Text style={[styles.statsText, { color: themeColors[currentTheme].subText }]}>
+                {t.words || "Words"}: {wordCount}
+              </Text>
+              <Text style={[styles.statsText, { color: themeColors[currentTheme].subText }]}>
+                {t.characters || "Characters"}: {charCount}
+              </Text>
+            </View>
+          </Animated.View>
+        </ScrollView>
+      </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-    padding: 16,
+  },
+  background: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 30,
+  },
+  content: {
+    padding: 20,
+    paddingTop: 100,
   },
   header: {
     flexDirection: "row",
@@ -148,85 +280,81 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#2c3e50",
   },
   saveStatus: {
     fontSize: 16,
-    color: "#34495e",
   },
-  topicContainer: {
-    marginBottom: 16,
+  inputContainer: {
+    marginBottom: 20,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  blurContainer: {
+    padding: 16,
   },
   label: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#2c3e50",
     marginBottom: 8,
   },
   topicInput: {
     height: 50,
-    borderWidth: 1,
-    borderColor: "#cbd5e0",
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   button: {
-    flex: 1,
-    marginHorizontal: 4,
-    padding: 12,
-    borderRadius: 8,
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    padding: 14,
     alignItems: "center",
-  },
-  saveButton: {
-    backgroundColor: "#4CAF50",
-  },
-  clearButton: {
-    backgroundColor: "#f44336",
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  textareaContainer: {
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginBottom: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  textareaBlurContainer: {
+    padding: 16,
+    minHeight: 400,
   },
   textarea: {
     height: 400,
-    borderWidth: 1,
-    borderColor: "#cbd5e0",
-    borderRadius: 12,
-    padding: 16,
     fontSize: 16,
-    backgroundColor: "#fff",
     lineHeight: 24,
-    textAlignVertical: "top",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 12,
     padding: 8,
   },
   statsText: {
     fontSize: 14,
-    color: "#666",
   },
 });
 

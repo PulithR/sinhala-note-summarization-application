@@ -1,44 +1,71 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
+  Animated,
   TouchableOpacity,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  StatusBar,
   ScrollView,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import TextArea from "../components/TextArea";
 import { BASE_API_URL } from "@env";
 import { AuthContext } from "../authentication/AuthContext";
+import { LanguageContext } from "../user_preference/LanguageContext";
+import { ThemeContext } from "../user_preference/ThemeContext";
+import themeColors from "../assets/ThemeColors.json";
 
 const AnswerGeneratorScreen = () => {
   const { token } = useContext(AuthContext);
+  const { t } = useContext(LanguageContext);
+  const { currentTheme } = useContext(ThemeContext);
+  
   const [text, setText] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const buttonScale = useRef(new Animated.Value(1)).current;
 
-  const renderCharacterCount = () => {
-    const maxLength = 3000; 
-    const remaining = maxLength - text.length;
-    const color =
-      remaining < 200 ? "#e74c3c" : remaining < 500 ? "#f39c12" : "#7f8c8d";
+  useEffect(() => {
+    StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
-    return (
-      <View style={styles.charCountContainer}>
-        <Text style={[styles.charCount, { color }]}>
-          {remaining} characters remaining
-        </Text>
-      </View>
-    );
+  const handlePressIn = () => {
+    Animated.spring(buttonScale, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 50,
+    }).start();
   };
 
-  const handleGenerateAnswer = async () => {
+  const handlePressOut = async () => {
+    Animated.spring(buttonScale, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+    
     if (text.trim().length === 0) return;
-
+    
     setIsLoading(true);
     try {
       const response = await fetch(`${BASE_API_URL}/generate-answer`, {
@@ -51,7 +78,7 @@ const AnswerGeneratorScreen = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch answer");
+        throw new Error(t.errorFetchAnswer || "Failed to fetch answer");
       }
 
       const data = await response.json();
@@ -63,213 +90,224 @@ const AnswerGeneratorScreen = () => {
     }
   };
 
+  const renderCharacterCount = () => {
+    const maxLength = 3000;
+    const remaining = maxLength - text.length;
+    const color = remaining < 500 ? '#ef4444' : remaining < 1000 ? '#f59e0b' : themeColors[currentTheme].subText;
+
+    return (
+      <Text style={[styles.charCount, { color }]}>
+        {remaining} {t.charactersRemaining || 'characters remaining'}
+      </Text>
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <LinearGradient colors={["#f0f8ff", "#e6f3ff"]} style={styles.gradient}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardAvoid}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={themeColors[currentTheme].background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
+        
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Header Section */}
+          <Animated.View style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}>
             <View style={styles.header}>
-              <Text style={styles.mainTopic}>Answer Generator</Text>
-              <View style={styles.headerDivider} />
+              <Text style={[styles.headerTitle, {color: themeColors[currentTheme].text}]}>
+                {t.answerGenerator || 'Answer Generator'}
+              </Text>
+              <View style={styles.placeholder}></View>
             </View>
 
-            {/* Main Content */}
-            <View style={styles.container}>
-              <View style={styles.labelContainer}>
-                <Text style={styles.label}>What's your question?</Text>
-                <Text style={styles.sublabel}>
-                  Enter your question below and I'll generate a detailed answer.
-                </Text>
-              </View>
+            <View style={styles.labelContainer}>
+              <Text style={[styles.label, {color: themeColors[currentTheme].text}]}>
+                {t.whatIsYourQuestion || 'What is your question?'}
+              </Text>
+              <Text style={[styles.sublabel, {color: themeColors[currentTheme].subText}]}>
+                {t.enterQuestionBelow || "Enter your question below and I'll generate a detailed answer"}
+              </Text>
+            </View>
 
-              <View style={styles.textAreaContainer}>
+            <View style={styles.textAreaContainer}>
+              <BlurView 
+                intensity={Platform.OS === 'android' ? 20 : (currentTheme === 'light' ? 50 : 30)}
+                tint={currentTheme === 'light' ? 'light' : 'dark'}
+                style={styles.blurContainer}
+              >
                 <TextArea
                   value={text}
                   onChangeText={setText}
-                  style={styles.customTextArea}
-                  placeholder="Type your question here..."
-                  maxLength={3000} 
+                  style={[styles.customTextArea, {color: themeColors[currentTheme].text}]}
+                  placeholder={t.typeYourQuestionHere || 'Type your question here...'}
+                  placeholderTextColor={themeColors[currentTheme].subText + '80'}
+                  maxLength={3000}
+                  multiline
                 />
                 {renderCharacterCount()}
-              </View>
+              </BlurView>
+            </View>
 
+            <Animated.View 
+              style={[
+                styles.buttonContainer,
+                { transform: [{ scale: buttonScale }] }
+              ]}
+            >
               <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  { opacity: text.trim().length > 0 ? 1 : 0.6 },
-                ]}
-                disabled={text.trim().length === 0 || isLoading}
-                onPress={handleGenerateAnswer}
+                style={[styles.button, { opacity: text.length > 0 ? 1 : 0.6 }]}
+                disabled={text.length === 0 || isLoading}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                activeOpacity={0.9}
               >
                 <LinearGradient
-                  colors={["#4a90e2", "#357abd"]}
-                  style={styles.submitGradient}
+                  colors={themeColors[currentTheme].buttonColors}
+                  style={styles.buttonGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
                   {isLoading ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
-                    <Text style={styles.submitButtonText}>Generate Answer</Text>
+                    <Text style={styles.buttonText}>
+                      {t.generateAnswer || 'Generate Answer'}
+                    </Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
+            </Animated.View>
 
-              {/* Display Generated Answer */}
-              {answer !== "" && (
-                <View style={styles.answerContainer}>
-                  <View style={styles.answerHeaderContainer}>
-                    <Text style={styles.answerLabel}>Generated Answer</Text>
-                    <View style={styles.answerDivider} />
-                  </View>
-                  <Text style={styles.answerText}>{answer}</Text>
-                </View>
-              )}
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+            {answer !== "" && (
+              <View style={styles.answerContainer}>
+                <Text style={[styles.answerLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.generatedAnswer || 'Generated Answer'}
+                </Text>
+                <Text style={[styles.answerText, {color: themeColors[currentTheme].subText}]}>
+                  {answer}
+                </Text>
+              </View>
+            )}
+          </Animated.View>
+        </ScrollView>
       </LinearGradient>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeContainer: {
+  container: {
     flex: 1,
   },
-  gradient: {
+  background: {
     flex: 1,
   },
-  keyboardAvoid: {
+  scrollView: {
     flex: 1,
   },
-  scrollContainer: {
+  scrollContent: {
     flexGrow: 1,
     paddingBottom: 30,
   },
-  header: {
-    alignItems: "center",
-    paddingTop: 60,
+  content: {
+    flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 100,
+  },
+  header: {
+    alignItems: 'center',
     marginBottom: 30,
   },
-  headerDivider: {
-    height: 2,
-    width: 60,
-    backgroundColor: "#4a90e2",
-    marginTop: 10,
-    borderRadius: 2,
-  },
-  mainTopic: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#2c3e50",
-  },
-  container: {
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
     flex: 1,
-    paddingHorizontal: 25,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
   },
   labelContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
+    alignItems: 'center'
   },
   label: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 10,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   sublabel: {
     fontSize: 16,
-    color: "#7f8c8d",
     lineHeight: 22,
   },
   textAreaContainer: {
-    marginBottom: 25,
+    flex: 1,
+    marginBottom: 20,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  blurContainer: {
+    flex: 1,
+    padding: 16,
+    minHeight: 250,
   },
   customTextArea: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 18,
-    minHeight: 180,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "rgba(74, 144, 226, 0.2)",
-  },
-  charCountContainer: {
-    marginTop: 10,
-    alignItems: "flex-end",
+    flex: 1,
+    fontSize: 16,
+    minHeight: 200,
   },
   charCount: {
+    marginTop: 10,
+    textAlign: 'right',
     fontSize: 14,
-    fontWeight: "500",
   },
-  submitButton: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginVertical: 15,
-    shadowColor: "#357abd",
+  buttonContainer: {
+    marginBottom: 20,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  submitGradient: {
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    height: 56,
-  },
-  submitButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
-  },
-  answerContainer: {
-    marginTop: 25,
-    padding: 22,
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
-    borderWidth: 1,
-    borderColor: "rgba(74, 144, 226, 0.15)",
   },
-  answerHeaderContainer: {
-    marginBottom: 15,
+  button: {
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  answerContainer: {
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   answerLabel: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 6,
-    textAlign: "center",
-  },
-  answerDivider: {
-    marginLeft: "24%",
-    height: 2,
-    width: "52%",
-    backgroundColor: "#4a90e2",
-    borderRadius: 2,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   answerText: {
     fontSize: 16,
-    color: "#34495e",
     lineHeight: 24,
   },
 });

@@ -275,13 +275,14 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 28,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   searchContainer: {
     marginVertical: 16,

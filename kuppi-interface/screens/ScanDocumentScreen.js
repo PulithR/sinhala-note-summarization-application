@@ -1,33 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
   Text,
   Image,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { BASE_API_URL } from "@env";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { LanguageContext } from '../user_preference/LanguageContext';
+import { ThemeContext } from '../user_preference/ThemeContext';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import themeColors from '../assets/ThemeColors.json';
+import { Ionicons } from "@expo/vector-icons";
 
 const ScanDocumentScreen = () => {
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const { t } = useContext(LanguageContext);
+  const { currentTheme } = useContext(ThemeContext);
+
+  const buttonColors = {
+    camera: themeColors[currentTheme].buttonColors,
+    gallery: ['#F59E0B', '#EA580C'],
+    retake: ['#EC4899', '#F43F5E'],
+    submit: themeColors[currentTheme].buttonColors,
+  };
+
+  useEffect(() => {
+    StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    (async () => {
+      await ImagePicker.getMediaLibraryPermissionsAsync();
+    })();
+  }, []);
 
   const openCamera = async () => {
     try {
       setLoading(true);
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
-        alert("Camera permission is required.");
+        alert(t.camera_permission_required || "Camera permission is required.");
         setLoading(false);
         return;
       }
 
-      // Use simpler options without MediaType or MediaTypeOptions
       const result = await ImagePicker.launchCameraAsync({
         aspect: [4, 3],
         quality: 0.8,
@@ -38,7 +59,7 @@ const ScanDocumentScreen = () => {
       }
     } catch (error) {
       console.error("Camera error:", error);
-      alert("Failed to open camera.");
+      alert(t.camera_error || "Failed to open camera.");
     } finally {
       setLoading(false);
     }
@@ -47,20 +68,17 @@ const ScanDocumentScreen = () => {
   const pickImageFromGallery = async () => {
     try {
       setLoading(true);
-
       const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
 
       if (status !== "granted") {
-        const { status: newStatus } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status: newStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (newStatus !== "granted") {
-          alert("Gallery permission is required.");
+          alert(t.gallery_permission_required || "Gallery permission is required.");
           setLoading(false);
           return;
         }
       }
 
-      // Use simpler options without MediaType or MediaTypeOptions
       const result = await ImagePicker.launchImageLibraryAsync({
         quality: 0.8,
       });
@@ -70,18 +88,11 @@ const ScanDocumentScreen = () => {
       }
     } catch (error) {
       console.error("Gallery error:", error);
-      alert("Failed to open gallery.");
+      alert(t.gallery_error || "Failed to open gallery.");
     } finally {
       setLoading(false);
     }
   };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      setPhoto(null);
-      setLoading(false);
-    }, [])
-  );
 
   const handleCaptureAgain = () => {
     setPhoto(null);
@@ -109,195 +120,283 @@ const ScanDocumentScreen = () => {
       });
 
       const data = await response.json();
-      alert("Extracted Text: " + data.text);
+      alert((t.extracted_text || "Extracted Text") + ": " + data.text);
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("Failed to process image.");
+      alert(t.failed_to_process || "Failed to process image.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Pre-check permissions when component mounts
-  React.useEffect(() => {
-    (async () => {
-      await ImagePicker.getMediaLibraryPermissionsAsync();
-    })();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      setPhoto(null);
+      setLoading(false);
+    }, [])
+  );
+
+  const renderButton = (icon, title, action, colorScheme) => (
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={action}
+        activeOpacity={0.9}
+        disabled={loading}
+      >
+        <BlurView 
+          intensity={currentTheme === 'light' ? 50 : 30} 
+          tint={currentTheme === 'light' ? 'light' : 'dark'} 
+          style={styles.blurContainer}
+        >
+          <View style={styles.iconContainer}>
+            <LinearGradient
+              colors={colorScheme}
+              style={styles.iconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <MaterialIcons name={icon} size={24} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <View style={styles.buttonTextContainer}>
+            <Text style={[styles.buttonTitle, {color: themeColors[currentTheme].text}]}>{title}</Text>
+          </View>
+        </BlurView>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      )}
-
-      {photo ? (
-        <View style={styles.previewContainer}>
-          <Image source={{ uri: photo }} style={styles.preview} />
-          <View style={styles.overlay}>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.uploadButton]}
-                onPress={handleSubmit}
-                disabled={loading}
-              >
-                <MaterialIcons
-                  name="upload"
-                  size={24}
-                  color="#FFFFFF"
-                  style={styles.icon}
-                />
-                <Text style={styles.buttonText}>Submit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.button, styles.retakeButton]}
-                onPress={handleCaptureAgain}
-                disabled={loading}
-              >
-                <MaterialIcons
-                  name="replay"
-                  size={24}
-                  color="#FFFFFF"
-                  style={styles.icon}
-                />
-                <Text style={styles.buttonText}>Retake</Text>
-              </TouchableOpacity>
-            </View>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={themeColors[currentTheme].background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
+        
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={[styles.screenTitle, {color: themeColors[currentTheme].text}]}>
+              {t.scan_document || "Scan Document"}
+            </Text>
           </View>
+
+          {photo ? (
+            <View style={styles.previewContainer}>
+              <View style={styles.imageWrapper}>
+                <BlurView 
+                  intensity={currentTheme === 'light' ? 50 : 30} 
+                  tint={currentTheme === 'light' ? 'light' : 'dark'} 
+                  style={styles.blurImageContainer}
+                >
+                  <Image source={{ uri: photo }} style={styles.preview} />
+                </BlurView>
+              </View>
+              
+              <View style={styles.buttonsRow}>
+                {renderButton(
+                  "upload",
+                  t.submit || "Submit",
+                  handleSubmit,
+                  buttonColors.submit
+                )}
+                {renderButton(
+                  "replay",
+                  t.retake || "Retake",
+                  handleCaptureAgain,
+                  buttonColors.retake
+                )}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.optionsContainer}>
+              <View style={styles.iconWrapper}>
+                <Ionicons 
+                  name="document-text-outline" 
+                  size={80} 
+                  color={themeColors[currentTheme].text} 
+                />
+              </View>
+              <Text style={[styles.instructionText, {color: themeColors[currentTheme].subText}]}>
+                {t.scan_instruction || "Capture or select a document to scan"}
+              </Text>
+              
+              <View style={styles.buttonsRow}>
+                {renderButton(
+                  "photo-camera",
+                  t.open_camera || "Open Camera",
+                  openCamera,
+                  buttonColors.camera
+                )}
+                
+                {renderButton(
+                  "photo-library",
+                  t.pick_from_gallery || "Pick from Gallery",
+                  pickImageFromGallery,
+                  buttonColors.gallery
+                )}
+              </View>
+            </View>
+          )}
         </View>
-      ) : (
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              styles.cameraButton,
-              loading && styles.disabledButton,
-            ]}
-            onPress={openCamera}
-            disabled={loading}
-          >
-            <MaterialIcons name="photo-camera" size={24} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Open Camera</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              styles.galleryButton,
-              loading && styles.disabledButton,
-            ]}
-            onPress={pickImageFromGallery}
-            disabled={loading}
-          >
-            <MaterialIcons name="photo-library" size={24} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Pick from Gallery</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </SafeAreaView>
+
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <BlurView 
+              intensity={60} 
+              tint={currentTheme === 'light' ? 'light' : 'dark'} 
+              style={styles.loadingBlur}
+            >
+              <ActivityIndicator size="large" color={themeColors[currentTheme === 'light' ? 'dark' : 'light'].text} />
+              <Text style={[styles.loadingText, {color: themeColors[currentTheme].text}]}>
+                {t.loading || "Loading..."}
+              </Text>
+            </BlurView>
+          </View>
+        )}
+      </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 100,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  screenTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  instructionText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 40,
+    marginTop: 20,
+  },
+  optionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 50,
+  },
+  iconWrapper: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 40,
+    padding: 20,
+    marginBottom: 20,
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    flexWrap: 'wrap',
+  },
+  buttonContainer: {
+    width: '45%',
+    marginBottom: 16,
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 18,
+    overflow: 'hidden',
+    height: 160,
+  },
+  blurContainer: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    marginBottom: 16,
+  },
+  iconGradient: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonTextContainer: {
+    alignItems: 'center',
+  },
+  buttonTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   previewContainer: {
     flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  imageWrapper: {
+    width: '100%',
+    height: '70%',
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  blurImageContainer: {
+    flex: 1,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   preview: {
-    flex: 1,
-    resizeMode: "contain",
-    width: "100%",
-  },
-  overlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 20,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    marginBottom: 20,
-    width: "100%",
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    width: '100%',
+    height: '100%',
     borderRadius: 16,
-    marginHorizontal: 10,
-  },
-  uploadButton: {
-    backgroundColor: "#2178dc",
-    flex: 1,
-  },
-  retakeButton: {
-    backgroundColor: "#FF6B6B",
-    flex: 1,
-  },
-  cameraButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    marginBottom: 20,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  galleryButton: {
-    backgroundColor: "#FF9800",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "900",
-    marginLeft: 8,
-  },
-  icon: {
-    marginRight: 8,
+    resizeMode: 'contain',
   },
   loadingOverlay: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 999,
   },
-  loadingText: {
-    color: "#FFFFFF",
-    marginTop: 10,
-    fontSize: 16,
+  loadingBlur: {
+    paddingHorizontal: 40,
+    paddingVertical: 30,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  disabledButton: {
-    opacity: 0.5,
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 
