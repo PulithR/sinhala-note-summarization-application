@@ -381,16 +381,10 @@ const ScanDocumentScreen = () => {
           onRequestClose={() => setShowResultModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View
-              style={[
-                styles.modalContainer,
-                {
-                  backgroundColor:
-                    currentTheme === "light"
-                      ? "rgba(255, 255, 255, 0.95)"
-                      : "rgba(30, 30, 30, 0.95)",
-                },
-              ]}
+            <BlurView
+              intensity={currentTheme === "light" ? 50 : 30}
+              tint={currentTheme === "light" ? "light" : "dark"}
+              style={styles.modalContainer}
             >
               <View style={styles.modalHeader}>
                 <Text
@@ -410,27 +404,38 @@ const ScanDocumentScreen = () => {
                     setShowResultModal(false);
                     setProcessedResult("");
                   }}
+                  style={styles.closeButton}
                 >
-                  <MaterialIcons
-                    name="close"
-                    size={24}
-                    color={themeColors[currentTheme].text}
-                  />
+                  <LinearGradient
+                    colors={themeColors[currentTheme].buttonColors}
+                    style={styles.closeButtonGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <MaterialIcons name="close" size={20} color="#FFFFFF" />
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
 
               <ScrollView
                 style={styles.modalContent}
                 contentContainerStyle={styles.modalContentContainer}
+                showsVerticalScrollIndicator={false}
               >
-                <Text
-                  style={[
-                    styles.resultText,
-                    { color: themeColors[currentTheme].text },
-                  ]}
+                <BlurView
+                  intensity={currentTheme === "light" ? 40 : 25}
+                  tint={currentTheme === "light" ? "light" : "dark"}
+                  style={styles.resultTextContainer}
                 >
-                  {processedResult || extractedText}
-                </Text>
+                  <Text
+                    style={[
+                      styles.resultText,
+                      { color: themeColors[currentTheme].text },
+                    ]}
+                  >
+                    {processedResult || extractedText}
+                  </Text>
+                </BlurView>
               </ScrollView>
 
               {!processedResult && (
@@ -438,26 +443,74 @@ const ScanDocumentScreen = () => {
                   <Text
                     style={[
                       styles.optionsTitle,
-                      { color: themeColors[currentTheme].subText },
+                      { color: themeColors[currentTheme].text },
                     ]}
                   >
-                    {t.process_text || "Process Text"}
+                    {t.what_to_do || "What would you like to do with this text?"}
                   </Text>
 
-                  <View style={styles.optionsRow}>
-                    {renderOptionButton(
-                      "summarize",
-                      "summarize",
-                      t.summarize || "Summarize",
-                      buttonColors.summarize
-                    )}
+                  <View style={styles.optionsCards}>
+                    <TouchableOpacity
+                      style={[
+                        styles.optionCard,
+                        selectedOption === "summarize" && styles.selectedCard,
+                        { borderColor: buttonColors.summarize[0] }
+                      ]}
+                      onPress={() => setSelectedOption("summarize")}
+                      disabled={processingOption}
+                    >
+                      <BlurView
+                        intensity={currentTheme === "light" ? 40 : 30}
+                        tint={currentTheme === "light" ? "light" : "dark"}
+                        style={styles.cardContent}
+                      >
+                        <LinearGradient
+                          colors={buttonColors.summarize}
+                          style={styles.cardIconContainer}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                        >
+                          <MaterialIcons name="summarize" size={24} color="#FFFFFF" />
+                        </LinearGradient>
+                        <Text style={[styles.cardTitle, { color: themeColors[currentTheme].text }]}>
+                          {t.summarize || "Summarize"}
+                        </Text>
+                        <Text style={[styles.cardDescription, { color: themeColors[currentTheme].subText }]}>
+                          {t.summarize_desc || "Create a concise summary of the text"}
+                        </Text>
+                      </BlurView>
+                    </TouchableOpacity>
 
-                    {renderOptionButton(
-                      "generate",
-                      "question-answer",
-                      t.generate_answer || "Generate Answer",
-                      buttonColors.generate
-                    )}
+                    <TouchableOpacity
+                      style={[
+                        styles.optionCard,
+                        selectedOption === "generate" && styles.selectedCard,
+                        { borderColor: buttonColors.generate[0] }
+                      ]}
+                      onPress={() => setSelectedOption("generate")}
+                      disabled={processingOption}
+                    >
+                      <BlurView
+                        intensity={currentTheme === "light" ? 40 : 30}
+                        tint={currentTheme === "light" ? "light" : "dark"}
+                        style={styles.cardContent}
+                      >
+                        <LinearGradient
+                          colors={buttonColors.generate}
+                          style={styles.cardIconContainer}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                        >
+                          <MaterialIcons name="question-answer" size={24} color="#FFFFFF" />
+                        </LinearGradient>
+                        <Text style={[styles.cardTitle, { color: themeColors[currentTheme].text }]}>
+                          {t.generate_answer || "Generate Answer"}
+                        </Text>
+                        <Text style={[styles.cardDescription, { color: themeColors[currentTheme].subText }]}>
+                          {t.generate_desc || "Treat the text as a question and get an answer"}
+                        </Text>
+                      </BlurView>
+                    </TouchableOpacity>
                   </View>
 
                   <TouchableOpacity
@@ -483,17 +536,25 @@ const ScanDocumentScreen = () => {
                       {processingOption ? (
                         <ActivityIndicator color="#FFFFFF" size="small" />
                       ) : (
-                        <Text style={styles.processButtonText}>
-                          {selectedOption === "summarize"
-                            ? t.summarize || "Summarize"
-                            : t.generate_answer || "Generate Answer"}
-                        </Text>
+                        <View style={styles.processButtonContent}>
+                          <MaterialIcons
+                            name={selectedOption === "summarize" ? "summarize" : "question-answer"}
+                            size={20}
+                            color="#FFFFFF"
+                            style={styles.processButtonIcon}
+                          />
+                          <Text style={styles.processButtonText}>
+                            {selectedOption === "summarize"
+                              ? t.summarize || "Summarize"
+                              : t.generate_answer || "Generate Answer"}
+                          </Text>
+                        </View>
                       )}
                     </LinearGradient>
                   </TouchableOpacity>
                 </View>
               )}
-            </View>
+            </BlurView>
           </View>
         </Modal>
 
@@ -739,60 +800,100 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(0, 0, 0, 0.1)",
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
   },
+  closeButton: {
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  closeButtonGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalContent: {
-    padding: 16,
-    maxHeight: 300,
+    padding: 20,
+    maxHeight: 350,
   },
   modalContentContainer: {
     flexGrow: 1,
     paddingBottom: 16,
   },
+  resultTextContainer: {
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(100, 100, 100, 0.1)",
+  },
   resultText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 17,
+    lineHeight: 26,
     flexWrap: "wrap",
     width: "100%",
+    fontWeight: "500",
   },
   processingOptions: {
-    padding: 16,
+    padding: 20,
     borderTopWidth: 1,
     borderTopColor: "rgba(0, 0, 0, 0.1)",
   },
   optionsTitle: {
-    fontSize: 14,
-    marginBottom: 12,
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 20,
     textAlign: "center",
   },
-  optionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 16,
+  optionsCards: {
+    width: "100%",
+    marginBottom: 24,
   },
-  optionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.1)",
+  optionCard: {
+    borderRadius: 20,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: "transparent",
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  optionGradient: {
-    width: 36,
-    height: 36,
+  selectedCard: {
+    borderWidth: 2,
+  },
+  cardContent: {
+    padding: 16,
     borderRadius: 18,
+  },
+  cardIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 8,
+    marginBottom: 12,
   },
-  optionText: {
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  cardDescription: {
     fontSize: 14,
+    lineHeight: 20,
   },
   processButton: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -801,9 +902,17 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   processButtonGradient: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 24,
     alignItems: "center",
+  },
+  processButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  processButtonIcon: {
+    marginRight: 8,
   },
   processButtonText: {
     color: "#FFFFFF",
