@@ -105,8 +105,8 @@ const AddNotesScreen = () => {
       if (response.ok) {
         setIsSaved(true);
         Alert.alert(
-          t.note_saved_title || "Success",
-          t.note_saved_message || "Note added successfully!",
+          t.noteSavedTitle || "Success",
+          t.noteSavedMessage || "Note added successfully!",
           [{
             text: t.ok || "OK",
             onPress: () => navigation.reset({

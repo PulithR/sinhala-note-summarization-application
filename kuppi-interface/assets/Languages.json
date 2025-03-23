@@ -100,7 +100,12 @@
       "failed_to_fetch_note": "Failed to fetch note",
       "failed_to_delete_note": "Failed to delete note",
       "failed_to_delete_all": "Failed to delete all notes",
-      "back": "Back"
+      "back": "Back",
+      "clear_note_title": "Clear Note",
+      "clear_note_message": "Are you sure you want to clear this note?",
+      "ok": "OK",
+      "error": "Error",
+      "failed_to_add_note": "Failed to add note"
     },
     "si": {
       "profile_settings": "පැතිකඩ සැකසීම්",
@@ -203,7 +208,12 @@
       "failed_to_fetch_note": "සටහන ලබා ගැනීමට අසමත් විය",
       "failed_to_delete_note": "සටහන මැකීමට අසමත් විය",
       "failed_to_delete_all": "සියලු සටහන් මැකීමට අසමත් විය",
-      "back": "ආපසු"
+      "back": "ආපසු",
+      "clear_note_title": "සටහන මකන්න",
+      "clear_note_message": "ඔබට මෙම සටහන මැකීමට අවශ්‍ය බව විශ්වාසද?",
+      "ok": "හරි",
+      "error": "දෝෂයකි",
+      "failed_to_add_note": "සටහන එකතු කිරීමට අසමත් විය"
       }
   }
   
