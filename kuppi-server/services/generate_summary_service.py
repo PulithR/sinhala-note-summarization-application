@@ -7,7 +7,7 @@ def generate_summary_service(data):
     try:
         user_content = data.get("content")
         percentage = data.get("percentage", 50)  # Default to 50% if not provided
-        style = data.get("style", "casual")  # Default to casual if not provided
+        style = data.get("style", "academic")  # Default to academic if not provided
         
         # Map style to descriptive text
         style_descriptions = {
