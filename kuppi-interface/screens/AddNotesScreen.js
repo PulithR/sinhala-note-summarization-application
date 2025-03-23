@@ -20,23 +20,29 @@ import { LanguageContext } from '../user_preference/LanguageContext';
 import themeColors from '../assets/ThemeColors.json';
 
 const AddNotesScreen = () => {
+  // Contexts for authentication, theme, and language preferences
   const { token } = useContext(AuthContext);
   const { currentTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   
   const navigation = useNavigation();
   
+  // State variables for note text, topic, and save status
   const [noteText, setNoteText] = useState("");
   const [noteTopic, setNoteTopic] = useState("");
   const [isSaved, setIsSaved] = useState(false);
   
+  // Animation references for fade, slide, and button scaling
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const saveButtonScale = useRef(new Animated.Value(1)).current;
   const clearButtonScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Set the status bar style based on the current theme
     StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    
+    // Start fade and slide animations when the component mounts
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -51,9 +57,11 @@ const AddNotesScreen = () => {
     ]).start();
   }, []);
 
+  // Calculate word and character counts for the note text
   const wordCount = noteText.trim() ? noteText.trim().split(/\s+/).length : 0;
   const charCount = noteText.length;
 
+  // Handle button press animations (scale down on press-in)
   const handleButtonPressIn = (scaleRef) => {
     Animated.spring(scaleRef, {
       toValue: 0.97,
@@ -62,6 +70,7 @@ const AddNotesScreen = () => {
     }).start();
   };
 
+  // Handle button release animations (scale back to normal on press-out)
   const handleButtonPressOut = (scaleRef) => {
     Animated.spring(scaleRef, {
       toValue: 1,
@@ -71,6 +80,7 @@ const AddNotesScreen = () => {
     }).start();
   };
 
+  // Clear the note text and topic with a confirmation alert
   const clearNote = () => {
     Alert.alert(
       t.clear_note_title || "Clear Note",
@@ -89,6 +99,7 @@ const AddNotesScreen = () => {
     );
   };
 
+  // Handle adding a new note by making a POST request to the API
   const handleAddNote = async () => {
     const title = noteTopic;
     const content = noteText;
@@ -126,18 +137,23 @@ const AddNotesScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Background gradient based on the current theme */}
       <LinearGradient
         colors={themeColors[currentTheme].background}
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
+        {/* Status bar styling */}
         <StatusBar barStyle={currentTheme === 'light' ? 'dark-content' : 'light-content'} />
+        
+        {/* Scrollable content */}
         <ScrollView 
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* Animated container for the main content */}
           <Animated.View style={[
             styles.content,
             {
@@ -145,6 +161,7 @@ const AddNotesScreen = () => {
               transform: [{ translateY: slideAnim }]
             }
           ]}>
+            {/* Header section with title and save status */}
             <View style={styles.header}>
               <Text style={[styles.title, { color: themeColors[currentTheme].text }]}>
                 {t.digital_notebook || "Digital Notebook"}
@@ -154,6 +171,7 @@ const AddNotesScreen = () => {
               </Text>
             </View>
 
+            {/* Input field for the note topic */}
             <View style={styles.inputContainer}>
               <BlurView 
                 intensity={currentTheme === 'light' ? 50 : 30}
@@ -177,6 +195,7 @@ const AddNotesScreen = () => {
               </BlurView>
             </View>
 
+            {/* Buttons for saving and clearing the note */}
             <View style={styles.buttonContainer}>
               <Animated.View style={[styles.buttonWrapper, { transform: [{ scale: saveButtonScale }] }]}>
                 <TouchableOpacity
@@ -219,6 +238,7 @@ const AddNotesScreen = () => {
               </Animated.View>
             </View>
 
+            {/* Text area for writing the note */}
             <View style={styles.textareaContainer}>
               <BlurView 
                 intensity={currentTheme === 'light' ? 50 : 30}
@@ -240,6 +260,7 @@ const AddNotesScreen = () => {
               </BlurView>
             </View>
 
+            {/* Word and character count display */}
             <View style={styles.statsContainer}>
               <Text style={[styles.statsText, { color: themeColors[currentTheme].subText }]}>
                 {t.words || "Words"}: {wordCount}

@@ -21,20 +21,26 @@ import { ThemeContext } from "../user_preference/ThemeContext";
 import themeColors from "../assets/ThemeColors.json";
 
 const AnswerGeneratorScreen = () => {
+  // Contexts for authentication, language, and theme preferences
   const { token } = useContext(AuthContext);
   const { t } = useContext(LanguageContext);
   const { currentTheme } = useContext(ThemeContext);
   
+  // State variables for user input, generated answer, and loading state
   const [text, setText] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
+  // Animation references for fade, slide, and button scaling
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Set the status bar style based on the current theme
     StatusBar.setBarStyle(currentTheme === 'light' ? 'dark-content' : 'light-content');
+    
+    // Start parallel animations for fade-in and slide-up effects
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -49,6 +55,7 @@ const AnswerGeneratorScreen = () => {
     ]).start();
   }, []);
 
+  // Handle button press-in animation (scale down)
   const handlePressIn = () => {
     Animated.spring(buttonScale, {
       toValue: 0.97,
@@ -57,6 +64,7 @@ const AnswerGeneratorScreen = () => {
     }).start();
   };
 
+  // Handle button press-out animation (scale back up) and API call
   const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
@@ -65,10 +73,12 @@ const AnswerGeneratorScreen = () => {
       useNativeDriver: true,
     }).start();
     
+    // Prevent API call if input is empty
     if (text.trim().length === 0) return;
     
-    setIsLoading(true);
+    setIsLoading(true); // Show loading indicator
     try {
+      // Make API request to generate an answer
       const response = await fetch(`${BASE_API_URL}/generate-answer`, {
         method: "POST",
         headers: {
@@ -78,22 +88,26 @@ const AnswerGeneratorScreen = () => {
         body: JSON.stringify({ question: text }),
       });
 
+      // Handle non-OK responses
       if (!response.ok) {
         throw new Error(t.errorFetchAnswer || "Failed to fetch answer");
       }
 
+      // Parse and set the generated answer
       const data = await response.json();
       setAnswer(data.answer);
     } catch (error) {
+      // Show error message to the user
       alert(error.message);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Hide loading indicator
     }
   };
 
+  // Render character count with dynamic color based on remaining characters
   const renderCharacterCount = () => {
-    const maxLength = 3000;
-    const remaining = maxLength - text.length;
+    const maxLength = 3000; // Maximum allowed characters
+    const remaining = maxLength - text.length; // Remaining characters
     const color = remaining < 500 ? '#ef4444' : remaining < 1000 ? '#f59e0b' : themeColors[currentTheme].subText;
 
     return (
@@ -105,21 +119,25 @@ const AnswerGeneratorScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Background gradient based on the current theme */}
       <LinearGradient
         colors={themeColors[currentTheme].background}
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
+        {/* Status bar configuration */}
         <StatusBar
           barStyle={currentTheme === "light" ? "dark-content" : "light-content"}
         />
 
+        {/* Scrollable content */}
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* Animated container for the main content */}
           <Animated.View
             style={[
               styles.content,
@@ -129,6 +147,7 @@ const AnswerGeneratorScreen = () => {
               },
             ]}
           >
+            {/* Header section */}
             <View style={styles.header}>
               <Text
                 style={[
@@ -141,6 +160,7 @@ const AnswerGeneratorScreen = () => {
               <View style={styles.placeholder}></View>
             </View>
 
+            {/* Input label and description */}
             <View style={styles.labelContainer}>
               <Text
                 style={[
@@ -161,6 +181,7 @@ const AnswerGeneratorScreen = () => {
               </Text>
             </View>
 
+            {/* Text area for user input */}
             <View style={styles.textAreaContainer}>
               <BlurView
                 intensity={
@@ -193,6 +214,7 @@ const AnswerGeneratorScreen = () => {
               </BlurView>
             </View>
 
+            {/* Button to generate the answer */}
             <Animated.View
               style={[
                 styles.buttonContainer,
@@ -223,6 +245,7 @@ const AnswerGeneratorScreen = () => {
               </TouchableOpacity>
             </Animated.View>
 
+            {/* Display the generated answer */}
             {answer !== "" && (
               <View style={styles.answerContainer}>
                 <Text
