@@ -117,7 +117,7 @@ const AddNotesScreen = () => {
         );
       } else {
         const errorData = await response.json();
-        Alert.alert(t.error || "Error", errorData.error || t.failed_to_add_note || "Failed to add note");
+        Alert.alert(t.error || "Error", t.failed_to_add_note || "Failed to add note");
       }
     } catch (error) {
       Alert.alert(t.error || "Error", error.message);
