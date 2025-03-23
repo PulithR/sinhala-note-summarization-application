@@ -51,7 +51,7 @@ function HomeStack() {
       <Stack.Screen 
         name="Home" 
         component={HomeScreen} 
-        options={{ headerShown: false }} // Hides the header for the Home screen
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="Summarizer"  
