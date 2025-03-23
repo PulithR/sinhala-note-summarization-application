@@ -136,7 +136,7 @@ const AnswerGeneratorScreen = () => {
                   { color: themeColors[currentTheme].text },
                 ]}
               >
-                {t.answerGenerator || "Answer Generator"}
+                {t.generate_answer || "Answer Generator"}
               </Text>
               <View style={styles.placeholder}></View>
             </View>

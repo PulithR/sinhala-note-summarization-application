@@ -100,7 +100,7 @@
       "title": "ඔබට අවශ්‍ය කුමක්ද?",
       "summarizer": "සාරාංශකරණය",
       "summarizer_desc": "ඔබගේ ලේඛන සඳහා ඉක්මන් සාරාංශ ලබාගන්න",
-      "generate_answer": "පිළිතුරු ලබාගන්න",
+      "generate_answer": "පිළිතුරු උත්පාදකය",
       "generate_answer_desc": "ඔබගේ ප්‍රශ්නවලට වහාම පිළිතුරු ලබාගන්න",
       "add_notes": "සටහන් එකතු කරන්න",
       "add_notes_desc": "ඔබගේ සටහන් සාදා පිළිවෙලට තබාගන්න",
@@ -174,7 +174,8 @@
       "processing_document": "ලේඛනය සැකසෙමින් පවතී",
       "errorFetchSummary": "සාරාංශය ලබා ගැනීමට අසමත් විය",
       "errorFetchAnswer": "පිළිතුර ලබා ගැනීමට අසමත් විය",
-      "failed_to_process": "පෙළ සැකසීමට අසමත් විය"
+      "failed_to_process": "පෙළ සැකසීමට අසමත් විය",
+      "submit": "යොමු කරන්න"
     }
   }
   
