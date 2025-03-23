@@ -26,6 +26,8 @@ const SummarizerScreen = () => {
   const [text, setText] = useState("");
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [percentage, setPercentage] = useState(50); // Default: 50%
+  const [style, setStyle] = useState("casual"); // Default: casual
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -73,7 +75,11 @@ const SummarizerScreen = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify({ 
+          content: text,
+          percentage: percentage,
+          style: style
+        }),
       });
 
       if (!response.ok) {
@@ -100,6 +106,66 @@ const SummarizerScreen = () => {
       </Text>
     );
   };
+
+  const PercentageOption = ({ value }) => (
+    <TouchableOpacity
+      style={[
+        styles.optionButton,
+        percentage === value && styles.optionButtonSelected,
+        { 
+          borderColor: percentage === value 
+            ? 'transparent' 
+            : currentTheme === 'dark' 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'rgba(0, 0, 0, 0.1)'
+        }
+      ]}
+      onPress={() => setPercentage(value)}
+      activeOpacity={0.85}
+    >
+      <Text style={[
+        styles.optionText,
+        percentage === value && styles.optionTextSelected,
+        { 
+          color: percentage === value 
+            ? '#FFFFFF' 
+            : themeColors[currentTheme].text
+        }
+      ]}>
+        {value}%
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const StyleOption = ({ value, label }) => (
+    <TouchableOpacity
+      style={[
+        styles.optionButton,
+        style === value && styles.optionButtonSelected,
+        { 
+          borderColor: style === value 
+            ? 'transparent' 
+            : currentTheme === 'dark' 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'rgba(0, 0, 0, 0.1)'
+        }
+      ]}
+      onPress={() => setStyle(value)}
+      activeOpacity={0.85}
+    >
+      <Text style={[
+        styles.optionText,
+        style === value && styles.optionTextSelected,
+        { 
+          color: style === value 
+            ? '#FFFFFF' 
+            : themeColors[currentTheme].text
+        }
+      ]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -158,6 +224,30 @@ const SummarizerScreen = () => {
               </BlurView>
             </View>
 
+            <View style={styles.optionsContainer}>
+              <View style={styles.optionSection}>
+                <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.summaryLength || 'Summary Length'}
+                </Text>
+                <View style={styles.optionsRow}>
+                  <PercentageOption value={25} />
+                  <PercentageOption value={50} />
+                  <PercentageOption value={75} />
+                </View>
+              </View>
+
+              <View style={styles.optionSection}>
+                <Text style={[styles.optionLabel, {color: themeColors[currentTheme].text}]}>
+                  {t.summaryStyle || 'Summary Style'}
+                </Text>
+                <View style={styles.optionsRow}>
+                  <StyleOption value="casual" label={t.casual || "Casual"} />
+                  <StyleOption value="formal" label={t.formal || "Formal"} />
+                  <StyleOption value="academic" label={t.academic || "Academic"} />
+                </View>
+              </View>
+            </View>
+
             <Animated.View 
               style={[
                 styles.buttonContainer,
@@ -192,6 +282,11 @@ const SummarizerScreen = () => {
               <View style={styles.summaryContainer}>
                 <Text style={[styles.summaryLabel, {color: themeColors[currentTheme].text}]}>
                   {t.generatedSummary || 'Generated Summary'}
+                </Text>
+                <Text style={[styles.summaryInfo, {color: themeColors[currentTheme].subText}]}>
+                  {percentage}% • {style === 'casual' ? (t.casual || 'Casual') : 
+                    style === 'formal' ? (t.formal || 'Formal') : 
+                    (t.academic || 'Academic')}
                 </Text>
                 <Text style={[styles.summaryText, {color: themeColors[currentTheme].subText}]}>
                   {summary}
@@ -272,6 +367,56 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 14,
   },
+  optionsContainer: {
+    marginBottom: 28,
+    marginHorizontal: 4,
+  },
+  optionSection: {
+    marginBottom: 22,
+  },
+  optionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    marginHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  optionButtonSelected: {
+    backgroundColor: themeColors?.['dark']?.accentColor || '#6366f1',
+    borderColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  optionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.3,
+  },
+  optionTextSelected: {
+    color: '#FFFFFF',
+  },
   buttonContainer: {
     marginBottom: 20,
     shadowColor: '#000',
@@ -302,8 +447,14 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 20,
     fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  summaryInfo: {
+    fontSize: 14,
     marginBottom: 12,
     textAlign: 'center',
+    opacity: 0.8,
   },
   summaryText: {
     fontSize: 16,
