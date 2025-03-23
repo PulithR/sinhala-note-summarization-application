@@ -112,14 +112,25 @@ const SummarizerScreen = () => {
       style={[
         styles.optionButton,
         percentage === value && styles.optionButtonSelected,
-        { borderColor: themeColors[currentTheme].accentColor }
+        { 
+          borderColor: percentage === value 
+            ? 'transparent' 
+            : currentTheme === 'dark' 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'rgba(0, 0, 0, 0.1)'
+        }
       ]}
       onPress={() => setPercentage(value)}
+      activeOpacity={0.85}
     >
       <Text style={[
         styles.optionText,
         percentage === value && styles.optionTextSelected,
-        { color: percentage === value ? '#FFFFFF' : themeColors[currentTheme].text }
+        { 
+          color: percentage === value 
+            ? '#FFFFFF' 
+            : themeColors[currentTheme].text
+        }
       ]}>
         {value}%
       </Text>
@@ -131,14 +142,25 @@ const SummarizerScreen = () => {
       style={[
         styles.optionButton,
         style === value && styles.optionButtonSelected,
-        { borderColor: themeColors[currentTheme].accentColor }
+        { 
+          borderColor: style === value 
+            ? 'transparent' 
+            : currentTheme === 'dark' 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'rgba(0, 0, 0, 0.1)'
+        }
       ]}
       onPress={() => setStyle(value)}
+      activeOpacity={0.85}
     >
       <Text style={[
         styles.optionText,
         style === value && styles.optionTextSelected,
-        { color: style === value ? '#FFFFFF' : themeColors[currentTheme].text }
+        { 
+          color: style === value 
+            ? '#FFFFFF' 
+            : themeColors[currentTheme].text
+        }
       ]}>
         {label}
       </Text>
@@ -346,15 +368,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   optionsContainer: {
-    marginBottom: 20,
+    marginBottom: 28,
+    marginHorizontal: 4,
   },
   optionSection: {
-    marginBottom: 16,
+    marginBottom: 22,
   },
   optionLabel: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   optionsRow: {
     flexDirection: 'row',
@@ -362,20 +385,34 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 12,
-    borderRadius: 14,
+    borderRadius: 18,
     borderWidth: 1,
-    marginHorizontal: 5,
+    marginHorizontal: 6,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
   },
   optionButtonSelected: {
-    backgroundColor: '#6366f1',
-    borderColor: '#6366f1',
+    backgroundColor: themeColors?.['dark']?.accentColor || '#6366f1',
+    borderColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   optionText: {
     fontSize: 14,
     fontWeight: '500',
+    letterSpacing: 0.3,
   },
   optionTextSelected: {
     color: '#FFFFFF',
