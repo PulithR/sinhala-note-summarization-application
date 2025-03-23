@@ -66,7 +66,13 @@
       "noteSavedMessage": "Your note has been saved.",
       "logout": "Log Out",
       "logout_desc": "Sign out of your account",
-      "features": "Features"
+      "features": "Features",
+      "summaryLength": "Summary Length",
+      "summaryStyle": "Summary Style",
+      "casual": "Casual",
+      "formal": "Formal",
+      "academic": "Academic",
+      "generatedSummary": "Generated Summary"
     },
     "si": {
       "profile_settings": "පැතිකඩ සැකසුම්",
@@ -136,7 +142,13 @@
       "noteSavedMessage": "ඔබේ සටහන සුරකින ලදී",
       "logout": "ලොග් අවුට්",
       "logout_desc": "ඔබේ ගිණුමෙන් ඉවත් වන්න",
-      "features": "විශේෂාංග"
+      "features": "විශේෂාංග",
+      "summaryLength": "සාරාංශයේ දිග",
+      "summaryStyle": "සාරාංශයේ විලාසය",
+      "casual": "සාමාන්ය",
+      "formal": "විධිමත්",
+      "academic": "අධ්යාපනික",
+      "generatedSummary": "ජනනය කරන ලද සාරාංශය"
     }
   }
   
