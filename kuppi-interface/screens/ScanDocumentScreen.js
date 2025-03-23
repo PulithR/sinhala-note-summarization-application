@@ -504,7 +504,7 @@ const ScanDocumentScreen = () => {
                           <MaterialIcons name="question-answer" size={24} color="#FFFFFF" />
                         </LinearGradient>
                         <Text style={[styles.cardTitle, { color: themeColors[currentTheme].text }]}>
-                          {t.generate_answer || "Generate Answer"}
+                          {t.generateAnswer || "Generate Answer"}
                         </Text>
                         <Text style={[styles.cardDescription, { color: themeColors[currentTheme].subText }]}>
                           {t.generate_desc || "Treat the text as a question and get an answer"}
@@ -546,7 +546,7 @@ const ScanDocumentScreen = () => {
                           <Text style={styles.processButtonText}>
                             {selectedOption === "summarize"
                               ? t.summarize || "Summarize"
-                              : t.generate_answer || "Generate Answer"}
+                              : t.generateAnswer || "Generate Answer"}
                           </Text>
                         </View>
                       )}

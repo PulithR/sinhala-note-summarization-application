@@ -13,15 +13,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
 import { BASE_API_URL } from '@env';
 import { AuthContext } from "../authentication/AuthContext";
-import { ThemeContext } from '../user_preference/ThemeContext'; // Added ThemeContext
-import { LanguageContext } from '../user_preference/LanguageContext'; // Added LanguageContext
+import { ThemeContext } from '../user_preference/ThemeContext';
+import { LanguageContext } from '../user_preference/LanguageContext';
 import { Ionicons } from "@expo/vector-icons";
 import themeColors from '../assets/ThemeColors.json';
 
 const NoteBookScreen = ({ navigation }) => {
   const { token } = useContext(AuthContext);
-  const { currentTheme, toggleTheme } = useContext(ThemeContext); // Theme context
-  const { t, toggleLanguage } = useContext(LanguageContext); // Language context
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { t, toggleLanguage } = useContext(LanguageContext);
   const [searchText, setSearchText] = useState("");
   const [notes, setNotes] = useState([]);
 
@@ -144,7 +144,16 @@ const NoteBookScreen = ({ navigation }) => {
   const RenderNoteItem = ({ item }) => {
     return (
       <TouchableOpacity
-        style={styles.noteContainer}
+        style={[
+          styles.noteContainer,
+          { 
+            backgroundColor: currentTheme === 'light' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.1)',
+            borderColor: currentTheme === 'light' ? '#E5E7EB' : 'rgba(255, 255, 255, 0.1)',
+            borderWidth: 1,
+            shadowColor: currentTheme === 'light' ? '#000' : 'transparent',
+            shadowOpacity: currentTheme === 'light' ? 0.1 : 0,
+          }
+        ]}
         onPress={() => handleNotePress(item._id)}
       >
         <View style={styles.blurContainer}>
@@ -363,15 +372,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 18,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3, 
+    overflow: 'hidden', 
   },
   blurContainer: {
     padding: 20,
     minHeight: 100,
     alignItems: 'center',
+    borderRadius: 18, 
   },
   noteTitle: {
     fontSize: 18,

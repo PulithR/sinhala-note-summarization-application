@@ -149,7 +149,7 @@ const HomeScreen = ({ navigation }) => {
               )}
               {renderButton(
                 "💡",
-                "generate_answer",
+                "generateAnswer",
                 "generate_answer_desc",
                 buttonScales.generateAnswer,
                 "GenerateAnswer",

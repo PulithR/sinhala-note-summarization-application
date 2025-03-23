@@ -136,7 +136,7 @@ const AnswerGeneratorScreen = () => {
                   { color: themeColors[currentTheme].text },
                 ]}
               >
-                {t.generate_answer || "Answer Generator"}
+                {t.generateAnswer || "Answer Generator"}
               </Text>
               <View style={styles.placeholder}></View>
             </View>
@@ -231,7 +231,7 @@ const AnswerGeneratorScreen = () => {
                     { color: themeColors[currentTheme].text },
                   ]}
                 >
-                  {t.generatedAnswer || "Generated Answer"}
+                  {t.generated_answer || "Generated Answer"}
                 </Text>
                 <Markdown
                   style={[
