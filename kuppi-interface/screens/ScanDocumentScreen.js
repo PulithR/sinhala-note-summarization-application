@@ -22,39 +22,47 @@ import { Ionicons } from "@expo/vector-icons";
 import { BASE_API_URL } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Main component for scanning documents
 const ScanDocumentScreen = () => {
-  const [photo, setPhoto] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [extractedText, setExtractedText] = useState("");
-  const [showResultModal, setShowResultModal] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("extract");
-  const [processedResult, setProcessedResult] = useState("");
-  const [processingOption, setProcessingOption] = useState(false);
+  // State variables for managing photo, loading, and text processing
+  const [photo, setPhoto] = useState(null); // Holds the selected or captured image URI
+  const [loading, setLoading] = useState(false); // Indicates if something is being processed
+  const [extractedText, setExtractedText] = useState(""); // Stores text extracted from the image
+  const [showResultModal, setShowResultModal] = useState(false); // Controls visibility of result modal
+  const [selectedOption, setSelectedOption] = useState("extract"); // Tracks the selected processing option
+  const [processedResult, setProcessedResult] = useState(""); // Stores the result after processing (summary or answer)
+  const [processingOption, setProcessingOption] = useState(false); // Indicates if text processing is in progress
 
-  const { t } = useContext(LanguageContext);
-  const { currentTheme } = useContext(ThemeContext);
+  // Access language and theme contexts for localization and styling
+  const { t } = useContext(LanguageContext); // Translation function for multilingual support
+  const { currentTheme } = useContext(ThemeContext); // Current theme (light/dark) for styling
 
+  // Define button color schemes based on the current theme
   const buttonColors = {
-    camera: themeColors[currentTheme].buttonColors,
-    gallery: ["#F59E0B", "#EA580C"],
-    retake: ["#EC4899", "#F43F5E"],
-    submit: themeColors[currentTheme].buttonColors,
-    summarize: ["#3B82F6", "#2563EB"],
-    generate: ["#10B981", "#059669"],
+    camera: themeColors[currentTheme].buttonColors, // Colors for camera button
+    gallery: ["#F59E0B", "#EA580C"], // Colors for gallery button
+    retake: ["#EC4899", "#F43F5E"], // Colors for retake button
+    submit: themeColors[currentTheme].buttonColors, // Colors for submit button
+    summarize: ["#3B82F6", "#2563EB"], // Colors for summarize option
+    generate: ["#10B981", "#059669"], // Colors for generate answer option
   };
 
+  // Setup initial effects when component mounts
   useEffect(() => {
+    // Adjust status bar style based on theme
     StatusBar.setBarStyle(
       currentTheme === "light" ? "dark-content" : "light-content"
     );
+    // Request media library permissions on mount
     (async () => {
       await ImagePicker.getMediaLibraryPermissionsAsync();
     })();
   }, []);
 
+  // Function to open the camera and capture an image
   const openCamera = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // Show loading indicator
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
         alert(t.camera_permission_required || "Camera permission is required.");
@@ -63,24 +71,25 @@ const ScanDocumentScreen = () => {
       }
 
       const result = await ImagePicker.launchCameraAsync({
-        aspect: [4, 3],
-        quality: 0.8,
+        aspect: [4, 3], // Aspect ratio for the camera
+        quality: 0.8, // Image quality setting
       });
 
       if (!result.canceled) {
-        setPhoto(result.assets[0].uri);
+        setPhoto(result.assets[0].uri); // Set the captured image URI
       }
     } catch (error) {
       console.error("Camera error:", error);
       alert(t.camera_error || "Failed to open camera.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Hide loading indicator
     }
   };
 
+  // Function to pick an image from the gallery
   const pickImageFromGallery = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // Show loading indicator
       const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
 
       if (status !== "granted") {
@@ -96,30 +105,32 @@ const ScanDocumentScreen = () => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        quality: 0.8,
+        quality: 0.8, // Image quality setting
       });
 
       if (!result.canceled) {
-        setPhoto(result.assets[0].uri);
+        setPhoto(result.assets[0].uri); // Set the selected image URI
       }
     } catch (error) {
       console.error("Gallery error:", error);
       alert(t.gallery_error || "Failed to open gallery.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Hide loading indicator
     }
   };
 
+  // Function to retake a photo by reopening the camera
   const handleCaptureAgain = () => {
-    setPhoto(null);
-    openCamera();
+    setPhoto(null); // Clear current photo
+    openCamera(); // Reopen camera
   };
 
+  // Function to submit the image for OCR processing
   const handleSubmit = async () => {
-    if (!photo) return;
+    if (!photo) return; // Do nothing if no photo is selected
 
     try {
-      setLoading(true);
+      setLoading(true); // Show loading indicator
       const formData = new FormData();
       formData.append("image", {
         uri: photo,
@@ -136,22 +147,23 @@ const ScanDocumentScreen = () => {
       });
 
       const data = await response.json();
-      setExtractedText(data.text);
-      setShowResultModal(true);
+      setExtractedText(data.text); // Store the extracted text
+      setShowResultModal(true); // Show the result modal
     } catch (error) {
       console.error("Error uploading image:", error);
       alert(t.failed_to_process || "Failed to process image.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Hide loading indicator
     }
   };
 
+  // Function to process the extracted text (summarize or generate answer)
   const handleProcessText = async () => {
-    if (!extractedText) return;
+    if (!extractedText) return; // Do nothing if no text is extracted
 
     try {
-      setProcessingOption(true);
-      const token = await AsyncStorage.getItem("userToken");
+      setProcessingOption(true); // Show processing indicator
+      const token = await AsyncStorage.getItem("userToken"); // Get user auth token
 
       if (selectedOption === "summarize") {
         try {
@@ -169,7 +181,7 @@ const ScanDocumentScreen = () => {
           }
 
           const data = await response.json();
-          setProcessedResult(data.summary);
+          setProcessedResult(data.summary); // Store the summary
         } catch (error) {
           alert(error.message);
         }
@@ -189,7 +201,7 @@ const ScanDocumentScreen = () => {
           }
 
           const data = await response.json();
-          setProcessedResult(data.answer);
+          setProcessedResult(data.answer); // Store the generated answer
         } catch (error) {
           alert(error.message);
         }
@@ -198,21 +210,23 @@ const ScanDocumentScreen = () => {
       console.error("Error processing text:", error);
       alert(t.failed_to_process || "Failed to process text.");
     } finally {
-      setProcessingOption(false);
+      setProcessingOption(false); // Hide processing indicator
     }
   };
 
+  // Reset state when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      setPhoto(null);
-      setLoading(false);
-      setExtractedText("");
-      setShowResultModal(false);
-      setSelectedOption("extract");
-      setProcessedResult("");
+      setPhoto(null); // Clear photo
+      setLoading(false); // Reset loading state
+      setExtractedText(""); // Clear extracted text
+      setShowResultModal(false); // Hide result modal
+      setSelectedOption("extract"); // Reset to default option
+      setProcessedResult(""); // Clear processed result
     }, [])
   );
 
+  // Helper function to render a styled button
   const renderButton = (icon, title, action, colorScheme, disabled = false) => (
     <View style={[styles.buttonContainer, disabled && { opacity: 0.7 }]}>
       <TouchableOpacity
@@ -222,13 +236,13 @@ const ScanDocumentScreen = () => {
         disabled={loading || disabled}
       >
         <BlurView
-          intensity={currentTheme === "light" ? 50 : 30}
-          tint={currentTheme === "light" ? "light" : "dark"}
+          intensity={currentTheme === "light" ? 50 : 30} // Blur intensity based on theme
+          tint={currentTheme === "light" ? "light" : "dark"} // Tint based on theme
           style={styles.blurContainer}
         >
           <View style={styles.iconContainer}>
             <LinearGradient
-              colors={colorScheme}
+              colors={colorScheme} // Gradient colors for the icon
               style={styles.iconGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -240,7 +254,7 @@ const ScanDocumentScreen = () => {
             <Text
               style={[
                 styles.buttonTitle,
-                { color: themeColors[currentTheme].text },
+                { color: themeColors[currentTheme].text }, // Text color based on theme
               ]}
             >
               {title}
@@ -251,12 +265,13 @@ const ScanDocumentScreen = () => {
     </View>
   );
 
+  // Helper function to render option buttons in the modal
   const renderOptionButton = (option, icon, title, colorScheme) => (
     <TouchableOpacity
       style={[
         styles.optionButton,
         selectedOption === option && {
-          borderColor: colorScheme[0],
+          borderColor: colorScheme[0], // Highlight selected option
           borderWidth: 2,
         },
       ]}
@@ -265,7 +280,7 @@ const ScanDocumentScreen = () => {
     >
       <LinearGradient
         colors={
-          selectedOption === option ? colorScheme : ["#64748B", "#475569"]
+          selectedOption === option ? colorScheme : ["#64748B", "#475569"] // Gradient based on selection
         }
         style={styles.optionGradient}
         start={{ x: 0, y: 0 }}
@@ -276,8 +291,8 @@ const ScanDocumentScreen = () => {
       <Text
         style={[
           styles.optionText,
-          { color: themeColors[currentTheme].text },
-          selectedOption === option && { fontWeight: "bold" },
+          { color: themeColors[currentTheme].text }, // Text color based on theme
+          selectedOption === option && { fontWeight: "bold" }, // Bold if selected
         ]}
       >
         {title}
@@ -285,16 +300,17 @@ const ScanDocumentScreen = () => {
     </TouchableOpacity>
   );
 
+  // Main render function
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={themeColors[currentTheme].background}
+        colors={themeColors[currentTheme].background} // Background gradient based on theme
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         <StatusBar
-          barStyle={currentTheme === "light" ? "dark-content" : "light-content"}
+          barStyle={currentTheme === "light" ? "dark-content" : "light-content"} // Status bar style
         />
 
         <View style={styles.content}>
@@ -302,18 +318,19 @@ const ScanDocumentScreen = () => {
             <Text
               style={[
                 styles.screenTitle,
-                { color: themeColors[currentTheme].text },
+                { color: themeColors[currentTheme].text }, // Title color based on theme
               ]}
             >
-              {t.scan_document || "Scan Document"}
+              {t.scan_document || "Scan Document"} // Translated title
             </Text>
           </View>
 
           {photo ? (
+            // Show preview if a photo is selected
             <View style={styles.previewContainer}>
               <View style={styles.imageWrapper}>
                 <BlurView
-                  intensity={currentTheme === "light" ? 50 : 30}
+                  intensity={currentTheme === "light" ? 50 : 30} // Blur effect for image container
                   tint={currentTheme === "light" ? "light" : "dark"}
                   style={styles.blurImageContainer}
                 >
@@ -337,18 +354,19 @@ const ScanDocumentScreen = () => {
               </View>
             </View>
           ) : (
+            // Show options if no photo is selected
             <View style={styles.optionsContainer}>
               <View style={styles.iconWrapper}>
                 <Ionicons
                   name="document-text-outline"
                   size={80}
-                  color={themeColors[currentTheme].text}
+                  color={themeColors[currentTheme].text} // Icon color based on theme
                 />
               </View>
               <Text
                 style={[
                   styles.instructionText,
-                  { color: themeColors[currentTheme].subText },
+                  { color: themeColors[currentTheme].subText }, // Instruction text color
                 ]}
               >
                 {t.scan_instruction || "Capture or select a document to scan"}
@@ -361,7 +379,6 @@ const ScanDocumentScreen = () => {
                   openCamera,
                   buttonColors.camera
                 )}
-
                 {renderButton(
                   "photo-library",
                   t.pick_from_gallery || "Pick from Gallery",
@@ -373,7 +390,7 @@ const ScanDocumentScreen = () => {
           )}
         </View>
 
-        {/* Result Modal */}
+        {/* Modal to display extracted text and processing options */}
         <Modal
           visible={showResultModal}
           animationType="slide"
@@ -382,7 +399,7 @@ const ScanDocumentScreen = () => {
         >
           <View style={styles.modalOverlay}>
             <BlurView
-              intensity={currentTheme === "light" ? 50 : 30}
+              intensity={currentTheme === "light" ? 50 : 30} // Blur effect for modal
               tint={currentTheme === "light" ? "light" : "dark"}
               style={styles.modalContainer}
             >
@@ -390,24 +407,24 @@ const ScanDocumentScreen = () => {
                 <Text
                   style={[
                     styles.modalTitle,
-                    { color: themeColors[currentTheme].text },
+                    { color: themeColors[currentTheme].text }, // Modal title color
                   ]}
                 >
                   {processedResult
                     ? selectedOption === "summarize"
                       ? t.summary || "Summary"
                       : t.generated_answer || "Generated Answer"
-                    : t.extracted_text || "Extracted Text"}
+                    : t.extracted_text || "Extracted Text"} // Dynamic title based on state
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
                     setShowResultModal(false);
-                    setProcessedResult("");
+                    setProcessedResult(""); // Reset processed result on close
                   }}
                   style={styles.closeButton}
                 >
                   <LinearGradient
-                    colors={themeColors[currentTheme].buttonColors}
+                    colors={themeColors[currentTheme].buttonColors} // Gradient for close button
                     style={styles.closeButtonGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
@@ -423,27 +440,28 @@ const ScanDocumentScreen = () => {
                 showsVerticalScrollIndicator={false}
               >
                 <BlurView
-                  intensity={currentTheme === "light" ? 40 : 25}
+                  intensity={currentTheme === "light" ? 40 : 25} // Blur effect for text container
                   tint={currentTheme === "light" ? "light" : "dark"}
                   style={styles.resultTextContainer}
                 >
                   <Text
                     style={[
                       styles.resultText,
-                      { color: themeColors[currentTheme].text },
+                      { color: themeColors[currentTheme].text }, // Result text color
                     ]}
                   >
-                    {processedResult || extractedText}
+                    {processedResult || extractedText} // Display processed result or extracted text
                   </Text>
                 </BlurView>
               </ScrollView>
 
               {!processedResult && (
+                // Show processing options if no result yet
                 <View style={styles.processingOptions}>
                   <Text
                     style={[
                       styles.optionsTitle,
-                      { color: themeColors[currentTheme].text },
+                      { color: themeColors[currentTheme].text }, // Options title color
                     ]}
                   >
                     {t.what_to_do || "What would you like to do with this text?"}
@@ -454,18 +472,18 @@ const ScanDocumentScreen = () => {
                       style={[
                         styles.optionCard,
                         selectedOption === "summarize" && styles.selectedCard,
-                        { borderColor: buttonColors.summarize[0] }
+                        { borderColor: buttonColors.summarize[0] } // Border color for summarize
                       ]}
                       onPress={() => setSelectedOption("summarize")}
                       disabled={processingOption}
                     >
                       <BlurView
-                        intensity={currentTheme === "light" ? 40 : 30}
+                        intensity={currentTheme === "light" ? 40 : 30} // Blur effect for card
                         tint={currentTheme === "light" ? "light" : "dark"}
                         style={styles.cardContent}
                       >
                         <LinearGradient
-                          colors={buttonColors.summarize}
+                          colors={buttonColors.summarize} // Gradient for summarize icon
                           style={styles.cardIconContainer}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}
@@ -485,18 +503,18 @@ const ScanDocumentScreen = () => {
                       style={[
                         styles.optionCard,
                         selectedOption === "generate" && styles.selectedCard,
-                        { borderColor: buttonColors.generate[0] }
+                        { borderColor: buttonColors.generate[0] } // Border color for generate
                       ]}
                       onPress={() => setSelectedOption("generate")}
                       disabled={processingOption}
                     >
                       <BlurView
-                        intensity={currentTheme === "light" ? 40 : 30}
+                        intensity={currentTheme === "light" ? 40 : 30} // Blur effect for card
                         tint={currentTheme === "light" ? "light" : "dark"}
                         style={styles.cardContent}
                       >
                         <LinearGradient
-                          colors={buttonColors.generate}
+                          colors={buttonColors.generate} // Gradient for generate icon
                           style={styles.cardIconContainer}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}
@@ -517,7 +535,7 @@ const ScanDocumentScreen = () => {
                     style={[
                       styles.processButton,
                       {
-                        opacity: processingOption ? 0.7 : 1,
+                        opacity: processingOption ? 0.7 : 1, // Dim button when processing
                       },
                     ]}
                     onPress={handleProcessText}
@@ -527,14 +545,14 @@ const ScanDocumentScreen = () => {
                       colors={
                         selectedOption === "summarize"
                           ? buttonColors.summarize
-                          : buttonColors.generate
+                          : buttonColors.generate // Gradient based on selected option
                       }
                       style={styles.processButtonGradient}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                     >
                       {processingOption ? (
-                        <ActivityIndicator color="#FFFFFF" size="small" />
+                        <ActivityIndicator color="#FFFFFF" size="small" /> // Show spinner when processing
                       ) : (
                         <View style={styles.processButtonContent}>
                           <MaterialIcons
@@ -559,6 +577,7 @@ const ScanDocumentScreen = () => {
         </Modal>
 
         {loading && (
+          // Loading overlay shown during processing
           <View style={styles.loadingOverlay}>
             <View
               style={[
@@ -567,14 +586,14 @@ const ScanDocumentScreen = () => {
                   backgroundColor:
                     currentTheme === "light"
                       ? "rgba(255, 255, 255, 0.95)"
-                      : "rgba(30, 30, 30, 0.95)",
+                      : "rgba(30, 30, 30, 0.95)", // Background color based on theme
                 },
               ]}
             >
               <View style={styles.loadingContent}>
                 <View style={styles.loadingIconContainer}>
                   <LinearGradient
-                    colors={buttonColors.submit}
+                    colors={buttonColors.submit} // Gradient for loading icon
                     style={styles.loadingGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
@@ -585,7 +604,7 @@ const ScanDocumentScreen = () => {
                 <Text
                   style={[
                     styles.loadingTitle,
-                    { color: themeColors[currentTheme].text },
+                    { color: themeColors[currentTheme].text }, // Loading title color
                   ]}
                 >
                   {t.processing_document || "Processing Document"}
@@ -593,7 +612,7 @@ const ScanDocumentScreen = () => {
                 <Text
                   style={[
                     styles.loadingSubtitle,
-                    { color: themeColors[currentTheme].subText },
+                    { color: themeColors[currentTheme].subText }, // Subtitle color
                   ]}
                 >
                   {t.please_wait || "Please wait while we extract the text"}
@@ -607,23 +626,24 @@ const ScanDocumentScreen = () => {
   );
 };
 
+// Styles for the component
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // Take up full screen
   },
   background: {
-    flex: 1,
+    flex: 1, // Background gradient container
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 100,
+    paddingTop: 100, // Space for header
   },
   header: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 30, // Space below header
   },
   screenTitle: {
     fontSize: 24,
@@ -634,16 +654,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginBottom: 40,
-    marginTop: 20,
+    marginTop: 20, // Spacing for instruction text
   },
   optionsContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingBottom: 50,
+    paddingBottom: 50, // Space at the bottom
   },
   iconWrapper: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Subtle background for icon
     borderRadius: 40,
     padding: 20,
     marginBottom: 20,
@@ -652,22 +672,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    flexWrap: "wrap",
+    flexWrap: "wrap", // Allow buttons to wrap if needed
   },
   buttonContainer: {
-    width: "45%",
+    width: "45%", // Two buttons per row
     marginBottom: 16,
     borderRadius: 18,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 5, // Shadow for depth
   },
   button: {
     borderRadius: 18,
     overflow: "hidden",
-    height: 160,
+    height: 160, // Fixed height for buttons
   },
   blurContainer: {
     flex: 1,
@@ -676,7 +696,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconContainer: {
-    marginBottom: 16,
+    marginBottom: 16, // Space between icon and text
   },
   iconGradient: {
     width: 56,
@@ -696,11 +716,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 20, // Vertical padding for preview
   },
   imageWrapper: {
     width: "100%",
-    height: "70%",
+    height: "70%", // Most of the space for image
     borderRadius: 24,
     overflow: "hidden",
     shadowColor: "#000",
@@ -719,7 +739,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 16,
-    resizeMode: "contain",
+    resizeMode: "contain", // Keep image proportions
   },
   loadingOverlay: {
     position: "absolute",
@@ -729,8 +749,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 999,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    zIndex: 999, // On top of everything
+    backgroundColor: "rgba(0, 0, 0, 0.3)", // Semi-transparent overlay
   },
   loadingContainer: {
     width: "80%",
@@ -771,18 +791,18 @@ const styles = StyleSheet.create({
   loadingSubtitle: {
     fontSize: 14,
     textAlign: "center",
-    opacity: 0.8,
+    opacity: 0.8, // Slightly faded
   },
   // Modal Styles
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay
   },
   modalContainer: {
     width: "90%",
-    maxHeight: "80%",
+    maxHeight: "80%", // Limit modal height
     borderRadius: 24,
     overflow: "hidden",
     shadowColor: "#000",
@@ -797,7 +817,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.1)",
+    borderBottomColor: "rgba(0, 0, 0, 0.1)", // Subtle divider
   },
   modalTitle: {
     fontSize: 20,
@@ -821,7 +841,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 20,
-    maxHeight: 350,
+    maxHeight: 350, // Scrollable content area
   },
   modalContentContainer: {
     flexGrow: 1,
@@ -832,7 +852,7 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "rgba(100, 100, 100, 0.1)",
+    borderColor: "rgba(100, 100, 100, 0.1)", // Light border
   },
   resultText: {
     fontSize: 17,
@@ -844,7 +864,7 @@ const styles = StyleSheet.create({
   processingOptions: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "rgba(0, 0, 0, 0.1)",
+    borderTopColor: "rgba(0, 0, 0, 0.1)", // Divider above options
   },
   optionsTitle: {
     fontSize: 18,
@@ -869,7 +889,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   selectedCard: {
-    borderWidth: 2,
+    borderWidth: 2, // Highlight selected card
   },
   cardContent: {
     padding: 16,
@@ -912,7 +932,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   processButtonIcon: {
-    marginRight: 8,
+    marginRight: 8, // Space between icon and text
   },
   processButtonText: {
     color: "#FFFFFF",

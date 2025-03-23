@@ -17,14 +17,20 @@ import { LanguageContext } from '../user_preference/LanguageContext';
 import themeColors from '../assets/ThemeColors.json';
 
 const HomeScreen = ({ navigation }) => {
+  // Accessing user authentication context
   const { user } = useContext(AuthContext);
+  // Accessing current theme from theme context
   const { currentTheme } = useContext(ThemeContext);
+  // Accessing translation function from language context
   const { t } = useContext(LanguageContext);
+  // Getting screen width for responsive design
   const { width } = Dimensions.get('window');
 
+  // Animation references for fade and slide effects
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
+  // Animation references for button scaling
   const buttonScales = {
     summarizer: useRef(new Animated.Value(1)).current,
     generateAnswer: useRef(new Animated.Value(1)).current,
@@ -32,6 +38,7 @@ const HomeScreen = ({ navigation }) => {
     scanDocument: useRef(new Animated.Value(1)).current,
   };
 
+  // Triggering animations on component mount
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -47,6 +54,7 @@ const HomeScreen = ({ navigation }) => {
     ]).start();
   }, []);
 
+  // Button press-in animation handler
   const handlePressIn = (scale) => {
     Animated.spring(scale, {
       toValue: 0.95,
@@ -55,6 +63,7 @@ const HomeScreen = ({ navigation }) => {
     }).start();
   };
 
+  // Button press-out animation handler and navigation
   const handlePressOut = (scale, screen) => {
     Animated.spring(scale, {
       toValue: 1,
@@ -64,6 +73,7 @@ const HomeScreen = ({ navigation }) => {
     }).start(() => navigation.navigate(screen));
   };
 
+  // Button gradient colors for different features
   const buttonColors = {
     summarizer: ['#4F46E5', '#7C3AED'],
     generateAnswer: ['#EC4899', '#F43F5E'],
@@ -71,6 +81,7 @@ const HomeScreen = ({ navigation }) => {
     scanDocument: ['#F59E0B', '#EA580C'],
   };
 
+  // Function to render a feature button
   const renderButton = (icon, titleKey, descKey, scale, screenName, colorScheme) => (
     <Animated.View style={[styles.buttonContainer, { transform: [{ scale }] }]}>
       <TouchableOpacity
@@ -79,9 +90,11 @@ const HomeScreen = ({ navigation }) => {
         onPressOut={() => handlePressOut(scale, screenName)}
         activeOpacity={0.9}
       >
+        {/* Adding blur effect to the button */}
         <BlurView intensity={currentTheme === 'light' ? 80 : 100} tint={currentTheme} style={styles.blurContainer}>
           <View style={styles.cardContent}>
             <View style={styles.iconContainer}>
+              {/* Gradient background for the button icon */}
               <LinearGradient
                 colors={colorScheme}
                 style={styles.iconGradient}
@@ -92,6 +105,7 @@ const HomeScreen = ({ navigation }) => {
               </LinearGradient>
             </View>
             <View style={styles.buttonTextContainer}>
+              {/* Button title and description */}
               <Text style={[styles.buttonTitle, { color: themeColors[currentTheme].text }]}>{t[titleKey]}</Text>
               <Text style={[styles.buttonDescription, { color: themeColors[currentTheme].subText }]}>{t[descKey]}</Text>
             </View>
@@ -103,6 +117,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Background gradient for the screen */}
       <LinearGradient
         colors={themeColors[currentTheme].background}
         style={styles.background}
@@ -122,6 +137,7 @@ const HomeScreen = ({ navigation }) => {
             }
           ]}>
             <View style={styles.header}>
+              {/* Settings button to navigate to the Profile screen */}
               <TouchableOpacity
                 style={styles.settingsButton}
                 onPress={() => navigation.navigate("Profile")}
@@ -130,6 +146,7 @@ const HomeScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
+            {/* Welcome text and user name */}
             <Text style={[styles.welcomeText, { color: themeColors[currentTheme].text }]}>{t.welcome}</Text>
             <Text style={[styles.title, { color: themeColors[currentTheme].text }]}>
               {user.name.charAt(0).toUpperCase() + user.name.slice(1).toLowerCase()}
@@ -138,6 +155,7 @@ const HomeScreen = ({ navigation }) => {
               {t.subtitle}
             </Text>
 
+            {/* Grid of feature buttons */}
             <View style={styles.featuresGrid}>
               {renderButton(
                 "📝",

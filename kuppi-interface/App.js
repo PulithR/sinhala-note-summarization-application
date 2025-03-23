@@ -19,7 +19,7 @@ import ProfileScreen from "./screens/ProfileScreen";
 import PasswordResetScreen from "./screens/PasswordResetScreen";
 import DisplayScreen from "./components/DisplayScreen";
 
-
+// Stack for authentication-related screens (e.g., Login, SignUp, Password Reset)
 function AuthStack() {
   const Stack = createStackNavigator();
   return (
@@ -27,7 +27,7 @@ function AuthStack() {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false }} // Hides the header for a cleaner look
       />
       <Stack.Screen
         name="SignUp"
@@ -43,6 +43,7 @@ function AuthStack() {
   );
 }
 
+// Stack for the main app screens (e.g., Home, Summarizer, Profile, etc.)
 function HomeStack() {
   const Stack = createStackNavigator();
   return (
@@ -50,7 +51,7 @@ function HomeStack() {
       <Stack.Screen 
         name="Home" 
         component={HomeScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false }} // Hides the header for the Home screen
       />
       <Stack.Screen 
         name="Summarizer"  
@@ -91,27 +92,30 @@ function HomeStack() {
   );
 }
 
+// Main navigator that decides whether to show the AuthStack or HomeStack
 function AppNavigator() {
   const { user, loading } = useContext(AuthContext);
 
   if (loading) {
+    // Show a splash screen while the app is loading
     return <SplashScreen />;
   }
 
   return (
     <NavigationContainer>
-      {user ? <HomeStack /> : <AuthStack />}
+      {user ? <HomeStack /> : <AuthStack />} 
+      {/* Show HomeStack if user is logged in, otherwise show AuthStack */}
     </NavigationContainer>
   );
 }
 
-
+// Root component that wraps the app with necessary providers
 export default function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <LanguageProvider>
-          <AppNavigator />
+    <AuthProvider> {/* Provides authentication context */}
+      <ThemeProvider> {/* Provides theme context */}
+        <LanguageProvider> {/* Provides language context */}
+          <AppNavigator /> {/* Main app navigation */}
         </LanguageProvider>
       </ThemeProvider>
     </AuthProvider>

@@ -17,6 +17,7 @@ import { AuthContext } from "../authentication/AuthContext";
 import OTPModal from "../components/OTPModal";
 
 const SignUpScreen = ({ navigation }) => {
+  // State variables for user input and UI behavior
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -29,11 +30,14 @@ const SignUpScreen = ({ navigation }) => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Accessing the signUp function from AuthContext
   const { signUp } = useContext(AuthContext);
 
+  // Animation references for slide-in effect and button scaling
   const slideAnim = useRef(new Animated.Value(700)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
 
+  // Slide-in animation for the form container
   useEffect(() => {
     Animated.timing(slideAnim, {
       toValue: 0,
@@ -42,6 +46,7 @@ const SignUpScreen = ({ navigation }) => {
     }).start();
   }, []);
 
+  // Button press-in animation for scaling down
   const handlePressIn = () => {
     Animated.spring(buttonScale, {
       toValue: 0.95,
@@ -50,6 +55,7 @@ const SignUpScreen = ({ navigation }) => {
     }).start();
   };
 
+  // Button press-out animation for scaling back up and handling sign-up logic
   const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
@@ -59,69 +65,73 @@ const SignUpScreen = ({ navigation }) => {
     }).start();
 
     try {
+      // Ensure all required fields are filled
       if (email && password && confirmPassword) {
         setOtpLoading(true);
         const response = await signUp({ email, name, password });
         setOtpLoading(false);
         if (response.success) {
-          setModalVisible(true);
+          setModalVisible(true); // Show OTP modal on successful sign-up
         } else {
-          alert(response.error);
+          alert(response.error); // Show error message if sign-up fails
         }
       } else {
-        alert("Please enter credentials!");
+        alert("Please enter credentials!"); // Prompt user to fill all fields
       }
     } catch (error) {
-      alert("Error initiating sign-up: " + error.message);
+      alert("Error initiating sign-up: " + error.message); // Handle unexpected errors
     } finally {
-      setOtpLoading(false);
+      setOtpLoading(false); // Ensure loading state is reset
     }
   };
 
+  // Email validation logic
   const validateEmail = (text) => {
     setEmail(text);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(text)) {
-      setEmailError("Enter a valid email");
+      setEmailError("Enter a valid email"); // Show error if email is invalid
     } else {
-      setEmailError("");
+      setEmailError(""); // Clear error if email is valid
     }
   };
 
+  // Password validation logic
   const validatePassword = (text) => {
     setPassword(text);
     if (text.length < 6) {
-      setPasswordError("Password must be at least 6 characters long");
+      setPasswordError("Password must be at least 6 characters long"); // Enforce minimum password length
     } else {
-      setPasswordError("");
+      setPasswordError(""); // Clear error if password is valid
     }
   };
 
+  // Confirm password validation logic
   const validateConfirmPassword = (text) => {
     setConfirmPassword(text);
     if (text !== password) {
-      setConfirmPasswordError("Passwords do not match");
+      setConfirmPasswordError("Passwords do not match"); // Ensure passwords match
     } else {
-      setConfirmPasswordError("");
+      setConfirmPasswordError(""); // Clear error if passwords match
     }
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust for keyboard on iOS
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" // Dismiss keyboard on tap outside
       >
         <LinearGradient
-          colors={["#f0f8ff", "#e6f3ff"]} // Matching HomeScreen light theme
+          colors={["#f0f8ff", "#e6f3ff"]} // Background gradient
           style={styles.background}
         >
           <View style={styles.topHalf}>
             <Image
-              source={require("../assets/login.png")}
+              source={require("../assets/login.png")} // Display logo or image
               style={styles.image}
             />
           </View>
@@ -130,50 +140,53 @@ const SignUpScreen = ({ navigation }) => {
             style={[
               styles.bottomHalf,
               {
-                transform: [{ translateX: slideAnim }],
+                transform: [{ translateX: slideAnim }], // Slide-in animation
               },
             ]}
           >
             <LinearGradient
-              colors={["#ffffff", "#f8f9ff"]}
+              colors={["#ffffff", "#f8f9ff"]} // Form container gradient
               style={styles.formContainer}
             >
               <Text style={styles.header}>Create an Account</Text>
               <Text style={styles.helper}>Sign up to get started</Text>
 
+              {/* Email input field */}
               <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                placeholderTextColor="#7f8c8d"
                 value={email}
                 onChangeText={validateEmail}
                 keyboardType="email-address"
               />
               {emailError ? (
-                <Text style={styles.errorText}>{emailError}</Text>
+                <Text style={styles.errorText}>{emailError}</Text> // Show email error
               ) : null}
 
+              {/* Name input field */}
               <TextInput
                 style={styles.input}
                 placeholder="Name"
-                placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                placeholderTextColor="#7f8c8d"
                 value={name}
                 onChangeText={setName}
               />
 
+              {/* Password input field with visibility toggle */}
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.inputWithButton}
                   placeholder="Password"
                   secureTextEntry={!showPassword}
-                  placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                  placeholderTextColor="#7f8c8d"
                   value={password}
                   onChangeText={validatePassword}
                 />
                 <TouchableOpacity
                   style={styles.visibilityButton}
                   activeOpacity={1}
-                  onPress={() => setShowPassword(!showPassword)}
+                  onPress={() => setShowPassword(!showPassword)} // Toggle password visibility
                 >
                   <Text style={styles.visibilityButtonText}>
                     {showPassword ? "HIDE" : "SHOW"}
@@ -181,22 +194,25 @@ const SignUpScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
               {passwordError ? (
-                <Text style={styles.errorText}>{passwordError}</Text>
+                <Text style={styles.errorText}>{passwordError}</Text> // Show password error
               ) : null}
 
+              {/* Confirm password input field with visibility toggle */}
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.inputWithButton}
                   placeholder="Confirm Password"
                   secureTextEntry={!showConfirmPassword}
-                  placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                  placeholderTextColor="#7f8c8d"
                   value={confirmPassword}
                   onChangeText={validateConfirmPassword}
                 />
                 <TouchableOpacity
                   style={styles.visibilityButton}
                   activeOpacity={1}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onPress={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  } // Toggle confirm password visibility
                 >
                   <Text style={styles.visibilityButtonText}>
                     {showConfirmPassword ? "HIDE" : "SHOW"}
@@ -204,24 +220,28 @@ const SignUpScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
               {confirmPasswordError ? (
-                <Text style={styles.errorText}>{confirmPasswordError}</Text>
+                <Text style={styles.errorText}>{confirmPasswordError}</Text> // Show confirm password error
               ) : null}
 
+              {/* Sign-up button with loading indicator */}
               <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
                 <TouchableOpacity
                   onPressIn={handlePressIn}
                   onPressOut={handlePressOut}
                   activeOpacity={0.9}
-                  disabled={otpLoading}
+                  disabled={otpLoading} // Disable button while loading
                 >
                   <LinearGradient
-                    colors={["#4F46E5", "#7C3AED"]} // Matching HomeScreen summarizer button
-                    style={[styles.loginButton, otpLoading && { opacity: 0.7 }]}
+                    colors={["#4F46E5", "#7C3AED"]} // Button gradient
+                    style={[
+                      styles.loginButton,
+                      otpLoading && { opacity: 0.7 }, // Dim button while loading
+                    ]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
                     {otpLoading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color="#fff" /> // Show loading spinner
                     ) : (
                       <Text style={styles.loginButtonText}>Sign Up</Text>
                     )}
@@ -229,13 +249,14 @@ const SignUpScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </Animated.View>
 
+              {/* Link to navigate to Login screen */}
               <Text style={styles.signupText}>
                 Already have an account?{" "}
                 <TouchableOpacity
                   onPress={() => {
                     navigation.reset({
                       index: 0,
-                      routes: [{ name: "Login" }],
+                      routes: [{ name: "Login" }], // Reset navigation stack to Login screen
                     });
                   }}
                 >
@@ -247,6 +268,7 @@ const SignUpScreen = ({ navigation }) => {
         </LinearGradient>
       </ScrollView>
 
+      {/* OTP modal for verification */}
       <OTPModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -257,6 +279,7 @@ const SignUpScreen = ({ navigation }) => {
   );
 };
 
+// Styles for the SignUpScreen components
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -296,11 +319,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 8,
-    color: "#2c3e50", // Matching HomeScreen text
+    color: "#2c3e50",
   },
   helper: {
     fontSize: 24,
-    color: "#7f8c8d", // Matching HomeScreen subText
+    color: "#7f8c8d",
     textAlign: "center",
     marginBottom: 40,
   },
@@ -312,7 +335,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     padding: 15,
     fontSize: 16,
-    color: "#2c3e50", // Matching HomeScreen text
+    color: "#2c3e50",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -340,7 +363,7 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingRight: 70,
     fontSize: 16,
-    color: "#2c3e50", // Matching HomeScreen text
+    color: "#2c3e50",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -365,7 +388,7 @@ const styles = StyleSheet.create({
   visibilityButtonText: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#4F46E5", // Matching HomeScreen button gradient start
+    color: "#4F46E5",
   },
   loginButton: {
     width: 300,
@@ -387,12 +410,12 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: 16,
-    color: "#7f8c8d", // Matching HomeScreen subText
+    color: "#7f8c8d",
     marginTop: 20,
   },
   loginLink: {
     fontSize: 14,
-    color: "#4F46E5", // Matching HomeScreen button gradient start
+    color: "#4F46E5",
     fontWeight: "bold",
     top: 3,
     left: 4,

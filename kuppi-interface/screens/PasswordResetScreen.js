@@ -19,6 +19,7 @@ import { AuthContext } from "../authentication/AuthContext";
 const PasswordResetScreen = ({ navigation }) => {
   const { requestPassReset, passwordReset } = useContext(AuthContext);
 
+  // State variables for managing input fields, errors, and UI states
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isOtpVerified, setisOtpVerified] = useState(false);
@@ -31,9 +32,11 @@ const PasswordResetScreen = ({ navigation }) => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Animation references for slide-in effect and button scaling
   const slideAnim = useRef(new Animated.Value(700)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
 
+  // Slide-in animation for the form container
   useEffect(() => {
     Animated.timing(slideAnim, {
       toValue: 0,
@@ -42,6 +45,7 @@ const PasswordResetScreen = ({ navigation }) => {
     }).start();
   }, []);
 
+  // Button press-in animation for scaling effect
   const handlePressIn = () => {
     Animated.spring(buttonScale, {
       toValue: 0.95,
@@ -50,6 +54,7 @@ const PasswordResetScreen = ({ navigation }) => {
     }).start();
   };
 
+  // Email validation logic
   const validateEmail = (text) => {
     setEmail(text);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,6 +65,7 @@ const PasswordResetScreen = ({ navigation }) => {
     }
   };
 
+  // Function to request OTP for email verification
   const requestOTP = async () => {
     setOtpLoading(true);
     try {
@@ -79,6 +85,7 @@ const PasswordResetScreen = ({ navigation }) => {
     setOtpLoading(false);
   };
 
+  // Password validation logic for new password
   const validateNewPassword = (text) => {
     setNewPassword(text);
     if (text.length < 6) {
@@ -88,6 +95,7 @@ const PasswordResetScreen = ({ navigation }) => {
     }
   };
 
+  // Validation logic for confirming the new password
   const validateConfirmNewPassword = (text) => {
     setConfirmNewPassword(text);
     if (text !== newPassword) {
@@ -97,6 +105,7 @@ const PasswordResetScreen = ({ navigation }) => {
     }
   };
 
+  // Button press-out animation and password reset logic
   const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
@@ -131,7 +140,7 @@ const PasswordResetScreen = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <LinearGradient
-            colors={["#f0f8ff", "#e6f3ff"]} // Matching HomeScreen light theme
+            colors={["#f0f8ff", "#e6f3ff"]} // Background gradient for the screen
             style={styles.background}
           >
             <View style={styles.topHalf}>
@@ -148,7 +157,7 @@ const PasswordResetScreen = ({ navigation }) => {
               ]}
             >
               <LinearGradient
-                colors={["#ffffff", "#f8f9ff"]}
+                colors={["#ffffff", "#f8f9ff"]} // Gradient for the form container
                 style={styles.formContainer}
               >
                 <Text style={styles.header}>Reset Password</Text>
@@ -158,12 +167,13 @@ const PasswordResetScreen = ({ navigation }) => {
                     : "Verify your Email"}
                 </Text>
 
+                {/* Email input field for requesting OTP */}
                 {!isOtpVerified && (
                   <>
                     <TextInput
                       style={styles.input}
                       placeholder="Email"
-                      placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                      placeholderTextColor="#7f8c8d" // Placeholder color
                       value={email}
                       onChangeText={validateEmail}
                       keyboardType="email-address"
@@ -174,6 +184,7 @@ const PasswordResetScreen = ({ navigation }) => {
                   </>
                 )}
 
+                {/* New password input field */}
                 {isOtpVerified && (
                   <>
                     <View style={styles.inputContainer}>
@@ -181,7 +192,7 @@ const PasswordResetScreen = ({ navigation }) => {
                         style={styles.inputWithButton}
                         placeholder="New Password"
                         secureTextEntry={!showPassword}
-                        placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                        placeholderTextColor="#7f8c8d" // Placeholder color
                         value={newPassword}
                         onChangeText={validateNewPassword}
                       />
@@ -201,6 +212,7 @@ const PasswordResetScreen = ({ navigation }) => {
                   </>
                 )}
 
+                {/* Confirm new password input field */}
                 {isOtpVerified && (
                   <>
                     <View style={styles.inputContainer}>
@@ -208,7 +220,7 @@ const PasswordResetScreen = ({ navigation }) => {
                         style={styles.inputWithButton}
                         placeholder="Confirm New Password"
                         secureTextEntry={!showConfirmPassword}
-                        placeholderTextColor="#7f8c8d" // Matching HomeScreen subText
+                        placeholderTextColor="#7f8c8d" // Placeholder color
                         value={confirmNewPassword}
                         onChangeText={validateConfirmNewPassword}
                       />
@@ -232,6 +244,7 @@ const PasswordResetScreen = ({ navigation }) => {
                   </>
                 )}
 
+                {/* Button for OTP verification or password reset */}
                 <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
                   {isOtpVerified ? (
                     <TouchableOpacity
@@ -240,7 +253,7 @@ const PasswordResetScreen = ({ navigation }) => {
                       activeOpacity={0.9}
                     >
                       <LinearGradient
-                        colors={["#4F46E5", "#7C3AED"]} // Matching HomeScreen summarizer button
+                        colors={["#4F46E5", "#7C3AED"]} // Button gradient
                         style={styles.resetButton}
                       >
                         <Text style={styles.resetButtonText}>
@@ -255,7 +268,7 @@ const PasswordResetScreen = ({ navigation }) => {
                       activeOpacity={0.9}
                     >
                       <LinearGradient
-                        colors={["#4F46E5", "#7C3AED"]} // Matching HomeScreen summarizer button
+                        colors={["#4F46E5", "#7C3AED"]} // Button gradient
                         style={styles.resetButton}
                       >
                         {otpLoading ? (
@@ -270,6 +283,7 @@ const PasswordResetScreen = ({ navigation }) => {
                   )}
                 </Animated.View>
 
+                {/* Navigation back to login screen */}
                 <TouchableOpacity
                   onPress={() => navigation.navigate("Login")}
                   style={styles.backButton}
@@ -280,6 +294,7 @@ const PasswordResetScreen = ({ navigation }) => {
             </Animated.View>
           </LinearGradient>
         </ScrollView>
+        {/* OTP Modal for email verification */}
         <OTPModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
@@ -292,6 +307,7 @@ const PasswordResetScreen = ({ navigation }) => {
   );
 };
 
+// Styles for the screen components
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -331,11 +347,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 8,
-    color: "#2c3e50", // Matching HomeScreen text
+    color: "#2c3e50", // Header text color
   },
   helper: {
     fontSize: 24,
-    color: "#7f8c8d", // Matching HomeScreen subText
+    color: "#7f8c8d", // Helper text color
     textAlign: "center",
     marginBottom: 40,
   },
@@ -347,7 +363,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     padding: 15,
     fontSize: 16,
-    color: "#2c3e50", // Matching HomeScreen text
+    color: "#2c3e50", // Input text color
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -369,7 +385,7 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingRight: 70,
     fontSize: 16,
-    color: "#2c3e50", // Matching HomeScreen text
+    color: "#2c3e50", // Input text color
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -393,7 +409,7 @@ const styles = StyleSheet.create({
   visibilityButtonText: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#4F46E5", // Matching HomeScreen button gradient start
+    color: "#4F46E5", // Button text color
   },
   errorText: {
     color: "#e74c3c",
@@ -424,7 +440,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    color: "#4F46E5", // Matching HomeScreen button gradient start
+    color: "#4F46E5", // Back button text color
   },
 });
 

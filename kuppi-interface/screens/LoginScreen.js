@@ -17,16 +17,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../authentication/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
+  // State variables for email, password, and UI interactions
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
 
+  // Accessing the login function from AuthContext
   const { login } = useContext(AuthContext);
 
+  // Animation references for sliding and button scaling
   const slideAnim = useRef(new Animated.Value(-350)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
 
+  // Slide-in animation for the form container
   useEffect(() => {
     Animated.timing(slideAnim, {
       toValue: 0,
@@ -35,6 +39,7 @@ const LoginScreen = ({ navigation }) => {
     }).start();
   }, []);
 
+  // Button press-in animation for scaling down
   const handlePressIn = () => {
     Animated.spring(buttonScale, {
       toValue: 0.95,
@@ -43,6 +48,7 @@ const LoginScreen = ({ navigation }) => {
     }).start();
   };
 
+  // Button press-out animation for scaling back up and triggering login
   const handlePressOut = async () => {
     Animated.spring(buttonScale, {
       toValue: 1,
@@ -54,6 +60,7 @@ const LoginScreen = ({ navigation }) => {
     await login({ email, password });
   };
 
+  // Email validation logic with regex
   const validateEmail = (text) => {
     setEmail(text);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,19 +73,23 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* KeyboardAvoidingView to handle keyboard interactions */}
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        {/* Dismiss keyboard when tapping outside */}
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Background gradient for the screen */}
             <LinearGradient
               colors={["#f0f8ff", "#e6f3ff"]} // Matching HomeScreen light theme
               style={styles.background}
             >
+              {/* Top section with an image */}
               <View style={styles.topHalf}>
                 <Image
                   source={require("../assets/login.png")}
@@ -86,6 +97,7 @@ const LoginScreen = ({ navigation }) => {
                 />
               </View>
 
+              {/* Animated form container */}
               <Animated.View
                 style={[
                   styles.bottomHalf,
@@ -96,9 +108,11 @@ const LoginScreen = ({ navigation }) => {
                   colors={["#ffffff", "#f8f9ff"]}
                   style={styles.formContainer}
                 >
+                  {/* Welcome text */}
                   <Text style={styles.header}>Welcome Back!</Text>
                   <Text style={styles.helper}>Sign in to continue</Text>
 
+                  {/* Email input field */}
                   <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -107,10 +121,12 @@ const LoginScreen = ({ navigation }) => {
                     onChangeText={validateEmail}
                     keyboardType="email-address"
                   />
+                  {/* Display email validation error */}
                   {emailError ? (
                     <Text style={styles.errorText}>{emailError}</Text>
                   ) : null}
 
+                  {/* Password input field with visibility toggle */}
                   <View style={styles.inputContainer}>
                     <TextInput
                       style={styles.inputWithButton}
@@ -131,6 +147,7 @@ const LoginScreen = ({ navigation }) => {
                     </TouchableOpacity>
                   </View>
 
+                  {/* Forgot password link */}
                   <TouchableOpacity
                     onPress={() =>
                       navigation.reset({
@@ -142,6 +159,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.forgotPassword}>Forgot Password?</Text>
                   </TouchableOpacity>
 
+                  {/* Login button with scaling animation */}
                   <Animated.View
                     style={{ transform: [{ scale: buttonScale }] }}
                   >
@@ -159,6 +177,7 @@ const LoginScreen = ({ navigation }) => {
                     </TouchableOpacity>
                   </Animated.View>
 
+                  {/* Sign-up link */}
                   <Text style={styles.signupText}>
                     Don't have an account?{" "}
                     <TouchableOpacity
@@ -182,6 +201,7 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
+// Styles for the LoginScreen components
 const styles = StyleSheet.create({
   container: {
     flex: 1,

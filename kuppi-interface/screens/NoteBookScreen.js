@@ -19,12 +19,13 @@ import { Ionicons } from "@expo/vector-icons";
 import themeColors from '../assets/ThemeColors.json';
 
 const NoteBookScreen = ({ navigation }) => {
-  const { token } = useContext(AuthContext);
-  const { currentTheme, toggleTheme } = useContext(ThemeContext); // Theme context
-  const { t, toggleLanguage } = useContext(LanguageContext); // Language context
-  const [searchText, setSearchText] = useState("");
-  const [notes, setNotes] = useState([]);
+  const { token } = useContext(AuthContext); // Auth context to get user token
+  const { currentTheme, toggleTheme } = useContext(ThemeContext); // Theme context for light/dark mode
+  const { t, toggleLanguage } = useContext(LanguageContext); // Language context for translations
+  const [searchText, setSearchText] = useState(""); // State to manage search input
+  const [notes, setNotes] = useState([]); // State to store notes
 
+  // Fetch notes and update status bar style when screen is focused
   useFocusEffect(
     React.useCallback(() => {
       fetchNotes();
@@ -32,6 +33,7 @@ const NoteBookScreen = ({ navigation }) => {
     }, [currentTheme])
   );
 
+  // Fetch all notes from the API
   const fetchNotes = async () => {
     try {
       const response = await fetch(`${BASE_API_URL}/notes`, {
@@ -44,16 +46,17 @@ const NoteBookScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setNotes(data.notes);
+        setNotes(data.notes); // Update notes state with fetched data
       } else {
         const errorData = await response.json();
         Alert.alert("Error", errorData.error || t.failed_to_fetch_notes || "Failed to fetch notes");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message); // Show error message if API call fails
     }
   };
 
+  // Handle note press to show options (open or delete)
   const handleNotePress = async (noteId) => {
     try {
       const response = await fetch(`${BASE_API_URL}/notes/${noteId}`, {
@@ -70,13 +73,13 @@ const NoteBookScreen = ({ navigation }) => {
           {
             text: t.open || "Open",
             onPress: () => {
-              navigation.navigate("DisplayScreen", { note: data.note });
+              navigation.navigate("DisplayScreen", { note: data.note }); // Navigate to note display screen
             },
           },
           {
             text: t.delete || "Delete",
             onPress: () => {
-              handleDeleteNote(noteId);
+              handleDeleteNote(noteId); // Call delete note function
             },
           },
           {
@@ -89,10 +92,11 @@ const NoteBookScreen = ({ navigation }) => {
         Alert.alert("Error", errorData.error || t.failed_to_fetch_note || "Failed to fetch note");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message); // Show error message if API call fails
     }
   };
 
+  // Delete a specific note by ID
   const handleDeleteNote = async (noteId) => {
     try {
       const response = await fetch(`${BASE_API_URL}/notes/${noteId}`, {
@@ -105,19 +109,20 @@ const NoteBookScreen = ({ navigation }) => {
 
       if (response.ok) {
         Alert.alert(t.success || "Success", t.note_deleted || "Note deleted successfully!");
-        fetchNotes();
+        fetchNotes(); // Refresh notes after deletion
       } else {
         const errorData = await response.json();
         Alert.alert("Error", errorData.error || t.failed_to_delete_note || "Failed to delete note");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message); // Show error message if API call fails
     }
   };
 
+  // Delete all notes
   const handleDeleteAll = async () => {
     if (!notes || notes.length === 0) {
-      Alert.alert(t.no_notes_to_delete || "No Notes to Delete");
+      Alert.alert(t.no_notes_to_delete || "No Notes to Delete"); // Show alert if no notes exist
       return;
     }
     try {
@@ -131,28 +136,29 @@ const NoteBookScreen = ({ navigation }) => {
 
       if (response.ok) {
         Alert.alert(t.success || "Success", t.all_notes_deleted || "All notes deleted successfully!");
-        fetchNotes();
+        fetchNotes(); // Refresh notes after deletion
       } else {
         const errorData = await response.json();
         Alert.alert("Error", errorData.error || t.failed_to_delete_all || "Failed to delete all notes");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message); // Show error message if API call fails
     }
   };
 
+  // Render a single note item in the list
   const RenderNoteItem = ({ item }) => {
     return (
       <TouchableOpacity
         style={styles.noteContainer}
-        onPress={() => handleNotePress(item._id)}
+        onPress={() => handleNotePress(item._id)} // Handle note press
       >
         <View style={styles.blurContainer}>
           <Text style={[styles.noteTitle, { color: themeColors[currentTheme].text }]}>
-            {item.title}
+            {item.title} {/* Display note title */}
           </Text>
           <Text style={[styles.noteDescription, { color: themeColors[currentTheme].subText }]}>
-            {item.description}
+            {item.description} {/* Display note description */}
           </Text>
         </View>
       </TouchableOpacity>
@@ -162,7 +168,7 @@ const NoteBookScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={themeColors[currentTheme].background}
+        colors={themeColors[currentTheme].background} // Apply theme-based background gradient
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -171,10 +177,11 @@ const NoteBookScreen = ({ navigation }) => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={[styles.sectionTitle, { color: themeColors[currentTheme].text }]}>
-              {t.your_notes || "Your Notes"}
+              {t.your_notes || "Your Notes"} {/* Display header title */}
             </Text>
           </View>
 
+          {/* Search bar for filtering notes */}
           <View style={styles.searchContainer}>
             <View style={[styles.searchBar, { backgroundColor: themeColors[currentTheme].cardBg }]}>
               <Ionicons
@@ -188,16 +195,17 @@ const NoteBookScreen = ({ navigation }) => {
                 placeholder={t.search_notes || "Search notes..."}
                 placeholderTextColor={themeColors[currentTheme].subText}
                 value={searchText}
-                onChangeText={setSearchText}
+                onChangeText={setSearchText} // Update search text state
               />
             </View>
           </View>
 
+          {/* Button to create a new note */}
           {!searchText && (
             <View style={styles.createButtonContainer}>
               <TouchableOpacity
                 style={styles.createButton}
-                onPress={() => navigation.navigate("AddNotesScreen")}
+                onPress={() => navigation.navigate("AddNotesScreen")} // Navigate to add note screen
               >
                 <LinearGradient
                   colors={['#10B981', '#059669']}
@@ -208,7 +216,7 @@ const NoteBookScreen = ({ navigation }) => {
                   <View style={styles.createButtonContent}>
                     <Text style={styles.createButtonIcon}>+</Text>
                     <Text style={styles.createButtonText}>
-                      {t.create_new_note || "Create New Note"}
+                      {t.create_new_note || "Create New Note"} {/* Button text */}
                     </Text>
                   </View>
                 </LinearGradient>
@@ -216,6 +224,7 @@ const NoteBookScreen = ({ navigation }) => {
             </View>
           )}
 
+          {/* Notes section */}
           <View style={styles.notesSection}>
             <View style={styles.notesHeader}>
               <Text style={[styles.notesHeaderText, { color: themeColors[currentTheme].text }]}>
@@ -223,11 +232,12 @@ const NoteBookScreen = ({ navigation }) => {
               </Text>
               {notes.length > 0 && (
                 <TouchableOpacity onPress={handleDeleteAll}>
-                  <Text style={styles.deleteText}>{t.delete_all || "Delete All"}</Text>
+                  <Text style={styles.deleteText}>{t.delete_all || "Delete All"}</Text> {/* Delete all button */}
                 </TouchableOpacity>
               )}
             </View>
 
+            {/* Show empty state if no notes exist */}
             {notes.length === 0 ? (
               <View style={styles.emptyNotesContainer}>
                 <Ionicons
@@ -240,16 +250,17 @@ const NoteBookScreen = ({ navigation }) => {
                 </Text>
               </View>
             ) : (
+              // Render list of notes
               <FlatList
                 data={
                   !searchText
-                    ? notes
+                    ? notes // Show all notes if no search text
                     : notes.filter((note) =>
-                        note.title.toLowerCase().includes(searchText.toLowerCase())
+                        note.title.toLowerCase().includes(searchText.toLowerCase()) // Filter notes by search text
                       )
                 }
                 keyExtractor={(item, index) => item._id?.toString() || index.toString()}
-                renderItem={RenderNoteItem}
+                renderItem={RenderNoteItem} // Render each note item
                 contentContainerStyle={styles.notesList}
                 showsVerticalScrollIndicator={false}
               />
