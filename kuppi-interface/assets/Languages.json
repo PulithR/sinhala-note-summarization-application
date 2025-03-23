@@ -72,7 +72,20 @@
       "casual": "Casual",
       "formal": "Formal",
       "academic": "Academic",
-      "generatedSummary": "Generated Summary"
+      "generatedSummary": "Generated Summary",
+      "extracted_text": "Extracted Text",
+      "summary": "Summary",
+      "generated_answer": "Generated Answer",
+      "what_to_do": "What would you like to do with this text?",
+      "summarize": "Summarize",
+      "summarize_desc": "Create a concise summary of the text",
+      "generate_desc": "Treat the text as a question and get an answer",
+      "process_text": "Process Text",
+      "please_wait": "Please wait while we extract the text",
+      "processing_document": "Processing Document",
+      "errorFetchSummary": "Failed to fetch summary",
+      "errorFetchAnswer": "Failed to fetch answer",
+      "failed_to_process": "Failed to process text"
     },
     "si": {
       "profile_settings": "පැතිකඩ සැකසුම්",
@@ -148,7 +161,20 @@
       "casual": "සාමාන්ය",
       "formal": "විධිමත්",
       "academic": "අධ්යාපනික",
-      "generatedSummary": "ජනනය කරන ලද සාරාංශය"
+      "generatedSummary": "ජනනය කරන ලද සාරාංශය",
+      "extracted_text": "උපුටාගත් පෙළ",
+      "summary": "සාරාංශය",
+      "generated_answer": "ජනනය කළ පිළිතුර",
+      "what_to_do": "මෙම පෙළ සමඟ ඔබට කුමක් කිරීමට අවශ්‍යද?",
+      "summarize": "සාරාංශ කරන්න",
+      "summarize_desc": "පෙළෙහි සංක්ෂිප්ත සාරාංශයක් සාදන්න",
+      "generate_desc": "පෙළ ප්‍රශ්නයක් ලෙස සලකා පිළිතුරක් ලබා ගන්න",
+      "process_text": "පෙළ සකසන්න",
+      "please_wait": "කරුණාකර අපි පෙළ උපුටා ගන්නා තුරු රැඳී සිටින්න",
+      "processing_document": "ලේඛනය සැකසෙමින් පවතී",
+      "errorFetchSummary": "සාරාංශය ලබා ගැනීමට අසමත් විය",
+      "errorFetchAnswer": "පිළිතුර ලබා ගැනීමට අසමත් විය",
+      "failed_to_process": "පෙළ සැකසීමට අසමත් විය"
     }
   }
   
