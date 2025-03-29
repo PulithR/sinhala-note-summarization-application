@@ -56,5 +56,6 @@ jobs:
         run: |
           curl -fsSL https://railway.app/install.sh | sh
           export RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }}
-          railway up --ci
+          railway up --ci --service kuppi-server
+
 
