@@ -20,8 +20,8 @@ import themeColors from '../assets/ThemeColors.json';
 
 const NoteBookScreen = ({ navigation }) => {
   const { token } = useContext(AuthContext);
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
-  const { t, toggleLanguage } = useContext(LanguageContext);
+  const { currentTheme } = useContext(ThemeContext);
+  const { t } = useContext(LanguageContext);
   const [searchText, setSearchText] = useState("");
   const [notes, setNotes] = useState([]);
 
@@ -161,7 +161,7 @@ const NoteBookScreen = ({ navigation }) => {
             {item.title}
           </Text>
           <Text style={[styles.noteDescription, { color: themeColors[currentTheme].subText }]}>
-            {item.description}
+            {item.content + "..."}
           </Text>
         </View>
       </TouchableOpacity>

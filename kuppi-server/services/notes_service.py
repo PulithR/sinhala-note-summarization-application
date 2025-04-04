@@ -37,7 +37,7 @@ def get_notes_service():
     if not user:
         return {"error": "User not found"}, 404
 
-    notes_preview = [{"_id": str(note["_id"]) if "_id" in note else None, "title": note["title"]} for note in user.get("notes", [])]
+    notes_preview = [{"_id": str(note["_id"]) if "_id" in note else None, "title": note["title"], "content": " ".join(note["content"].split(" ")[:10])} for note in user.get("notes", [])]
     return {"notes": notes_preview}, 200
 
 def get_note_by_id_service(note_id):
