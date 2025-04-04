@@ -16,7 +16,7 @@ class TestNotesService(unittest.TestCase):
         self.user = {"email": self.email, "notes": []}
         self.note_id = "5f9f1b0b9b9b9b9b9b9b0001"
         self.title = "Test Note"
-        self.content = "This is a test note."
+        self.content = "This is a test note. It contains multiple words for preview testing."
         self.data = {"title": self.title, "content": self.content}
         self.object_id = ObjectId(self.note_id)
 
@@ -61,13 +61,17 @@ class TestNotesService(unittest.TestCase):
         mock_get_jwt_identity.return_value = self.email
         mock_users_collection.find_one.return_value = {
             "email": self.email,
-            "notes": [{"_id": self.object_id, "title": self.title}]
+            "notes": [{"_id": self.object_id, "title": self.title, "content": self.content}]
         }
 
         response, status = get_notes_service()
 
         self.assertEqual(status, 200)
-        self.assertEqual(response["notes"], [{"_id": self.note_id, "title": self.title}])
+        self.assertEqual(response["notes"], [{
+            "_id": self.note_id,
+            "title": self.title,
+            "content": " ".join(self.content.split(" ")[:10])
+        }])
 
     @patch("services.notes_service.users_collection")
     @patch("services.notes_service.get_jwt_identity")
