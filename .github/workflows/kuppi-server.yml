@@ -42,20 +42,20 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:$(pwd)/kuppi-server
           pytest kuppi-server/tests/
 
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+  # deploy:
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v3
 
-      - name: Deploy Flask Backend to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          curl -fsSL https://railway.app/install.sh | sh
-          export RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }}
-          railway up --ci --service kuppi-server
+  #     - name: Deploy Flask Backend to Railway
+  #       env:
+  #         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  #       run: |
+  #         curl -fsSL https://railway.app/install.sh | sh
+  #         export RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }}
+  #         railway up --ci --service kuppi-server
 
 
